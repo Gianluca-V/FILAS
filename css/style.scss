@@ -1,0 +1,16 @@
+@use "common.scss" as common;
+
+:root{
+    --text: #170707;
+    --background: #ffffff;
+    --primary: #f70000;
+    --secondary: #f7a59d;
+    --accent: #66291c;
+}
+
+body{
+    @include common.flex(column,center,center);
+}
+
+
+
