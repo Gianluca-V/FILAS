@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2? family= Montserrat:wght@500 & family= Mulish:wght@300 & family= Playfair+Display & display=swap');
 * {
   padding: 0;
   margin: 0;
@@ -12,11 +13,38 @@
   --accent: #66291c;
 }
 
-body {
+
+
+/*# sourceMappingURL=style.css.map */
+.content-img1{
+  position: fixed;
+  width: 300px;
+}
+.content-nav{
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: end;
+  padding: 30px;
+}
+nav ul {
+  list-style-type: none;
+  
+}
+nav li {
+  display: inline;
+  margin-right: 20px; 
+  text-decoration: none;
+}
+nav li a {
+  text-decoration: none;
+  color: black;
+  font-family: 'Montserrat', sans-serif;
+  margin: 10px;
 }
 
-/*# sourceMappingURL=style.css.map */
+nav li a:hover {
+  text-decoration: underline;
+  font-family: 'Montserrat', sans-serif;
+}
+
