@@ -107,9 +107,8 @@
 }
 
 .sections{
-    
     height: 300px;
-    border: 6px solid #66291c;
+    border: 6px solid #f7a59d;
     border-radius: 5px;
     margin: 30px;
     display: flex;
@@ -133,11 +132,12 @@
 }
 .sections__section{
     width: 25%;
-    background-color: #66291c;
+    background-color: eeeeeeeeee;
     margin: 7px;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #f7a59d;
     transition: 0.2s;
 }
 .sections__section:hover{
@@ -149,7 +149,6 @@
     margin-right: 10px;
     height: 45px;
 }
-
 
 @media (max-width: 1200px){
     .sections__section{
