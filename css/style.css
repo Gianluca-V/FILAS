@@ -1,24 +1,3 @@
-* {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  --text: #170707;
-  --background: #ffffff;
-  --primary: #f70000;
-  --secondary: #f7a59d;
-  --accent: #66291c;
-}
-
-body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
 /*# sourceMappingURL=style.css.map */
 *{
     padding: 0;
@@ -28,9 +7,15 @@ body {
     border: none;
     text-decoration: none;
     box-sizing: border-box;
-
     font-family: 'Mulish';
-    color: white;
+}
+
+:root{
+    --text: #000000;
+    --background: #ffffff;
+    --primary: #d31b1b;
+    --secondary: #c8690a;
+    --accent: #118e11;
 }
 
 /*
@@ -40,17 +25,21 @@ body {
     --secondary: #f7a59d;
     --accent: #66291c;
 */
+a{
+    text-decoration: none;
+    color:inherit;
+}
+
 .header{
     width: 100%;
     height: 80px;
-    background-color: #f70000;
-    
+    background-color: var(--primary);
 }
 .main{
+    color: var(--background);
     width: 100%;
     height: 50vh;
-    background: rgb(247,165,157);
-    background: linear-gradient(90deg, rgba(247,165,157,1) 0%, rgba(247,0,0,1) 100%);
+    background:var(--primary);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -75,7 +64,7 @@ body {
     flex-direction: column;
     justify-content: center;
     width: 50%;
-    border-left: 2px solid white;
+    border-left: 2px solid var(--background);
     height: max-content;
     padding-left: 20px;
     padding-right: 30px;
@@ -112,7 +101,7 @@ body {
         
         width: 90%;
         margin-bottom: 40px;
-        border: 2px solid white;
+        border: 2px solid var(--background);
         padding: 20px;
     }
 }
@@ -126,60 +115,71 @@ body {
 }
 
 .sections{
+    color:var(--background);
     height: 300px;
-    border: 6px solid #f7a59d;
+    border: 6px solid var(--primary);
     border-radius: 5px;
     margin: 30px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background-color: var(--background);
 }
 .sections__title{
-    color: #66291c;
+    color: var(--secondary);
     font-size: 2rem;
     
     margin-top: 14px;
 }
 
-.sections__sections{
+.sections__container{
     display: flex;
     width: 100%;
     height: 100%;
-    
     padding: 7px;
 }
 .sections__section{
     width: 25%;
-    background-color: eeeeeeeeee;
     margin: 7px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #f7a59d;
+    background-color: var(--primary);
     transition: 0.2s;
+}
+.sections__section--green{
+    background-color: var(--accent);
+}
+.sections__section--brown{
+    background-color: var(--secondary);
 }
 .sections__section:hover{
     transform: scale(1.1);
     box-shadow: 0 0 4px black;
     transition: 0.2s;
 }
-.sections__section img{
+.sections__img{
     margin-right: 10px;
     height: 45px;
+    filter: grayscale(100%) saturate(0%) sepia(100%);
+}
+
+.sections__name{
+    font-size: clamp(1rem,2vw,1.66rem);
 }
 
 @media (max-width: 1200px){
     .sections__section{
-        
         flex-direction: column;
     }
-    .sections__section img{
+    .sections__img{
         margin: 0;
         margin-bottom: 10px;
     }
 }
-@media (max-width: 750px){
+@media (max-width: 768px){
     .sections{
         background-color: #66291c;
         border-radius: 0;
@@ -188,6 +188,10 @@ body {
         height: auto;
         padding-bottom: 20px;
     }
+    .sections__container{
+        display: flex;
+        flex-direction: column;
+    }
     .sections__title{
         padding: 0px;
         margin: 0px;
@@ -195,20 +199,12 @@ body {
         margin-top: 40px;
         margin-bottom: 20px;
     }
-    .sections__sections{
-        flex-direction: column;
-        padding: 5px;
-        margin: 0px;
-    }
     .sections__section{
         width: auto;
         border: 2px solid white;
-        border-radius: 150px;
-        padding: 0px;
-        padding-left: 60px;
-        padding-top: 20px;
-        padding-bottom: 20px;
-        flex-direction: row;
+        padding-block: 1rem;
+        display: flex;
+        flex-direction: column;
         justify-content: left;
         margin: 5px;
     }
@@ -216,7 +212,7 @@ body {
         transform: scale(1.0);
         height: 120px;
     }
-    .sections__section img{
+    .sections__img{
         margin-right: 10px;
     }
 }
