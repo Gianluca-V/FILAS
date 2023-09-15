@@ -1,6 +1,6 @@
 @use "common.scss" as common;
 
-:root{
+:root {
     --text: #170707;
     --background: #ffffff;
     --primary: #f70000;
@@ -8,9 +8,174 @@
     --accent: #66291c;
 }
 
-body{
-    @include common.flex(column,center,center);
+body {
+    @include common.flex(column, center, center);
 }
 
+.header {
+    width: 100%;
+    height: 80px;
+    background-color: var(--primary);
+}
 
+.main {
+    width: 100%;
+    height: 50vh;
+    background: var(--secondary);
+    background: linear-gradient(90deg, var(--secondary) 0%, var(--primary) 100%);
+    @include common.flex(row, center, center);
 
+    &__img {
+        height: 100%;
+        margin-right: 80px;
+        animation: 1s main__img-animation;
+    }
+
+    &__textbox {
+        @include common.flex(column, center);
+        width: 50%;
+        border-left: 2px solid white;
+        height: max-content;
+        padding-left: 20px;
+        padding-right: 30px;
+        animation: 1.5s main__textbox-animation;
+    }
+    &__title {
+        margin-bottom: 10px;
+        font-size: 2rem;
+    }
+    &__description {
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 450px) {
+        &__img {
+            width: 80%;
+            margin-right: 0;
+        }
+    }
+
+    @media (max-width: 750px) {
+        flex-direction: column;
+        height: auto;
+        align-items: center;
+
+        &__img {
+            width: 60%;
+            margin-right: 0;
+        }
+
+        &__textbox {
+            width: 90%;
+            margin-bottom: 40px;
+            border: 2px solid white;
+            padding: 20px;
+        }
+    }
+}
+
+.sections {
+    height: 300px;
+    border: 6px solid var(--secondary);
+    border-radius: 5px;
+    margin: 30px;
+    @include common.flex(column, center, center);
+
+    &__title {
+        color: var(--accent);
+        font-size: 2rem;
+        margin-top: 14px;
+    }
+
+    &__container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        padding: 7px;
+    }
+
+    &__section {
+        width: 25%;
+        background-color: var(--background);
+        margin: 7px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--secondary);
+        transition: 0.2s;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 4px black;
+            transition: 0.2s;
+        }
+    }
+
+    &__img {
+        
+        margin-right: 10px;
+        height: 45px;
+    }
+
+    @media (max-width: 1200px) {
+        &__container {
+            flex-direction: column;
+        }
+
+        &__img {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+    }
+
+    @media (max-width: 750px) {
+        background-color: var(--accent);
+        border-radius: 0;
+        padding: 0;
+        margin: 0;
+        height: auto;
+        padding-bottom: 20px;
+
+        &__title {
+            padding: 0;
+            margin: 0;
+            color: white;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        &__sections {
+            flex-direction: column;
+            padding: 5px;
+            margin: 0;
+        }
+
+        &__section {
+            width: auto;
+            border: 2px solid white;
+            border-radius: 150px;
+            padding: 0;
+            padding-left: 60px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            flex-direction: row;
+            justify-content: left;
+            margin: 5px;
+
+            &:hover {
+                transform: scale(1);
+                height: 120px;
+            }
+        }
+
+        &__img {
+            margin-right: 10px;
+        }
+    }
+}
+
+footer {
+    width: 100%;
+    height: 80px;
+    background-color: var(--primary);
+}

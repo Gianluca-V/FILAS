@@ -1,7 +1,13 @@
 *{
     padding: 0;
     margin: 0;
+    border: 0;
+    outline: none;
+    border: none;
+    text-decoration: none;
     box-sizing: border-box;
+    font-family: 'Mulish';
+    color: white;
 }
 
 @mixin flex($direction: row, $justify: initial, $align: initial) {
