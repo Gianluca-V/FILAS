@@ -7,7 +7,11 @@
     text-decoration: none;
     box-sizing: border-box;
     font-family: 'Mulish';
-    color: white;
+}
+
+a{
+    text-decoration: none;
+    color:inherit;
 }
 
 @mixin flex($direction: row, $justify: initial, $align: initial) {
