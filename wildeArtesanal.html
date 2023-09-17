@@ -1,11 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/wilderArtesanal.scss">
+  <title>Shopping Website</title>
 </head>
 <body>
-    
-</body>
+    <header class="header">
+      <h1 class="header__title">Shopping Website</h1>
+      <input class="header__search" type="text" id="search" placeholder="Search products">
+      <div class="header__filters filters">
+        <label class="filters__label" for="sort">Sort by:</label>
+        <select class="filters__select" id="sort">
+          <option value="name">Alphabetical</option>
+          <option value="price">Price</option>
+        </select>
+      </div>
+    </header>
+    <main class="main">
+      <div class="product-grid" id="product-grid">
+        <!-- Product cards will be generated here -->
+      </div>
+    </main>
+    <script src="script.js"></script>
+  </body>
 </html>
