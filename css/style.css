@@ -14,6 +14,30 @@ a {
   color: inherit;
 }
 
+.footer {
+  background-color: #4a4a9e;
+  color: var(--background);
+  text-align: left;
+  bottom: 0;
+  width: 100%;
+}
+.footer__p {
+  padding: 10px;
+}
+.footer__a {
+  text-align: center;
+  color: #fff;
+  margin: 0 10px;
+}
+.footer__a :hover {
+  text-decoration: underline;
+}
+.footer .copyright {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
 :root {
   --text: #000000;
   --background: #ffffff;
