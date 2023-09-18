@@ -2,8 +2,8 @@
 switch ($request_method) {
     case 'GET':
         // Get all products or a specific product by ID
-        if (isset($_GET['id'])) {
-            $product_id = intval($_GET['id']);
+        if ($parts[4] !== "") {
+            $product_id = intval($parts[4]);
             getProduct($product_id);
         } else {
             getProducts();

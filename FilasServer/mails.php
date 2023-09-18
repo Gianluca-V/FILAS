@@ -2,8 +2,8 @@
 switch ($request_method) {
     case 'GET':
         // Get all mails or a specific mail by ID
-        if (isset($_GET['id'])) {
-            $mail_id = intval($_GET['id']);
+        if ($parts[4] !== "") {
+            $mail_id = intval($parts[4]);
             getMail($mail_id);
         } else {
             getMails();

@@ -23,14 +23,16 @@ $request_uri = $_SERVER['REQUEST_URI'];
 $parts = explode('/', $request_uri);
 
 // Check for the base path, e.g., /api
-if ($parts[1] !== 'api') {
+if ($parts[2] !== "api") {
     http_response_code(404);
-    echo json_encode(array("message" => "Not Found"));
+    echo json_encode(array("message" => "Not Found","request"=>$request_uri,"parts" => print_r($parts)));
     exit();
 }
 
 // Determine the table based on the URI
-$table = $parts[2];
+$table = $parts[3];
+
+$request_method = $_SERVER['REQUEST_METHOD'];
 
 switch ($table) {
     case 'products':

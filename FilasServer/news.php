@@ -19,8 +19,8 @@ $request_method = $_SERVER['REQUEST_METHOD'];
 switch ($request_method) {
     case 'GET':
         // Handle GET request for news
-        if (isset($_GET['id'])) {
-            $news_id = intval($_GET['id']);
+        if ($parts[4] !== "") {
+            $news_id = intval($parts[4]);
             $sql = "SELECT * FROM News WHERE ID = $news_id";
         } else {
             $sql = "SELECT * FROM News";

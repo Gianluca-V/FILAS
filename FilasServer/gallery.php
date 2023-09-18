@@ -2,8 +2,8 @@
 switch ($request_method) {
     case 'GET':
         // Handle GET request for gallery
-        if (isset($_GET['id'])) {
-            $image_id = intval($_GET['id']);
+        if ($parts[4] !== "") {
+            $image_id = intval($parts[4]);
             $sql = "SELECT * FROM Gallery WHERE ID = $image_id";
         } else {
             $sql = "SELECT * FROM Gallery";
