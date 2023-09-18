@@ -48,3 +48,38 @@ nav li a:hover {
   font-family: 'Montserrat', sans-serif;
 }
 
+/*footer*/
+footer {
+  background-color: #f70000;
+  color: #fff;
+  padding: 20px 0;
+  text-align: left;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+footer p{
+  padding: 10px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+
+footer a {
+  text-align: center;
+  color: #fff;
+  text-decoration: none;
+  margin: 0 10px;
+  font-family: 'Montserrat', sans-serif;
+}
+footer a:hover{
+  text-decoration: underline;
+  font-family: 'Montserrat', sans-serif;
+}
+
+
+.copyright {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+}
