@@ -249,18 +249,17 @@
 footer{
   background-color: #4a4a9e;
   color: #fff;
-  
   text-align: left;
   bottom: 0;
   width: 100%;
   
 }
+
 footer p{
-  padding: 10px;
+  padding: 20px;
+  width: 100%;
   font-family: 'Montserrat', sans-serif;
 }
-
-
 footer a {
   text-align: center;
   color: #fff;
@@ -284,7 +283,7 @@ footer a:hover{
 #contact_box{
   width: 100%;
   margin: auto;
-  padding: 40px;
+ 
 }
 
 
@@ -432,11 +431,11 @@ line-height: 70px;
 @media (max-width: 950px){
   #contact_box-contact-title{
     padding-bottom: 10px;
+    color: #fff;
     
   }
   #contact_box{
-    background: rgb(81,92,113);
-    background: linear-gradient(90deg, #191c32 0%, #191c32 45%, darkblue 100%);
+    background: #4a4a9e;
     width: 100%;
     margin: 0;
     padding: 0;
@@ -469,7 +468,7 @@ line-height: 70px;
   #contact_box-info h2{
     font-size: 1.5rem;
     text-align: center;
-    color: white;
+    color: black;
   }
   #contact_box-info,
   #contact_box-form{
@@ -508,16 +507,16 @@ line-height: 70px;
     }
 }
 
-.content-img1{
-  position: fixed;
+.logo{
+  position: absolute;
   width: 285px;
 }
-.content-nav{
+nav{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: end;
-  padding: 30px;
+  padding: 40px;
 }
 nav ul {
   list-style-type: none;
