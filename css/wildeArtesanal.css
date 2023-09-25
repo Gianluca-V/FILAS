@@ -21,17 +21,21 @@ a {
   bottom: 0;
   width: 100%;
 }
+
 .footer__p {
   padding: 10px;
 }
+
 .footer__a {
   text-align: center;
   color: #fff;
   margin: 0 10px;
 }
+
 .footer__a :hover {
   text-decoration: underline;
 }
+
 .footer .copyright {
   text-align: center;
   margin-top: 10px;
@@ -64,6 +68,7 @@ body {
   justify-content: center;
   margin: auto;
 }
+
 .product__card {
   text-wrap: balance;
   border: 1px solid var(--text);
@@ -71,27 +76,32 @@ body {
   background-color: var(--primary);
   height: 25rem;
 }
+
 .product__img {
   height: 300px;
   border-radius: 1rem 1rem 0 0;
   width: 100%;
 }
+
 .product__data {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: clamp(0.7rem, 8vw, 2.5rem) 100%;
   align-items: center;
 }
+
 .product__name {
   grid-area: 1/1/1/3;
   line-height: clamp(1rem, 5vw, 1.5rem);
   font-size: clamp(1rem, 5vw, 1.5rem);
 }
+
 .product__price {
   grid-area: 2/1/2/1;
   font-size: clamp(1rem, 5vw, 1.3rem);
   font-weight: 600;
 }
+
 .product__buy {
   grid-area: 2/2;
   margin: 5px;
@@ -101,6 +111,7 @@ body {
   background-color: var(--accent);
   transition: background-color 0.2s ease;
 }
+
 .product__buy:hover {
   background-color: #118e11;
 }
@@ -123,6 +134,7 @@ body {
   align-items: initial;
   gap: 1.5rem;
 }
+
 .cart__title-container {
   display: flex;
   flex-direction: row;
@@ -131,6 +143,7 @@ body {
   font-size: 2rem;
   gap: 1rem;
 }
+
 .cart__products-container {
   display: flex;
   flex-direction: column;
@@ -140,17 +153,20 @@ body {
   margin-left: 5rem;
   font-size: 1.3rem;
 }
+
 .cart__product {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: initial;
 }
+
 .cart__total-container {
   margin-left: 5rem;
   font-size: 1.5rem;
   font-weight: 600;
 }
+
 .cart__buy {
   font-size: 1.66rem;
   width: 50%;
@@ -160,8 +176,16 @@ body {
   cursor: pointer;
   background-color: var(--accent);
 }
+
 .cart__buy:hover {
   background-color: #118e11;
 }
 
-/*# sourceMappingURL=wildeartesanal.css.map */
+.product-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/*# sourceMappingURL=wildeArtesanal.css.map */

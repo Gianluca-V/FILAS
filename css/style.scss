@@ -144,7 +144,6 @@
         }
     }
     @media (max-width: 768px){
-        background-color: #66291c;
         border-radius: 0;
         padding: 0px;
         margin: 0;
@@ -156,15 +155,13 @@
         &__title{
             padding: 0px;
             margin: 0px;
-            color: white;
             margin-top: 40px;
             margin-bottom: 20px;
         }
         &__section{
             width: auto;
-            border: 2px solid white;
             padding-block: 1rem;
-            @include common.flex(column,flex-end);
+            @include common.flex(column,flex-end,center);
             margin: 5px;
             &:hover{
                 transform: scale(1.0);

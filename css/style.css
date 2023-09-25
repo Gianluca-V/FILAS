@@ -192,7 +192,6 @@ a {
 }
 @media (max-width: 768px) {
   .sections {
-    background-color: #66291c;
     border-radius: 0;
     padding: 0px;
     margin: 0;
@@ -208,18 +207,16 @@ a {
   .sections__title {
     padding: 0px;
     margin: 0px;
-    color: white;
     margin-top: 40px;
     margin-bottom: 20px;
   }
   .sections__section {
     width: auto;
-    border: 2px solid white;
     padding-block: 1rem;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    align-items: initial;
+    align-items: center;
     margin: 5px;
   }
   .sections__section:hover {
