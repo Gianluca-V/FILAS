@@ -1,46 +1,4 @@
-* {
-  padding: 0;
-  margin: 0;
-  border: 0;
-  outline: none;
-  border: none;
-  text-decoration: none;
-  box-sizing: border-box;
-  font-family: "Mulish";
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.footer {
-  background-color: #4a4a9e;
-  color: var(--background);
-  text-align: left;
-  bottom: 0;
-  width: 100%;
-}
-
-.footer__p {
-  padding: 10px;
-}
-
-.footer__a {
-  text-align: center;
-  color: #fff;
-  margin: 0 10px;
-}
-
-.footer__a :hover {
-  text-decoration: underline;
-}
-
-.footer .copyright {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 14px;
-}
+@use "common.scss" as common;
 
 :root {
   --text: #000000;
@@ -128,27 +86,18 @@ body {
   margin-top: 5rem;
   margin-bottom: 2rem;
   margin-left: 4rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: initial;
-  align-items: initial;
+  @include common.flex(column);
   gap: 1.5rem;
 }
 
 .cart__title-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
+ @include common.flex(row,flex-start,center);
   font-size: 2rem;
   gap: 1rem;
 }
 
 .cart__products-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: initial;
-  align-items: initial;
+  @include common.flex(column);
   gap: 0.5rem;
   margin-left: 5rem;
   font-size: 1.3rem;

@@ -18,6 +18,7 @@
 }
 )()
 
+let cart = []
 // Function to generate a product card
 function generateProductCard(product) {
     const productCard = document.createElement("div");
@@ -42,12 +43,17 @@ function generateProductCard(product) {
     productDescription.classList.add("product__description");
 
     const productBuyBtn = document.createElement("button");
-    productBuyBtn.textContent = "Comprar";
+    productBuyBtn.textContent = "Añadir al carrito";
     productBuyBtn.classList.add("product__buy");
-    productBuyBtn.addEventListener("click",()=>{
-        openProductModal(product);
-        document.querySelector(".product-modal").showModal();
-    });
+
+    productBuyBtn.addEventListener("click", () => {
+        const existingProduct = cart.find(item => item.name === product.Name);
+        if (existingProduct) {
+            existingProduct.quantity++;
+        } else {
+            cart.push({ name: product.Name, quantity: 1 });
+        }
+    })
 
     const productData = document.createElement("div");
     productData.classList.add("product__data");
@@ -63,23 +69,7 @@ function generateProductCard(product) {
     return productCard;
 }
 
-openProductModal = (product)=>{
-    // Create elements for product details (e.g., name, price, image, description)
-    const productName = document.querySelector(".product-data__title");
-    productName.textContent = product.Name;
-
-    const productPrice = document.querySelector(".product-data__price");
-    productPrice.textContent = `$${product.Price}`;
-
-    const productImage = document.querySelector(".product-modal__img");
-    productImage.src = product.Image != ''? product.Image : "assets/default-img.png";
-    productImage.alt = product.Name;
-
-    const productDescription = document.querySelector(".product-data__description");
-    productDescription.textContent = product.Description;
-
-    const productBuyBtn = document.querySelector("product-modal__buy");
-    //productBuyBtn.addEventListener("click",openProductModal);
+function updateCart() {
 
 }
 

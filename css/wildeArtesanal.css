@@ -21,21 +21,17 @@ a {
   bottom: 0;
   width: 100%;
 }
-
 .footer__p {
   padding: 10px;
 }
-
 .footer__a {
   text-align: center;
   color: #fff;
   margin: 0 10px;
 }
-
 .footer__a :hover {
   text-decoration: underline;
 }
-
 .footer .copyright {
   text-align: center;
   margin-top: 10px;
