@@ -1,6 +1,6 @@
 @use "common.scss" as common;
 
-:root{
+:root {
     --text: #000000;
     --background: #ffffff;
     --primary: #d31b1b;
@@ -8,19 +8,19 @@
     --accent: #118e11;
 }
 
-.main{
+.main {
     color: var(--background);
     width: 100%;
     height: 50vh;
-    background:var(--primary);
-    @include common.flex(row,center,center);
-    &__img{
+    background: var(--primary);
+    @include common.flex(row, center, center);
+    &__img {
         height: 100%;
         margin-right: 80px;
         animation: 1s main__img-animation;
     }
 
-    &__textbox{
+    &__textbox {
         width: 50%;
         border-left: 2px solid var(--background);
         height: max-content;
@@ -28,143 +28,138 @@
         padding-right: 30px;
         animation: 1.5s main__textbox-animation;
     }
-    &__title{
+    &__title {
         margin-bottom: 10px;
         font-size: 2rem;
     }
-    &__description{
+    &__description {
         font-size: 1.1rem;
     }
 
-    @media (max-width: 750px){
-        @include common.flex(column,center,center);
+    @media (max-width: 750px) {
+        @include common.flex(column, center, center);
         height: auto;
-        &__img{
-            
+        &__img {
             width: 60%;
             margin-right: 0;
-            
         }
-        &__textbox{
-            
+        &__textbox {
             width: 90%;
             margin-bottom: 40px;
             border: 2px solid var(--background);
             padding: 20px;
         }
     }
-    @media (max-width: 450px){
-        &__img{
-            
+    @media (max-width: 450px) {
+        &__img {
             width: 80%;
             margin-right: 0;
-            
         }
     }
 }
 
-@keyframes main__img-animation{
-    0%{
+@keyframes main__img-animation {
+    0% {
         opacity: 0%;
         transform: translateX(15%);
     }
-    100%{
+    100% {
         opacity: 100%;
         transform: translateX(0%);
     }
 }
 
-@keyframes main__textbox-animation{
-    0%{
+@keyframes main__textbox-animation {
+    0% {
         opacity: 0%;
     }
-    100%{
+    100% {
         opacity: 100%;
     }
 }
 
-.sections{
-    color:var(--background);
+.sections {
+    color: var(--background);
     height: 300px;
     border: 6px solid var(--primary);
     border-radius: 5px;
     margin: 30px;
-    @include common.flex(column,center,center);
+    @include common.flex(column, center, center);
     background-color: var(--background);
-    &__title{
+    &__title {
         color: var(--secondary);
         font-size: 2rem;
-        
+
         margin-top: 14px;
     }
-    &__container{
+    &__container {
         @include common.flex();
         width: 100%;
         height: 100%;
         padding: 7px;
     }
-    &__section{
+    &__section {
         width: 25%;
         margin: 7px;
-        @include common.flex(column,center,center);
+        @include common.flex(column, center, center);
         background-color: var(--primary);
         transition: 0.2s;
-        &--green{
+        &--green {
             background-color: var(--accent);
         }
-        &--brown{
+        &--brown {
             background-color: var(--secondary);
         }
-        &:hover{
+        &:hover {
             transform: scale(1.1);
             box-shadow: 0 0 4px black;
             transition: 0.2s;
         }
     }
-    &__img{
+    &__img {
         margin-right: 10px;
         height: 45px;
         filter: grayscale(100%) saturate(0%) sepia(100%);
     }
-    &__name{
-        font-size: clamp(1rem,2vw,1.66rem);
+    &__name {
+        font-size: clamp(1rem, 2vw, 1.66rem);
     }
 
-    @media (max-width: 1200px){
-        &__section{
+    @media (max-width: 1200px) {
+        &__section {
             flex-direction: column;
         }
-        &__img{
+        &__img {
             margin: 0;
             margin-bottom: 10px;
         }
     }
-    @media (max-width: 768px){
+    @media (max-width: 768px) {
         border-radius: 0;
         padding: 0px;
         margin: 0;
         height: auto;
         padding-bottom: 20px;
-        &__container{
+        &__container {
             @include common.flex(column);
         }
-        &__title{
+        &__title {
             padding: 0px;
             margin: 0px;
             margin-top: 40px;
             margin-bottom: 20px;
         }
-        &__section{
+        &__section {
             width: auto;
             padding-block: 1rem;
-            @include common.flex(column,flex-end,center);
+            @include common.flex(column, flex-end, center);
             margin: 5px;
-            &:hover{
-                transform: scale(1.0);
+            &:hover {
+                transform: scale(1);
                 height: 120px;
             }
         }
-        &__img{
+        &__img {
             margin-right: 10px;
         }
     }
