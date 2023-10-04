@@ -1,0 +1,125 @@
+*{
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #118E11;
+    height: 120px;
+}
+
+.footer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #118E11;
+    height: 120px;
+}
+
+.header .nav__ul{
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    color: #FFF;
+    list-style: none;
+}
+
+.header .nav__ul .nav__a{
+    text-decoration: none;
+    color: #FFF;
+
+}
+
+section{
+    margin: 0 auto;
+    width: 70%;
+}
+
+h2{
+    text-align: center;
+}
+
+.news{
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    width: 100%;
+    padding: 20px;
+}
+
+.form{
+    padding: 20px;
+}
+
+.form__title-container{
+    padding: 10px;
+}
+
+.form form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+input[type="text"]{
+    border-radius: 20px;
+    border: none;
+    padding: 10px;
+    background-color: rgb(203, 203, 203);
+}
+
+input[type="mail"]{
+    border-radius: 20px;
+    border: none;
+    padding: 10px;
+    background-color: rgb(203, 203, 203);
+}
+
+input[type="tel"]{
+    border-radius: 20px;
+    border: none;
+    padding: 10px;
+    background-color: rgb(203, 203, 203);
+}
+
+input[type="submit"]{
+    background-color: #118E11;
+    border-radius: 20px;
+    border: none;
+    padding: 10px;
+    color: white;
+    width: 80px;
+}
+
+.news__img{
+    width: 20%;
+    height: 30%;
+}
+
+.section--news__text{
+    color: #FFF;
+    text-align: center;
+}
+
+.news__events-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    width: 60%;
+    background: linear-gradient(135deg, rgba(248,80,50,1) 0%, rgba(241,111,92,1) 50%, rgba(246,41,12,1) 51%, rgba(240,47,23,1) 71%, rgba(231,56,39,1) 100%);
+}
+
+.news__events-container:nth-of-type(even){
+   align-self: flex-end;
+   flex-direction: row-reverse;
+}
+
