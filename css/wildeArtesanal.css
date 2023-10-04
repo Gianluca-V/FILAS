@@ -193,7 +193,7 @@ body {
   cursor: pointer;
   background-color: var(--accent);
 }
-.cart:hover {
+.cart__buy:hover {
   background-color: #118e11;
 }
 

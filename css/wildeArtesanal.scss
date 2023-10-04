@@ -119,9 +119,10 @@ body {
     padding: 0.25rem;
     cursor: pointer;
     background-color: var(--accent);
+    
+    &:hover {
+      background-color: #118e11;
+    }
   }
 
-  &:hover {
-    background-color: #118e11;
-  }
 }
