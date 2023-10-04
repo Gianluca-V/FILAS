@@ -129,22 +129,6 @@ body {
       background: none;
       border: 1px solid #eee;
       font-size: 1.5rem;
-      -webkit-appearance: none;
-      appearance: none;
-      &::-webkit-outer-spin-button,::-webkit-inner-spin-button{
-        -webkit-appearance: none;
-        appearance: none;
-      }
-      &::-webkit-outer-spin-button::after{
-        content: '\25BC'; // Unicode character for a down arrow
-        color: #555;
-        font-size: 1.2rem;
-      }
-      &::-webkit-inner-spin-button::after{
-        content: '\25B2'; // Unicode character for a down arrow 
-        color: #555; 
-        font-size: 1.2rem; 
-      }
     }
 
     &-delete{
