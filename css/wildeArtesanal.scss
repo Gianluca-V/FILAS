@@ -88,13 +88,17 @@ body {
 }
 
 .cart {
-  max-width: 500px;
+  max-width: 650px;
+  margin: 4rem;
   margin-top: 5rem;
   margin-bottom: 2rem;
   margin-left: 4rem;
   @include common.flex(column);
   gap: 1.5rem;
 
+  &__title{
+    font-size: clamp(1.666rem,8vw,2.255rem);
+  }
   &__title-container {
     @include common.flex(row, flex-start, center);
     font-size: 2rem;
@@ -109,12 +113,15 @@ body {
   }
 
   &__product {
-    @include common.flex(row, space-between);
+    @include common.flex(row, flex-start);
 
+    &-name{
+      margin-right: 1rem;
+    }
     &-quantity-container{
       @include common.flex(row,initial,center);
       gap:1rem;
-      position: relative;
+      margin-left: auto;
     }
     &-quantity{
       width: 100%;
@@ -162,7 +169,7 @@ body {
   }
 
   &__buy {
-    font-size: 1.66rem;
+    font-size: clamp(1rem, 8vw, 1.66rem);
     width: 50%;
     text-align: center;
     border-radius: 1rem;
@@ -176,6 +183,9 @@ body {
   }
 
   @media (width <= 620px) {
+    margin-top: 5rem;
+    margin-bottom: 2rem;
+    margin-inline: 2rem;
     &__products-container,&__total-container{
       margin-left: 0rem;
     }
@@ -190,6 +200,7 @@ body {
       }
       &-quantity-container{
         grid-area: 2/2;
+        margin-left: 1rem;
       }
 
       &-delete{
