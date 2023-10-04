@@ -95,7 +95,7 @@ function updateCart() {
         productQuantityContainer = document.createElement("div")
         productQuantityContainer.classList.add("cart__product-quantity-container");
         productQuantityContainer.innerHTML = `
-        X <input type="number" name="product-quantity" id="product-quantity" class="cart__product-quantity" min="1" value="${product.quantity}" placeholder="1" required>
+        X <input type="number" name="product-quantity" id="product-quantity" class="cart__product-quantity" step="1" min="1" value="${product.quantity}" placeholder="1" required>
         `
 
         productQuantityInput = productQuantityContainer.querySelector("input");

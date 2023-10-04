@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   padding: 0;
   margin: 0;
@@ -185,6 +186,37 @@ body {
   justify-content: space-between;
   align-items: initial;
 }
+.cart__product-quantity-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: initial;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+.cart__product-quantity {
+  width: 100%;
+  max-width: 150px;
+  background: none;
+  border: 1px solid #eee;
+  font-size: 1.5rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.cart__product-quantity::-webkit-outer-spin-button, .cart__product-quantity ::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.cart__product-quantity::-webkit-outer-spin-button::after {
+  content: "▼";
+  color: #555;
+  font-size: 1.2rem;
+}
+.cart__product-quantity::-webkit-inner-spin-button::after {
+  content: "▲";
+  color: #555;
+  font-size: 1.2rem;
+}
 .cart__product-delete {
   order: -1;
   background: none;
@@ -214,6 +246,28 @@ body {
 }
 .cart__buy:hover {
   background-color: var(--accent-hover);
+}
+@media (width <= 620px) {
+  .cart__products-container, .cart__total-container {
+    margin-left: 0rem;
+  }
+  .cart__product {
+    display: grid;
+    grid-template-columns: 0.5fr 2fr;
+    grid-template-rows: 0.5fr 1fr;
+    align-items: center;
+    row-gap: 0.5rem;
+  }
+  .cart__product-name {
+    grid-area: 1/2;
+  }
+  .cart__product-quantity-container {
+    grid-area: 2/2;
+  }
+  .cart__product-delete {
+    grid-area: 1/1/3/1;
+    margin: auto;
+  }
 }
 
 /*# sourceMappingURL=wildeArtesanal.css.map */
