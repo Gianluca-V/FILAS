@@ -9,20 +9,59 @@
     font-family: "Mulish";
 }
 
+
+@mixin flex($direction: row, $justify: initial, $align: initial) {
+    display: flex;
+    flex-direction: $direction;
+    justify-content: $justify;
+    align-items: $align;
+}
+
+
 a {
     text-decoration: none;
     color: inherit;
 }
 
+.header{
+    @include flex(row, space-between, center);
+    width: 100%;
+    background-color: var(--primary);
+}
+
+.logo{
+    max-width: 100%;
+}
+
+.nav{
+    &__ul{
+        @include flex(row, space-around, center);
+        gap:1.5rem;
+        padding: 30px;
+    }
+    &__li{
+        display: block;
+        font-size: 1.2rem;
+    }
+    &__a{
+        color: #fff;
+        padding: 10px;
+        &:hover{
+            text-decoration: underline;
+        }
+    }
+}
+
+
+
 .footer {
     background-color: #4a4a9e;
     color: var(--background);
-
     text-align: left;
-    bottom: 0;
     width: 100%;
     &__p {
-        padding: 10px;
+        padding: 20px;
+        width: 100%;
     }
     &__a {
         text-align: center;
@@ -37,12 +76,4 @@ a {
         margin-top: 10px;
         font-size: 14px;
     }
-}
-
-
-@mixin flex($direction: row, $justify: initial, $align: initial) {
-    display: flex;
-    flex-direction: $direction;
-    justify-content: $justify;
-    align-items: $align;
 }

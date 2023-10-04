@@ -1,21 +1,21 @@
 (
-() => {
-    fetch('http://localhost/filasserver/api/products/')
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then((data) => {
-            // Handle the received data (list of products)
-            // You can process and display the data here
-            displayProducts(data);
-        })
-        .catch((error) => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-}
+    () => {
+        fetch('http://localhost/filasserver/api/products/')
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                // Handle the received data (list of products)
+                // You can process and display the data here
+                displayProducts(data);
+            })
+            .catch((error) => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
 )()
 
 let cart = []
@@ -34,7 +34,7 @@ function generateProductCard(product) {
     productPrice.classList.add("product__price");
 
     const productImage = document.createElement("img");
-    productImage.src = product.Image != ''? product.Image : "assets/default-img.png";
+    productImage.src = product.Image != '' ? product.Image : "assets/default-img.png";
     productImage.alt = product.Name;
     productImage.classList.add("product__img");
 
@@ -51,8 +51,9 @@ function generateProductCard(product) {
         if (existingProduct) {
             existingProduct.quantity++;
         } else {
-            cart.push({ name: product.Name, quantity: 1 });
+            cart.push({ name: product.Name, quantity: 1, price: product.Price });
         }
+        updateCart();
     })
 
     const productData = document.createElement("div");
@@ -70,6 +71,59 @@ function generateProductCard(product) {
 }
 
 function updateCart() {
+    cartProductsContainer = document.querySelector(".cart__products-container")
+    cartProductsContainer.innerHTML = ""
+
+    let totalCost = 0;
+    const cartTotalElement = document.querySelector(".cart__total");
+
+    console.log(cart)
+    if (cart.length <= 0) {
+        cartProductsContainer.textContent = "Agregue productos al carrito";
+        cartTotalElement.textContent = totalCost;
+        return;
+    }
+
+    cart.forEach(product => {
+        cartProduct = document.createElement("div");
+        cartProduct.classList.add("cart__product");
+
+        productName = document.createElement("div")
+        productName.classList.add("cart__product-name")
+        productName.textContent = product.name;
+
+        productQuantityContainer = document.createElement("div")
+        productQuantityContainer.classList.add("cart__product-quantity-container");
+        productQuantityContainer.innerHTML = `
+        X <input type="number" name="product-quantity" id="product-quantity" class="cart__product-quantity" min="1" value="${product.quantity}" placeholder="1" required>
+        `
+
+        productQuantityInput = productQuantityContainer.querySelector("input");
+
+        console.log(productQuantityInput);
+        productQuantityInput.addEventListener("input", () => {
+            product.quantity = productQuantityInput.value;
+            updateCart();
+            return;
+        })
+
+        productDelete = document.createElement("button");
+        productDelete.classList.add("cart__product-delete")
+        productDelete.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>';
+        productDelete.addEventListener("click", () => {
+            cart = cart.filter(item => item.name !== product.name);
+            updateCart();
+            return;
+        });
+
+        totalCost += parseFloat(product.price) * parseInt(product.quantity);
+        cartTotalElement.textContent = totalCost;
+
+        cartProduct.appendChild(productName);
+        cartProduct.appendChild(productQuantityContainer);
+        cartProduct.appendChild(productDelete);
+        cartProductsContainer.appendChild(cartProduct);
+    });
 
 }
 

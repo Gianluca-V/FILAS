@@ -14,15 +14,48 @@ a {
   color: inherit;
 }
 
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: var(--primary);
+}
+
+.logo {
+  max-width: 100%;
+}
+
+.nav__ul {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 30px;
+}
+.nav__li {
+  display: block;
+  font-size: 1.2rem;
+}
+.nav__a {
+  color: #fff;
+  padding: 10px;
+}
+.nav__a:hover {
+  text-decoration: underline;
+}
+
 .footer {
   background-color: #4a4a9e;
   color: var(--background);
   text-align: left;
-  bottom: 0;
   width: 100%;
 }
 .footer__p {
-  padding: 10px;
+  padding: 20px;
+  width: 100%;
 }
 .footer__a {
   text-align: center;
