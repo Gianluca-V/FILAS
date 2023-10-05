@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="CSS/common.scss">
-    <link rel="stylesheet" href="CSS/organizations.css">
+    <link rel="stylesheet" href="css/organizations.css">
     <title>Document</title>
 </head>
 <body>
-  <header class="header">
-    <img class="logo" src="assets/logo2.webp" alt="">
-        <nav class="nav">
-            <ul class="nav__ul">
-                <li class="nav__li"><a href="familias.html" class="nav__a">Familia</a></li>
-                <li class="nav__li"><a href="organizaciones.html" class="nav__a">Organizaciones</a></li>
-                <li class="nav__li"><a href="wildeArtesanal.html" class="nav__a">Artesanías</a></li>
-                <li class="nav__li"><a href="" class="nav__a">Noticias</a></li>
-            </ul>
-        </nav>
-</header>
+  <section class="nav-content">
+     <img class="logo" src="assets/logo2.webp" alt="">
+            <nav>
+                <ul>
+                    <li><a href="">Inicio</a></li>
+                    <li><a href="">Familia</a></li>
+                    <li><a href="">Organisaciones</a></li>
+                    <li><a href="">Artesanias</a></li>
+                    <li><a href="">Noticias</a></li>
+                </ul>
+            </nav>
+    </section>
 
     <section id="team_box">
         <h2 id="team_box-team-title">organizaciones</h2>
@@ -107,37 +107,47 @@
 </section>
 
 <section id="contact_box">
-    <h2 id="contact_box-contact-title">Contact</h2>
-    <section id="contact_box-main">
-      <form target="_blank" action="" method="post" id="contact_box-form" action="">
-        <h2 id="form-t">Send a message</h2>
+  <h2 id="contact_box-contact-title">Contact</h2>
+  <section id="contact_box-main">
+    <div id="contact_box-info">
+      <div id="contact_box-info-num">
+        <img src="IMG/whatsapp.svg" alt="">
+        <a target="_blank"><h2>11 4353-2255</h2></a>
+      </div>
+      <div id="contact_box-info-mail">
+        <img src="IMG/envelop.svg" alt="">
+        <a href="mailto:fundacionfilas@gmail.com" target="_blank"><h2>fundacionfilas@gmail.com</h2></a>
+      </div>
+    </div>
 
-            <label for="email" id="form-correo">E-mail:</label>
-            <input type="text" id="email" name="email" class="input input--email" required
-                placeholder="ingrese su mail" />
-        
-            <label for="message" id="form-mensaje">Message:</label>
-            <textarea id="message" name="message" class="input input--text" required
-                placeholder="Message..."></textarea>
+    <form target="_blank" action="https://formsubmit.co/fundacionfilas@gmail.com" method="post" id="contact_box-form" action="">
+      <h2 id="form-t">Send a message</h2>
 
-        <input id="form-boton" type="submit" value="Enviar mensaje">
-        
-      </form>
+          <label for="email" id="form-correo">E-mail:</label>
+          <input type="text" id="email" name="email" class="input input--email" required
+              placeholder="ingrese su mail" />
+
+
+      
+          <label for="message" id="form-mensaje">Message:</label>
+          <textarea id="message" name="message" class="input input--text" required
+              placeholder="Message..."></textarea>
+
+      <input id="form-boton" type="submit" value="Enviar mensaje">
+      
+    </form>
 </section>
 
-<footer class="footer">
-  <div class="footer__container">
-      <p class="footer__p">Seguinos en nuestras redes</p>
-      <a href="#" class="footer__a">Facebook</a>
-      <a href="#" class="footer__a">Twitter</a>
-      <a href="#" class="footer__a">LinkedIn</a>
-      <a href="#" class="footer__a">Instagram</a>
-  </div>
-  <div class="copyright">
-      &copy; 2023 F.I.L.A.S.
-  </div>
+<footer>
+        <p>Seguinos en nuestras redes</p>
+        <a href="#">Facebook</a>
+        <a href="#">Twitter</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Instagram</a>
+    <div class="copyright">
+        &copy; 2023 F.I.L.A.S.
+    </div>
 </footer>
-
     <script src="js/slider.js"></script>
 </body>
 </html>

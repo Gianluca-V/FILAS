@@ -1,101 +1,33 @@
 * {
   padding: 0;
   margin: 0;
-  border: 0;
-  outline: none;
-  border: none;
-  text-decoration: none;
   box-sizing: border-box;
-  font-family: "Mulish";
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  background-color: var(--primary);
-}
-
-.logo {
-  max-width: 100%;
-}
-
-.nav__ul {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 30px;
-}
-.nav__li {
-  display: block;
-  font-size: 1.2rem;
-}
-.nav__a {
-  color: #fff;
-  padding: 10px;
-}
-.nav__a:hover {
-  text-decoration: underline;
-}
-
-.footer {
-  background-color: #4a4a9e;
-  color: var(--background);
-  text-align: left;
-  width: 100%;
-}
-.footer__p {
-  padding: 20px;
-  width: 100%;
-}
-.footer__a {
-  text-align: center;
-  color: #fff;
-  margin: 0 10px;
-}
-.footer__a :hover {
-  text-decoration: underline;
-}
-.footer .copyright {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 14px;
 }
 
 :root {
   --text: #04042f;
   --background: #f6f6fe;
   --primary: #f70000;
-  --secondary: #d1d1e1;
+  --secondary: #d1d1E1;
   --accent: #4a4a9e;
 }
 
-#team_box-team-title {
+/*# sourceMappingURL=organizations.css.map */
+#team_box-team-title{
   padding-bottom: 30px;
   font-size: 2rem;
   text-align: center;
   color: #4a4a9e;
 }
-
-#team_box {
+#team_box{
   width: 100%;
   padding-bottom: 30px;
   scroll-behavior: smooth;
   background-color: #4a4a9e;
 }
-
-.slider {
+.slider{
   position: relative;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: #00000000;
   width: 75%;
   min-height: 500px;
   margin: 20px auto;
@@ -104,35 +36,33 @@ a {
   border-radius: 20px;
 }
 
-.slider .slide {
+.slider .slide{
   position: absolute;
   width: 100%;
   height: 100%;
-  -webkit-clip-path: circle(0% at 0 50%);
-          clip-path: circle(0% at 0 50%);
+  clip-path: circle(0% at 0 50%);
   display: flex;
 }
 
-.img-abogado {
+.img-abogado{
   width: 50%;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-.slider .slide.active {
-  -webkit-clip-path: circle(150% at 0 50%);
-          clip-path: circle(150% at 0 50%);
-  transition: 1s;
+.slider .slide.active{
+  clip-path: circle(150% at 0 50%);
+  transition: 2s;
 }
 
-.slider .slide img {
+.slider .slide img{
   position: absolute;
   width: 100%;
   height: 100%;
 }
 
-.slider .slide .info {
+.slider .slide .info{
   color: #222;
   width: 50%;
   padding: 25px;
@@ -142,21 +72,21 @@ a {
   justify-content: center;
 }
 
-.slider .slide .info h2 {
+.slider .slide .info h2{
   font-size: 2em;
   color: #152744;
 }
 
-.slider .slide .info p {
+.slider .slide .info p{
   font-size: 1em;
   color: black;
-  font-family: "Outfit";
+  font-family: 'Outfit';
   line-height: 21px;
   font-weight: 400;
   text-align: justify;
 }
 
-.navigation {
+.navigation{
   height: 500px;
   display: flex;
   align-items: center;
@@ -165,40 +95,39 @@ a {
   transition: opacity 0.5s ease;
 }
 
-.slider:hover .navigation {
+.slider:hover .navigation{
   opacity: 1;
 }
 
-.prev-btn,
-.next-btn {
+.prev-btn, .next-btn{
   z-index: 999;
   font-size: 2em;
   color: #222;
   background: rgba(255, 255, 255, 0.397);
   padding: 10px;
   cursor: pointer;
-  font-family: "REM";
+  font-family: 'REM';
   font-size: 1.5rem;
   box-shadow: 0 0 2px black;
 }
 
-.prev-btn {
+.prev-btn{
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
 
-.next-btn {
+.next-btn{
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
 }
 
-.navigation-visibility {
+.navigation-visibility{
   z-index: 999;
   display: flex;
   justify-content: center;
 }
 
-.navigation-visibility .slide-icon {
+.navigation-visibility .slide-icon{
   z-index: 999;
   background: rgba(255, 255, 255, 0.5);
   width: 20px;
@@ -210,131 +139,217 @@ a {
   display: none;
 }
 
-.navigation-visibility .slide-icon.active {
+.navigation-visibility .slide-icon.active{
   background-color: #367591;
 }
 
-@media (max-width: 900px) {
-  .slider {
+@media (max-width: 900px){
+  .slider{
     width: 100%;
   }
-  .slider .slide .info {
+
+  .slider .slide .info{
     position: relative;
     width: 80%;
     margin-left: auto;
     margin-right: auto;
   }
 }
-@media (max-width: 500px) {
-  .slider .slide .info h2 {
+
+@media (max-width: 500px){
+  .slider .slide .info h2{
     font-size: 1.8em;
     line-height: 40px;
   }
-  .slider .slide .info p {
+
+  .slider .slide .info p{
     font-size: 0.9em;
   }
 }
-@media (max-width: 550px) {
-  #team_box-team-title {
+
+@media (max-width: 550px){  
+
+  #team_box-team-title{
     padding-bottom: 30px;
     font-size: 4.5rem;
   }
-  #team_box {
+  #team_box{
     padding-bottom: 0;
   }
-  .slider {
+
+  .slider{
     height: 100%;
     margin: 0px;
+
   }
-  .slider .slide {
+
+  .slider .slide{
     flex-direction: column;
   }
-  .img-abogado {
+
+  .img-abogado{
     background-position: center;
     height: 35%;
     width: 100%;
   }
-  .slider .slide .info {
-    height: 65%;
+
+  .slider .slide.active{
+    
+  }
+
+  .slider .slide img{
+    
+  }
+
+  .slider .slide .info{
+    height:65%;
     width: 100%;
   }
+
+  .slider .slide .info h2{
+    
+  }
+
+  .slider .slide .info p{
+    
+  }
+
+  .navigation{
+    
+  }
+
+  .slider:hover .navigation{
+    
+  }
+
+  .prev-btn, .next-btn{
+    
+  }
+
+  .prev-btn{
+    
+  }
+
+  .next-btn{
+    
+  }
+
+  .navigation-visibility{
+  }
+
+  .navigation-visibility .slide-icon{
+    
+  }
+
+  .navigation-visibility .slide-icon.active{
+    
+  }
 }
-#contact_box {
+
+footer{
+  background-color: #4a4a9e;
+  color: #fff;
+  text-align: left;
+  bottom: 0;
+  width: 100%;
+  
+}
+
+footer p{
+  padding: 20px;
+  width: 100%;
+  font-family: 'Montserrat', sans-serif;
+}
+footer a {
+  text-align: center;
+  color: #fff;
+  text-decoration: none;
+  margin: 0 10px;
+  font-family: 'Montserrat', sans-serif;
+}
+footer a:hover{
+  text-decoration: underline;
+  font-family: 'Montserrat', sans-serif;
+}
+
+
+.copyright {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+#contact_box{
   width: 100%;
   margin: auto;
+ 
 }
 
-#contact_box-contact-title {
-  font-family: "Outfit";
-  color: black;
-  font-size: 3.5rem;
-  text-align: center;
-  line-height: 70px;
-}
 
-#contact_box-main {
+#contact_box-contact-title{
+font-family: 'Outfit';
+color: black;
+font-size: 3.5rem;
+text-align: center;
+line-height: 70px;
+
+}
+#contact_box-main{
   background-color: #4a4a9e;
   border-radius: 10px;
   height: 500px;
   width: 75%;
+  
   margin: 40px auto;
   margin-top: 20px;
   display: flex;
   align-items: center;
 }
-
-#contact_box-main hr {
+#contact_box-main hr{
   outline: 2px solid white;
   height: 10%;
 }
 
-#contact_box-info {
+#contact_box-info{
   padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-
-#contact_box-info a {
+#contact_box-info a{
   text-decoration: none;
 }
-
-#contact_box-info a:hover {
+#contact_box-info a:hover{
   text-decoration: underline;
   padding: 10px;
   border-radius: 10px;
 }
-
-#contact_box-info div {
+#contact_box-info div{
   display: flex;
   align-items: center;
 }
-
-#contact_box-info img {
+#contact_box-info img{
   margin: 10px;
   height: 20px;
   opacity: 70%;
 }
-
-#contact_box-info h2 {
+#contact_box-info h2{
   font-size: 1.2rem;
-  font-family: "Outfit";
+  font-family: 'Outfit';
   font-weight: 400;
   color: white;
   opacity: 70%;
 }
-
-#address_text:hover {
+#address_text:hover{
   cursor: pointer;
   text-decoration: underline;
 }
-
 #contact_box-info,
-#contact_box-form {
+#contact_box-form{
   width: 50%;
-}
-
-#contact_box-form {
+} 
+#contact_box-form{
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -342,40 +357,37 @@ a {
   padding-right: 60px;
 }
 
-#contact_box-form h2 {
-  font-family: "Outfit";
+#contact_box-form h2{
+  font-family: 'Outfit';
   color: white;
   font-size: 1.7rem;
-  margin-bottom: 15px;
+  margin-bottom: 15px;      
 }
-
-#contact_box-form label {
-  font-family: "Outfit";
+#contact_box-form label{
+  font-family: 'Outfit';
   color: white;
   font-weight: 400;
   font-size: 0.9rem;
   margin-bottom: 10px;
 }
-
-#contact_box-form input {
+#contact_box-form input{
   margin-bottom: 10px;
-  font-family: "REM";
+  font-family: 'REM';
   height: 35px;
   padding: 5px;
   border-radius: 2px;
   transition: 0.2s ease-in-out;
-  background-color: rgba(54, 118, 145, 0);
+  background-color: #36769100;
   border: 2px solid #367591;
   color: white;
   font-size: 1rem;
 }
-
-#contact_box-form input:focus {
+#contact_box-form input:focus{
   height: 40px;
   transition: 0.2s;
+  
 }
-
-#contact_box-form input[type=submit] {
+#contact_box-form input[type="submit"]{
   margin-top: 10px;
   height: 35px;
   width: 50%;
@@ -384,47 +396,45 @@ a {
   color: white;
   background-color: #367691;
 }
-
-#contact_box-form textarea {
-  background-color: rgba(54, 118, 145, 0);
+#contact_box-form textarea{
+  background-color: #36769100;
   border: 2px solid #367591;
   font-size: 1rem;
   border-radius: 2px;
   resize: none;
   padding: 7px;
   height: 60px;
-  font-family: "REM";
+  font-family: 'REM';
   transition: 0.2s;
   color: white;
 }
-
-#contact_box-form textarea:focus {
+#contact_box-form textarea:focus{
   height: 120px;
   transition: 0.2s;
 }
-
-#contact_box-form input[type=submit]:hover {
+#contact_box-form input[type=submit]:hover{
   color: white;
   width: 100%;
   transition: 0.2s;
 }
-
-#footer_box {
+#footer_box{
   width: 100%;
+  
 }
-
-#footer_box h2 {
+#footer_box h2{
   font-size: 2rem;
   text-align: center;
+  
   color: white;
 }
 
-@media (max-width: 950px) {
-  #contact_box-contact-title {
+@media (max-width: 950px){
+  #contact_box-contact-title{
     padding-bottom: 10px;
     color: #fff;
+    
   }
-  #contact_box {
+  #contact_box{
     background: #4a4a9e;
     width: 100%;
     margin: 0;
@@ -432,62 +442,99 @@ a {
     padding: 30px;
     height: auto;
   }
-  #contact_box-main {
+  #contact_box-main{
     width: 100%;
     display: flex;
     flex-direction: column;
     background: none;
     height: auto;
   }
-  #contact_box-info {
+
+  #contact_box-info{
     width: 100%;
     margin: 0;
     padding: 0;
   }
-  #contact_box-info div {
+  #contact_box-info div{
     flex-direction: column;
     margin-bottom: 22px;
   }
-  #contact_box-info img {
+  #contact_box-info img{
     margin: 0;
     padding: 0;
     margin-bottom: 12px;
     height: 35px;
   }
-  #contact_box-info h2 {
+  #contact_box-info h2{
     font-size: 1.5rem;
     text-align: center;
     color: black;
   }
   #contact_box-info,
-  #contact_box-form {
+  #contact_box-form{
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  } 
+  #contact_box-form{
     width: 100%;
     margin: 0;
     padding: 0;
   }
-  #contact_box-form {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  #contact_box-form h2 {
+
+  #contact_box-form h2{
     font-size: 2.2rem;
     color: white;
   }
-  #contact_box-form label {
+  #contact_box-form label{
     font-size: 1.6rem;
     margin-bottom: 7px;
   }
-  #contact_box-form input {
+  #contact_box-form input{
     height: 45px;
     margin-bottom: 20px;
   }
-  #contact_box-form input[type=submit] {
+  #contact_box-form input[type="submit"]{
     height: 55px;
     width: 100%;
     font-size: 1.4rem;
   }
-  #contact_box-form textarea {
+  #contact_box-form textarea{
     height: 120px;
   }
-}/*# sourceMappingURL=organizations.css.map */
+  .logo{
+      display: none;
+    }
+}
+
+.logo{
+  position: absolute;
+  width: 285px;
+}
+nav{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: end;
+  padding: 40px;
+}
+nav ul {
+  list-style-type: none;
+  
+}
+nav li {
+  display: inline;
+  margin-right: 20px; 
+  text-decoration: none;
+}
+nav li a {
+  text-decoration: none;
+  color: black;
+  font-family: 'Montserrat', sans-serif;
+  margin: 10px;
+}
+
+nav li a:hover {
+  text-decoration: underline;
+  font-family: 'Montserrat', sans-serif;
+}
