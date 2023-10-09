@@ -17,7 +17,8 @@
   padding-bottom: 30px;
   font-size: 2rem;
   text-align: center;
-  color: #4a4a9e;
+  color: white;
+  font-family: 'Montserrat', sans-serif;
 }
 #team_box{
   width: 100%;
@@ -106,7 +107,7 @@
   background: rgba(255, 255, 255, 0.397);
   padding: 10px;
   cursor: pointer;
-  font-family: 'REM';
+  font-family: 'Outfit';
   font-size: 1.5rem;
   box-shadow: 0 0 2px black;
 }
@@ -171,7 +172,8 @@
 
   #team_box-team-title{
     padding-bottom: 30px;
-    font-size: 4.5rem;
+    font-size: 2.5rem;
+    font-family: 'Montserrat', sans-serif;
   }
   #team_box{
     padding-bottom: 0;
@@ -206,43 +208,60 @@
     width: 100%;
   }
 
-  .slider .slide .info h2{
-    
+  nav{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+  }
+  nav ul {
+    list-style-type: none;
+    font-size: 1rem;
+  
+  }
+  nav li {
+    display: inline;
+    margin-right: 20px; 
+    text-decoration: none;
+  }
+  nav li a {
+    text-decoration: none;
+    color: black;
+    font-family: 'Montserrat', sans-serif;
+   
   }
 
-  .slider .slide .info p{
+  footer{
+    background-color: #4a4a9e;
+    color: #fff;
+    text-align: left;
+    bottom: 0;
+    width: 100%;
     
   }
-
-  .navigation{
-    
+  
+  footer p{
+    padding: 20px;
+    width: 100%;
+    font-family: 'Montserrat', sans-serif;
   }
-
-  .slider:hover .navigation{
-    
+  footer a {
+    text-align: center;
+    color: #fff;
+    text-decoration: none;
+    margin: 0 10px;
+    font-family: 'Montserrat', sans-serif;
   }
-
-  .prev-btn, .next-btn{
-    
+  footer a:hover{
+    text-decoration: underline;
   }
-
-  .prev-btn{
-    
-  }
-
-  .next-btn{
-    
-  }
-
-  .navigation-visibility{
-  }
-
-  .navigation-visibility .slide-icon{
-    
-  }
-
-  .navigation-visibility .slide-icon.active{
-    
+  
+  
+  .copyright {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
   }
 }
 
@@ -330,6 +349,7 @@ line-height: 70px;
   align-items: center;
 }
 #contact_box-info img{
+  border-radius: 10px;
   margin: 10px;
   height: 20px;
   opacity: 70%;
@@ -358,13 +378,13 @@ line-height: 70px;
 }
 
 #contact_box-form h2{
-  font-family: 'Outfit';
+  font-family: 'Montserrat', sans-serif;
   color: white;
   font-size: 1.7rem;
   margin-bottom: 15px;      
 }
 #contact_box-form label{
-  font-family: 'Outfit';
+  font-family: 'Montserrat', sans-serif;
   color: white;
   font-weight: 400;
   font-size: 0.9rem;
@@ -468,7 +488,7 @@ line-height: 70px;
   #contact_box-info h2{
     font-size: 1.5rem;
     text-align: center;
-    color: black;
+    
   }
   #contact_box-info,
   #contact_box-form{
@@ -531,10 +551,8 @@ nav li a {
   text-decoration: none;
   color: black;
   font-family: 'Montserrat', sans-serif;
-  margin: 10px;
 }
 
 nav li a:hover {
   text-decoration: underline;
-  font-family: 'Montserrat', sans-serif;
 }
