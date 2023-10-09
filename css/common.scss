@@ -30,7 +30,8 @@ a {
 }
 
 .logo{
-    max-width: 100%;
+    max-width: 250px;
+    padding: 10px;
 }
 
 .nav{
@@ -55,7 +56,7 @@ a {
 
 
 .footer {
-    background-color: #4a4a9e;
+    background-color: var(--primary);
     color: var(--background);
     text-align: left;
     width: 100%;

@@ -24,7 +24,8 @@ a {
 }
 
 .logo {
-  max-width: 100%;
+  max-width: 250px;
+  padding: 10px;
 }
 
 .nav__ul {
@@ -48,7 +49,7 @@ a {
 }
 
 .footer {
-  background-color: #4a4a9e;
+  background-color: var(--primary);
   color: var(--background);
   text-align: left;
   width: 100%;
@@ -196,7 +197,7 @@ a {
   background-color: var(--secondary);
 }
 .sections__section:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
   box-shadow: 0 0 4px black;
   transition: 0.2s;
 }
