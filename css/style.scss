@@ -164,3 +164,20 @@
         }
     }
 }
+
+.history{
+    margin-block: 2rem;
+    @include common.flex(column, center, center);
+    &__title{
+        text-align: center;
+        font-size: 2rem;
+        color:var(--secondary)
+    }
+    &__p{
+        max-width: 1600px;
+        padding-inline: 2rem;
+        text-align: center;
+        text-wrap: balance;
+        font-size: 1.125rem;
+    }
+}
