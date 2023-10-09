@@ -161,7 +161,7 @@ body {
     cursor: pointer;
     background-color: var(--accent);
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: var(--accent-hover);
     }
   }

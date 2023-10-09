@@ -126,6 +126,10 @@ function updateCart() {
 
 }
 
+document.querySelector(".cart__buy").addEventListener("click",()=>{
+    
+})
+
 // Function to display products in the product grid
 function displayProducts(products) {
     const productGrid = document.querySelector(".products-section");

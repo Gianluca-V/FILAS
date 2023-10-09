@@ -1,39 +1,11 @@
-*{
-    margin: 0px;
-    padding: 0px;
-    box-sizing: border-box;
-}
+@use "common.scss" as common;
 
-.header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: #118E11;
-    height: 120px;
-}
-
-.footer{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: #118E11;
-    height: 120px;
-}
-
-.header .nav__ul{
-    display: flex;
-    flex-direction: row;
-    gap: 30px;
-    color: #FFF;
-    list-style: none;
-}
-
-.header .nav__ul .nav__a{
-    text-decoration: none;
-    color: #FFF;
-
+:root {
+    --text: #000000;
+    --background: #ffffff;
+    --primary: #d31b1b;
+    --secondary: #c8690a;
+    --accent: #118e11;
 }
 
 section{

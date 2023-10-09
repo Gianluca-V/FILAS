@@ -24,7 +24,8 @@ a {
 }
 
 .logo {
-  max-width: 100%;
+  max-width: 250px;
+  padding: 10px;
 }
 
 .nav__ul {
@@ -48,7 +49,7 @@ a {
 }
 
 .footer {
-  background-color: #4a4a9e;
+  background-color: var(--primary);
   color: var(--background);
   text-align: left;
   width: 100%;
@@ -234,7 +235,7 @@ body {
   cursor: pointer;
   background-color: var(--accent);
 }
-.cart__buy:hover {
+.cart__buy:hover:not(:disabled) {
   background-color: var(--accent-hover);
 }
 @media (width <= 620px) {
@@ -266,4 +267,4 @@ body {
   }
 }
 
-/*# sourceMappingURL=wildeArtesanal.css.map */
+/*# sourceMappingURL=wildeartesanal.css.map */
