@@ -35,7 +35,6 @@ a {
   align-items: center;
   gap: 1.5rem;
   padding: 30px;
-  width: 20%;
 }
 .nav__li {
   display: block;
@@ -43,15 +42,10 @@ a {
 }
 .nav__a {
   color: #fff;
-  padding: 10px 0px;
+  padding: 10px;
 }
 .nav__a:hover {
   text-decoration: underline;
-  transition: all .5s;
-}
-
-.toggle-menu{
-  display: none;
 }
 
 .footer {
@@ -90,8 +84,7 @@ a {
   padding-bottom: 30px;
   font-size: 2rem;
   text-align: center;
-  color: white;
-  font-family: 'Montserrat', sans-serif;
+  color: #4a4a9e;
 }
 
 #team_box {
@@ -220,35 +213,7 @@ a {
   background-color: #367591;
 }
 
-
 @media (max-width: 900px) {
-  .nav__ul{
-    display: flex;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 8vh;
-    width: 30%;
-    z-index: 1;
-    transform: translatex(-550%);
-    transition: all .5s ease-in-out;
-   }
-   .show-menu{
-    transform: translatex(0%);
-    transition: all .5s ease-in-out;
-   }
-   .nav__li{
-    margin: 2em;
-    color: black;
-   }
-   
-   .toggle-menu{
-    display: block;
-    font-size: 2em;
-   }
-
-
   .slider {
     width: 100%;
   }
@@ -271,8 +236,7 @@ a {
 @media (max-width: 550px) {
   #team_box-team-title {
     padding-bottom: 30px;
-    font-size: 2.5rem;
-    font-family: 'Montserrat', sans-serif;
+    font-size: 4.5rem;
   }
   #team_box {
     padding-bottom: 0;
@@ -492,7 +456,7 @@ a {
   #contact_box-info h2 {
     font-size: 1.5rem;
     text-align: center;
-    
+    color: black;
   }
   #contact_box-info,
   #contact_box-form {
