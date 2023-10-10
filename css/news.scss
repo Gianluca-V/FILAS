@@ -1,0 +1,26 @@
+@use "common.scss" as common;
+
+:root {
+    --text: #000000;
+    --background: #ffffff;
+    --primary: #d31b1b;
+    --secondary: #c8690a;
+    --accent: #118e11;
+}
+
+.article{
+    margin-block:5rem;
+    width: 100%;
+    @include common.flex(column, space-around, center);
+    gap:1rem;
+    &__image{
+        max-width: 800px;
+    }
+    &__title{
+        font-size: clamp(2rem,4vw,4rem);
+        font-weight: 500;
+    }
+    &__content{
+        padding-inline: 10%;
+    }
+}

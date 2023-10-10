@@ -7,7 +7,8 @@
     "compile:wildeArtesanal": "cd css && sass wildeArtesanal.scss wildeArtesanal.css --watch",
     "compile:style": "cd css && sass style.scss style.css --watch",
     "compile:organizations": "cd css && sass organizations.scss organizations.css --watch",
-    "compile:familias": "cd css && sass familias.scss familias.css --watch"
+    "compile:familias": "cd css && sass familias.scss familias.css --watch",
+    "compile:news": "cd css && sass news.scss news.css --watch"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
