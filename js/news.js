@@ -20,9 +20,9 @@ function displayNews(news){
     const newsSection = document.querySelector(".news");
     let index = 0;
     news.forEach(article => {
+        const newsItem = document.createElement('div');
+        newsItem.classList.add('news__new');
         if(index === 0){
-            const newsItem = document.createElement('div');
-            newsItem.classList.add('news__new');
             newsItem.classList.add('news__new--big');
             newsItem.innerHTML = `
             <img src="${article.Image}" alt="${article.Title}" class="new__img new__img--big">
@@ -33,8 +33,6 @@ function displayNews(news){
         `
         }
         else{
-            const newsItem = document.createElement('div');
-            newsItem.classList.add('news__new');
             newsItem.innerHTML = `
                 <img src="${article.Image}" alt="${article.Title}" class="new__img">
                 <div class="new__data">
@@ -43,6 +41,7 @@ function displayNews(news){
                 </div>
             `
         }
+        newsSection.appendChild(newsItem);
         index++;
     });
 }
