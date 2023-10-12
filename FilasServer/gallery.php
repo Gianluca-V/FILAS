@@ -1,13 +1,31 @@
+
 <?php
+header("Access-Control-Allow-Origin: *");
+$request_method = $_SERVER['REQUEST_METHOD'];
+$parts = explode('/', $_SERVER['REQUEST_URI']);
+
+$servername = "localhost";
+$username = "root";
+$password = "";
+$database = "filas";
+
+$conn = new mysqli($servername, $username, $password, $database);
+
+if ($conn->connect_error) {
+    die("Conn error: " . $conn->connect_error);
+}
+
+
 switch ($request_method) {
     case 'GET':
         // Handle GET request for gallery
-        if ($parts[4] !== "") {
+        if (count($parts) >= 5) {
             $image_id = intval($parts[4]);
             $sql = "SELECT * FROM Gallery WHERE ID = $image_id";
         } else {
             $sql = "SELECT * FROM Gallery";
         }
+        
 
         $result = $conn->query($sql);
 
