@@ -214,6 +214,39 @@ a {
 }
 
 @media (max-width: 900px) {
+   .nav__ul {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 10px;
+    width: 10%;
+    z-index: 999999999999999999999;
+    transform: translatex(-100%);
+    transition: all .5s ease-in-out;
+    background-color: #4a4a9e;
+    padding: 100px;
+    border-radius: 10px;
+  }
+
+
+   .show-menu{
+    transform: translatex(-100%);
+    transition: all .5s ease-in-out;
+   }
+   .nav__li{
+    margin: 2em;
+    color: black;
+   }
+   
+   .toggle-menu{
+    display: block;
+    font-size: 2em;
+   }
+
+
   .slider {
     width: 100%;
   }
@@ -224,6 +257,7 @@ a {
     margin-right: auto;
   }
 }
+
 @media (max-width: 500px) {
   .slider .slide .info h2 {
     font-size: 1.8em;
