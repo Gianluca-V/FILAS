@@ -78,3 +78,131 @@ a {
         font-size: 14px;
     }
 }
+
+
+* {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    outline: none;
+    border: none;
+    text-decoration: none;
+    box-sizing: border-box;
+    font-family: "Mulish";
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: var(--primary);
+  }
+  
+  .logo {
+    max-width: 250px;
+    padding: 10px;
+  }
+  
+  .nav__ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 30px;
+  }
+  .nav__li {
+    display: block;
+    font-size: 1.2rem;
+  }
+  .nav__a {
+    color: #fff;
+    padding: 10px;
+  }
+  .nav__a:hover {
+    text-decoration: underline;
+  }
+  
+  .footer {
+    background-color: var(--primary);
+    color: var(--background);
+    text-align: left;
+    width: 100%;
+  }
+  .footer__p {
+    padding: 20px;
+    width: 100%;
+  }
+  .footer__a {
+    text-align: center;
+    color: #fff;
+    margin: 0 10px;
+  }
+  .footer__a :hover {
+    text-decoration: underline;
+  }
+  .footer .copyright {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  
+ 
+  
+  @media (max-width: 900px) {
+     .nav__ul {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 10px;
+      width: 10%;
+      z-index: 999999999999999999999;
+      transform: translatex(-100%);
+      transition: all .5s ease-in-out;
+      background-color: #4a4a9e;
+      padding: 100px;
+      border-radius: 10px;
+    }
+  
+  
+     .show-menu{
+      transform: translatex(-100%);
+      transition: all .5s ease-in-out;
+     }
+     .nav__li{
+      margin: 2em;
+      color: black;
+     }
+     
+     .toggle-menu{
+      display: block;
+      font-size: 2em;
+     }
+  
+  
+    .slider {
+      width: 100%;
+    }
+    .slider .slide .info {
+      position: relative;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  
+  
+  
+  
+  /*# sourceMappingURL=organizations.css.map */
+  
