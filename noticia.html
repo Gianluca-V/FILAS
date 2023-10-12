@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/news.css">
+    <title>Fundación FILAS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <img class="logo" src="assets/logo.png" alt="">
+        <nav class="nav">
+            <ul class="nav__ul">
+                <li class="nav__li"><a href="familias.html" class="nav__a">Familia</a></li>
+                <li class="nav__li"><a href="organizaciones.html" class="nav__a">Organizaciones</a></li>
+                <li class="nav__li"><a href="wildeArtesanal.html" class="nav__a">Artesanías</a></li>
+                <li class="nav__li"><a href="noticias.html" class="nav__a">Noticias</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="article">
+        <img class="article__image" src="" alt="">
+        <h1 class="article__title"></h1>
+        <p class="article__content"></p>
+    </div>
+
+    <script>
+        window.addEventListener("DOMContentLoaded",()=>{
+            const params = new URLSearchParams(window.location.search);
+            const articleId = params.get('ID');
+            console.log(`http://localhost/FilasServer/api/news/${articleId}`)
+        
+        
+            // Fetch the specific news article from your backend based on articleId.
+            fetch(`http://localhost/FilasServer/api/news/${articleId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(article => {
+                    // Populate the news template with data.
+                    const newsImage = document.querySelector('.article__image');
+                    const newsTitle = document.querySelector('.article__title');
+                    const newsContent = document.querySelector('.article__content');
+
+                    article = article[0];
+                    console.log(article)
+                    newsImage.src = article.Image;
+                    newsImage.alt = article.Title;
+                    newsTitle.textContent = article.Title;
+                    newsContent.textContent = article.Body;
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        })
+    </script>
+    
+    <footer class="footer">
+        <div class="footer__container">
+            <p class="footer__p">Seguinos en nuestras redes</p>
+            <a href="#" class="footer__a">Facebook</a>
+            <a href="#" class="footer__a">Twitter</a>
+            <a href="#" class="footer__a">LinkedIn</a>
+            <a href="#" class="footer__a">Instagram</a>
+        </div>
+        <div class="copyright">
+            &copy; 2023 F.I.L.A.S.
+        </div>
+    </footer>
+</body>
+</html>

@@ -256,4 +256,24 @@ a {
   }
 }
 
+.history {
+  margin-block: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.history__title {
+  text-align: center;
+  font-size: 2rem;
+  color: var(--secondary);
+}
+.history__p {
+  max-width: 1600px;
+  padding-inline: 2rem;
+  text-align: center;
+  text-wrap: balance;
+  font-size: 1.125rem;
+}
+
 /*# sourceMappingURL=style.css.map */

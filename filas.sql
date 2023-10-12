@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-09-2023 a las 04:23:12
--- Versión del servidor: 10.4.19-MariaDB
--- Versión de PHP: 8.0.6
+-- Tiempo de generación: 12-10-2023 a las 07:05:46
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -30,7 +30,18 @@ SET time_zone = "+00:00";
 CREATE TABLE `gallery` (
   `ID` int(11) NOT NULL,
   `Image` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `gallery`
+--
+
+INSERT INTO `gallery` (`ID`, `Image`) VALUES
+(1, 'assets/pruebagaleria.jpg'),
+(2, 'assets/pruebagaleria.jpg'),
+(3, 'assets/pruebagaleria2.jpg'),
+(4, 'assets/pruebagaleria3.jpg'),
+(5, 'assets/pruebagaleria4.JPG');
 
 -- --------------------------------------------------------
 
@@ -41,7 +52,7 @@ CREATE TABLE `gallery` (
 CREATE TABLE `mails` (
   `ID` int(11) NOT NULL,
   `Mail` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -54,7 +65,7 @@ CREATE TABLE `news` (
   `Title` varchar(99) NOT NULL,
   `Body` text DEFAULT NULL,
   `Image` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -69,7 +80,7 @@ CREATE TABLE `products` (
   `Stock` int(11) NOT NULL,
   `Image` text DEFAULT NULL,
   `Description` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `products`
@@ -130,7 +141,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT de la tabla `gallery`
 --
 ALTER TABLE `gallery`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `mails`
