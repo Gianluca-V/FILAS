@@ -1,28 +1,11 @@
-* {
-    padding: 0;
-    margin: 0;
-    border: 0;
-    outline: none;
-    border: none;
-    text-decoration: none;
-    box-sizing: border-box;
-    font-family: "Mulish";
-}
-
-body{
-    background-color: var(--background);
-}
-a{
-    text-decoration: none;
-    color: inherit;
-}
+@use "common.scss" as common;
 
 :root {
     --text: #000000;
     --background: #ffffff;
-    --primary: #f67575;
-    --secondary: #f6b677;
-    --accent: #99e999;
+    --primary: #d31b1b;
+    --secondary: #c8690a;
+    --accent: #118e11;
 }
 
 /* VER IMÁGEN */

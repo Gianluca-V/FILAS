@@ -1,6 +1,6 @@
 $(document).ready(function() {
     $.ajax({
-        url: 'http://localhost/FilasServer/gallery.php',
+        url: 'http://localhost/FilasServer/api/gallery/',
         type: 'GET',
         dataType: 'json',
         success: function(data) {
@@ -10,6 +10,7 @@ $(document).ready(function() {
                     var imgElement = $('<img>').addClass('gallery__photo').attr('src', image.Image).attr('alt', 'Imagen ' + (index + 1));
                     imageContainer.append(imgElement);
                 });
+                addClickListener();
             } else {
                 $('#image-container').html('<p>No se encontraron imágenes.</p>');
             }
@@ -20,22 +21,22 @@ $(document).ready(function() {
     });
 });
 
-
-function toggleImage(){
-    document.querySelector('.viewimg').style.display = 'none';
+const addClickListener = () =>{
+    function toggleImage(){
+        document.querySelector('.viewimg').style.display = 'none';
+    }
+    const galleryPhotos = document.querySelectorAll('.gallery__photo');
+    const closeImg = document.querySelector('.viewimg__close');
+    
+    galleryPhotos.forEach(photo => {
+        photo.addEventListener('click', () => {
+            document.querySelector('.viewimg').style.display = 'flex';
+            document.querySelector('.viewimg__photo').src = photo.src;
+        });
+    });
+    
+    closeImg.addEventListener('click', () => {
+        document.querySelector('.viewimg').style.display = 'none';
+    });
 }
 
-const galleryPhotos = document.querySelectorAll('.gallery__photo');
-const closeImg = document.querySelector('.viewimg__close');
-
-galleryPhotos.forEach(photo => {
-    photo.addEventListener('click', () => {
-        
-        document.querySelector('.viewimg').style.display = 'flex';
-        document.querySelector('.viewimg__photo').src = photo.src;
-    });
-});
-
-closeImg.addEventListener('click', () => {
-    document.querySelector('.viewimg').style.display = 'none';
-});

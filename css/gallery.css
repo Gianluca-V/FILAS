@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   padding: 0;
   margin: 0;
@@ -208,97 +209,80 @@ a {
   --accent: #118e11;
 }
 
-section {
-  margin: 0 auto;
-  width: 70%;
-}
-
-h2 {
-  text-align: center;
-}
-
-.news {
-  display: flex;
-  flex-direction: column;
-  gap: 50px;
+/* VER IMÁGEN */
+.viewimg {
+  position: fixed;
+  margin: auto;
   width: 100%;
-  padding: 20px;
-}
-
-.form {
-  padding: 20px;
-}
-
-.form__title-container {
-  padding: 10px;
-}
-
-.form form {
-  display: flex;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 6px black;
+  display: none;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 20px;
 }
 
-input[type=text] {
-  border-radius: 20px;
-  border: none;
-  padding: 10px;
-  background-color: rgb(203, 203, 203);
-}
-
-input[type=mail] {
-  border-radius: 20px;
-  border: none;
-  padding: 10px;
-  background-color: rgb(203, 203, 203);
-}
-
-input[type=tel] {
-  border-radius: 20px;
-  border: none;
-  padding: 10px;
-  background-color: rgb(203, 203, 203);
-}
-
-input[type=submit] {
-  background-color: #118E11;
-  border-radius: 20px;
-  border: none;
-  padding: 10px;
-  color: white;
-  width: 80px;
-}
-
-.news__img {
-  width: 20%;
-  height: 30%;
-}
-
-.section--news__text {
-  color: #FFF;
-  text-align: center;
-}
-
-.news__events-container {
+.viewimg__header {
+  height: 10%;
+  width: 100%;
+  background-color: var(--secondary);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 20px;
-  width: 60%;
-  transition: 0.2s;
-  background: linear-gradient(135deg, rgb(248, 80, 50) 0%, rgb(241, 111, 92) 50%, rgb(246, 41, 12) 51%, rgb(240, 47, 23) 71%, rgb(231, 56, 39) 100%);
 }
 
-.news__events-container:hover {
-  width: 90%;
-  transition: 0.2s;
+.viewimg__close {
+  padding: 10px;
+  border-radius: 40px;
+  cursor: pointer;
 }
 
-.news__events-container:nth-of-type(even) {
-  align-self: flex-end;
-  flex-direction: row-reverse;
+.viewimg__photo {
+  height: 90%;
+  padding: 10px;
+  max-width: 80%;
 }
 
-/*# sourceMappingURL=familias.css.map */
+/* GALERÍA */
+.gallery {
+  width: 65%;
+  margin: auto;
+  padding: 10px;
+}
+
+.gallery__header {
+  margin-bottom: 10px;
+}
+
+.gallery__title {
+  color: var(--text);
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: var(--primary);
+}
+
+.gallery__photos {
+  column-count: 3;
+  column-gap: 10px;
+}
+
+.gallery__photos .gallery__photo {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+@media (max-width: 750px) {
+  .gallery {
+    width: 100%;
+  }
+  .gallery__photos {
+    column-count: 2;
+  }
+}
+
+/*# sourceMappingURL=gallery.css.map */
