@@ -79,22 +79,6 @@ a {
     }
 }
 
-
-* {
-    padding: 0;
-    margin: 0;
-    border: 0;
-    outline: none;
-    border: none;
-    text-decoration: none;
-    box-sizing: border-box;
-    font-family: "Mulish";
-  }
-  
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
   
   .header {
     display: flex;
@@ -110,6 +94,9 @@ a {
     padding: 10px;
   }
   
+  .nav{
+    position: relative;
+  }
   .nav__ul {
     display: flex;
     flex-direction: row;
@@ -160,50 +147,31 @@ a {
   
   @media (max-width: 900px) {
      .nav__ul {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
+      display: none;
+      gap:0;
       position: absolute;
-      top: 0;
-      left: 0;
-      height: 10px;
+      top: 100%;
+      right: 0;
       width: 10%;
-      transform: translateX(-100%);
       transition: all .5s ease-in-out;
-      background-color: #4a4a9e;
-      padding: 100px;
+      background-color: var(--primary);
+      padding-inline: 100px;
       border-radius: 10px;
+      z-index: 999999;
+    }
+    .nav__ul.active{
+      @include flex(column,center,center);
     }
   
     .toggle-menu{
         display: block;
         padding-right: .5rem;
+        font-size: 2rem;
     }
-
-     .show-menu{
-      transform: translateX(-100%);
-      transition: all .5s ease-in-out;
-     }
      .nav__li{
-      margin: 2em;
+      margin: 2rem;
       color: black;
      }
-     
-     .toggle-menu{
-      display: block;
-      font-size: 2em;
-     }
-  
-  
-    .slider {
-      width: 100%;
-    }
-    .slider .slide .info {
-      position: relative;
-      width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-    }
   }
   
   

@@ -73,22 +73,6 @@ a {
   font-size: 14px;
 }
 
-* {
-  padding: 0;
-  margin: 0;
-  border: 0;
-  outline: none;
-  border: none;
-  text-decoration: none;
-  box-sizing: border-box;
-  font-family: "Mulish";
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
 .header {
   display: flex;
   flex-direction: row;
@@ -101,6 +85,10 @@ a {
 .logo {
   max-width: 250px;
   padding: 10px;
+}
+
+.nav {
+  position: relative;
 }
 
 .nav__ul {
@@ -160,44 +148,32 @@ a {
 
 @media (max-width: 900px) {
   .nav__ul {
+    display: none;
+    gap: 0;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 10%;
+    transition: all 0.5s ease-in-out;
+    background-color: var(--primary);
+    padding-inline: 100px;
+    border-radius: 10px;
+    z-index: 999999;
+  }
+  .nav__ul.active {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 10px;
-    width: 10%;
-    transform: translateX(-100%);
-    transition: all 0.5s ease-in-out;
-    background-color: #4a4a9e;
-    padding: 100px;
-    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
   }
   .toggle-menu {
     display: block;
     padding-right: 0.5rem;
-  }
-  .show-menu {
-    transform: translateX(-100%);
-    transition: all 0.5s ease-in-out;
+    font-size: 2rem;
   }
   .nav__li {
-    margin: 2em;
+    margin: 2rem;
     color: black;
-  }
-  .toggle-menu {
-    display: block;
-    font-size: 2em;
-  }
-  .slider {
-    width: 100%;
-  }
-  .slider .slide .info {
-    position: relative;
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
   }
 }
 

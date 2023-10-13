@@ -72,22 +72,6 @@ a {
   font-size: 14px;
 }
 
-* {
-  padding: 0;
-  margin: 0;
-  border: 0;
-  outline: none;
-  border: none;
-  text-decoration: none;
-  box-sizing: border-box;
-  font-family: "Mulish";
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
 .header {
   display: flex;
   flex-direction: row;
@@ -100,6 +84,10 @@ a {
 .logo {
   max-width: 250px;
   padding: 10px;
+}
+
+.nav {
+  position: relative;
 }
 
 .nav__ul {
@@ -159,134 +147,33 @@ a {
 
 @media (max-width: 900px) {
   .nav__ul {
+    display: none;
+    gap: 0;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 10%;
+    transition: all 0.5s ease-in-out;
+    background-color: var(--primary);
+    padding-inline: 100px;
+    border-radius: 10px;
+    z-index: 999999;
+  }
+  .nav__ul.active {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 10px;
-    width: 10%;
-    transform: translateX(-100%);
-    transition: all 0.5s ease-in-out;
-    background-color: #4a4a9e;
-    padding: 100px;
-    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
   }
   .toggle-menu {
     display: block;
     padding-right: 0.5rem;
-  }
-  .show-menu {
-    transform: translateX(-100%);
-    transition: all 0.5s ease-in-out;
+    font-size: 2rem;
   }
   .nav__li {
-    margin: 2em;
+    margin: 2rem;
     color: black;
   }
-  .toggle-menu {
-    display: block;
-    font-size: 2em;
-  }
-  .slider {
-    width: 100%;
-  }
-  .slider .slide .info {
-    position: relative;
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-:root {
-  --text: #04042f;
-  --background: #f6f6fe;
-  --primary: #f70000;
-  --secondary: #d1d1e1;
-  --accent: #4a4a9e;
-}
-
-* {
-  padding: 0;
-  margin: 0;
-  border: 0;
-  outline: none;
-  border: none;
-  text-decoration: none;
-  box-sizing: border-box;
-  font-family: "Mulish";
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  background-color: var(--primary);
-}
-
-.logo {
-  max-width: 250px;
-  padding: 10px;
-}
-
-.nav__ul {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 30px;
-}
-
-.nav__li {
-  display: block;
-  font-size: 1.2rem;
-}
-
-.nav__a {
-  color: #fff;
-  padding: 10px;
-}
-
-.nav__a:hover {
-  text-decoration: underline;
-}
-
-.footer {
-  background-color: var(--primary);
-  color: var(--background);
-  text-align: left;
-  width: 100%;
-}
-
-.footer__p {
-  padding: 20px;
-  width: 100%;
-}
-
-.footer__a {
-  text-align: center;
-  color: #fff;
-  margin: 0 10px;
-}
-
-.footer__a :hover {
-  text-decoration: underline;
-}
-
-.footer .copyright {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 14px;
 }
 
 :root {
@@ -431,33 +318,6 @@ a {
 }
 
 @media (max-width: 900px) {
-  .nav__ul {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 10vh;
-    width: 10%;
-    z-index: 1;
-    transform: translatex(-100%);
-    transition: all 0.5s ease-in-out;
-    background-color: #4a4a9e;
-    padding: 100px;
-  }
-  .show-menu {
-    transform: translatex(-100%);
-    transition: all 0.5s ease-in-out;
-  }
-  .nav__li {
-    margin: 2em;
-    color: black;
-  }
-  .toggle-menu {
-    display: block;
-    font-size: 2em;
-  }
   .slider {
     width: 100%;
   }
@@ -508,7 +368,6 @@ a {
 }
 
 #contact_box-contact-title {
-  font-family: "Outfit";
   color: black;
   font-size: 3.5rem;
   text-align: center;
@@ -561,7 +420,6 @@ a {
 
 #contact_box-info h2 {
   font-size: 1.2rem;
-  font-family: "Outfit";
   font-weight: 400;
   color: white;
   opacity: 70%;
@@ -586,14 +444,12 @@ a {
 }
 
 #contact_box-form h2 {
-  font-family: "Outfit";
   color: white;
   font-size: 1.7rem;
   margin-bottom: 15px;
 }
 
 #contact_box-form label {
-  font-family: "Outfit";
   color: white;
   font-weight: 400;
   font-size: 0.9rem;
