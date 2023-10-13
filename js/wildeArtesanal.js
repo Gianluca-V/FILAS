@@ -81,8 +81,10 @@ function updateCart() {
     if (cart.length <= 0) {
         cartProductsContainer.textContent = "Agregue productos al carrito";
         cartTotalElement.textContent = totalCost;
+        document.querySelector(".cart__buy").setAttribute("disabled",true)
         return;
     }
+    document.querySelector(".cart__buy").removeAttribute("disabled")
 
     cart.forEach(product => {
         cartProduct = document.createElement("div");

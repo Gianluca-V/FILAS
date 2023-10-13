@@ -95,7 +95,7 @@ a {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 30px;
 }
 

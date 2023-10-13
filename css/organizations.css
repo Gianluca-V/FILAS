@@ -95,7 +95,7 @@ a {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 30px;
 }
 
@@ -492,7 +492,6 @@ a {
   resize: none;
   padding: 7px;
   height: 60px;
-  font-family: "REM";
   transition: 0.2s;
   color: white;
 }
@@ -526,8 +525,6 @@ a {
   #contact_box {
     background: #4a4a9e;
     width: 100%;
-    margin: 0;
-    padding: 0;
     padding: 30px;
     height: auto;
   }
@@ -540,16 +537,12 @@ a {
   }
   #contact_box-info {
     width: 100%;
-    margin: 0;
-    padding: 0;
   }
   #contact_box-info div {
     flex-direction: column;
     margin-bottom: 22px;
   }
   #contact_box-info img {
-    margin: 0;
-    padding: 0;
     margin-bottom: 12px;
     height: 35px;
   }
@@ -561,13 +554,9 @@ a {
   #contact_box-info,
   #contact_box-form {
     width: 100%;
-    margin: 0;
-    padding: 0;
   }
   #contact_box-form {
     width: 100%;
-    margin: 0;
-    padding: 0;
   }
   #contact_box-form h2 {
     font-size: 2.2rem;

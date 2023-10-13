@@ -318,7 +318,6 @@
     resize: none;
     padding: 7px;
     height: 60px;
-    font-family: "REM";
     transition: 0.2s;
     color: white;
   }
@@ -352,8 +351,6 @@
     #contact_box {
       background: #4a4a9e;
       width: 100%;
-      margin: 0;
-      padding: 0;
       padding: 30px;
       height: auto;
     }
@@ -366,16 +363,12 @@
     }
     #contact_box-info {
       width: 100%;
-      margin: 0;
-      padding: 0;
     }
     #contact_box-info div {
       flex-direction: column;
       margin-bottom: 22px;
     }
     #contact_box-info img {
-      margin: 0;
-      padding: 0;
       margin-bottom: 12px;
       height: 35px;
     }
@@ -387,13 +380,9 @@
     #contact_box-info,
     #contact_box-form {
       width: 100%;
-      margin: 0;
-      padding: 0;
     }
     #contact_box-form {
       width: 100%;
-      margin: 0;
-      padding: 0;
     }
     #contact_box-form h2 {
       font-size: 2.2rem;
