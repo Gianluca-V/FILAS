@@ -174,7 +174,7 @@ svg{
 
 .prev-btn,
 .next-btn {
-  z-index: 999;
+  z-index: 1;
   font-size: 2em;
   color: #222;
   background: rgba(255, 255, 255, 0.397);
@@ -196,7 +196,6 @@ svg{
 }
 
 .navigation-visibility {
-  z-index: 999;
   display: flex;
   justify-content: center;
 }
@@ -225,9 +224,7 @@ svg{
     position: absolute;
     top: 0;
     left: 0;
-    height: 10px;
     width: 10%;
-    z-index: 999999999999999999999;
     transform: translatex(-100%);
     transition: all .5s ease-in-out;
     background-color: #4a4a9e;
@@ -237,6 +234,7 @@ svg{
 
 
    .show-menu{
+    z-index: 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999;
     transform: translatex(-100%);
     transition: all .5s ease-in-out;
    }
