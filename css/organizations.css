@@ -80,11 +80,15 @@ a {
   --accent: #4a4a9e;
 }
 
+svg{
+  display: none;
+}
+
 #team_box-team-title {
   padding-bottom: 30px;
   font-size: 2rem;
   text-align: center;
-  color: #4a4a9e;
+  color: #ffff;
 }
 
 #team_box {
@@ -242,10 +246,12 @@ a {
    }
    
    .toggle-menu{
-    display: block;
-    font-size: 2em;
+    display: flex;
+    font-size: 3em;
    }
-
+   svg{
+    display: block;
+  }
 
   .slider {
     width: 100%;
