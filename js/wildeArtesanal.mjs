@@ -5,26 +5,6 @@ API.Products.GetAll().then((data)=>{
     displayProducts(data);
 })
 
-/*(
-    () => {
-        fetch('http://localhost/filasserver/api/products/')
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                // Handle the received data (list of products)
-                // You can process and display the data here
-                displayProducts(data);
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }
-)()*/
-
 let cart = []
 // Function to generate a product card
 function generateProductCard(product) {

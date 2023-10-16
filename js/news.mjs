@@ -1,20 +1,8 @@
-(
-    () => {
-        fetch('http://localhost/filasserver/api/news/')
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                displayNews(data);
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }
-)()
+import {API} from './API.mjs';
+
+API.News.GetAll().then((data)=>{
+    displayNews(data);
+});
 
 function displayNews(news){
     const newsSection = document.querySelector(".news");
