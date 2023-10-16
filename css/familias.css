@@ -226,7 +226,7 @@ h2 {
   background: linear-gradient(135deg, rgb(248, 80, 50) 0%, rgb(241, 111, 92) 50%, rgb(246, 41, 12) 51%, rgb(240, 47, 23) 71%, rgb(231, 56, 39) 100%);
 }
 
-@media (width > 600px) {
+@media (width > 600px) and (prefers-reduced-motion: false) {
   .news__events-container:hover {
     width: 90%;
     transition: 0.2s;

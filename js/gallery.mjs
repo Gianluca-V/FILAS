@@ -9,6 +9,7 @@ API.Gallery.GetAll().then((data)=>{
             imgElement.classList.add('gallery__photo')
             imgElement.setAttribute('src', image.Image)
             imgElement.setAttribute('alt', 'Imagen ' + (index + 1));
+            imgElement.setAttribute('loading', 'lazy');
             imageContainer.appendChild(imgElement);
             index++;
         });
