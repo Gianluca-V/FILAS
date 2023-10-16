@@ -15,6 +15,7 @@ section{
 
 h2{
     text-align: center;
+    font-size: clamp(2rem,4vw,3.5rem);
 }
 
 .news{
@@ -25,55 +26,10 @@ h2{
     padding: 20px;
 }
 
-.form{
-    padding: 20px;
-}
-
-.form__title-container{
-    padding: 10px;
-}
-
-.form form{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-}
-
-input[type="text"]{
-    border-radius: 20px;
-    border: none;
-    padding: 10px;
-    background-color: rgb(203, 203, 203);
-}
-
-input[type="mail"]{
-    border-radius: 20px;
-    border: none;
-    padding: 10px;
-    background-color: rgb(203, 203, 203);
-}
-
-input[type="tel"]{
-    border-radius: 20px;
-    border: none;
-    padding: 10px;
-    background-color: rgb(203, 203, 203);
-}
-
-input[type="submit"]{
-    background-color: #118E11;
-    border-radius: 20px;
-    border: none;
-    padding: 10px;
-    color: white;
-    width: 80px;
-}
-
 .news__img{
-    width: 20%;
-    height: 30%;
+    max-width: 200px;
+    width: 100%;
+    padding: 8px;
 }
 
 .section--news__text{
@@ -91,13 +47,26 @@ input[type="submit"]{
     background: linear-gradient(135deg, rgba(248,80,50,1) 0%, rgba(241,111,92,1) 50%, rgba(246,41,12,1) 51%, rgba(240,47,23,1) 71%, rgba(231,56,39,1) 100%);
 }
 
-.news__events-container:hover{
-    width: 90%;
-    transition: 0.2s;
+@media (width > 950px) {
+    .news__events-container:hover{
+        width: 90%;
+        transition: 0.2s;
+    }
+    
+    .news__events-container:nth-of-type(even){
+       align-self: flex-end;
+       flex-direction: row-reverse;
+    }
 }
 
-.news__events-container:nth-of-type(even){
-   align-self: flex-end;
-   flex-direction: row-reverse;
+@media (width <= 950px) {
+    .news__events-container{
+        width: 100%;
+    }
 }
 
+@media (width <= 600px) {
+    .news__events-container{
+        @include common.flex(column,center,center);
+    }
+}
