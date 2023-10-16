@@ -1,4 +1,11 @@
-(
+import {API} from './API.mjs';
+
+API.Products.GetAll().then((data)=>{
+    console.log(data)
+    displayProducts(data);
+})
+
+/*(
     () => {
         fetch('http://localhost/filasserver/api/products/')
             .then((response) => {
@@ -16,7 +23,7 @@
                 console.error('There was a problem with the fetch operation:', error);
             });
     }
-)()
+)()*/
 
 let cart = []
 // Function to generate a product card
