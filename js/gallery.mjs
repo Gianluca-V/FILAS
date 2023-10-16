@@ -19,9 +19,6 @@ API.Gallery.GetAll().then((data)=>{
 })
 
 const addClickListener = () =>{
-    function toggleImage(){
-        document.querySelector('.viewimg').style.display = 'none';
-    }
     const galleryPhotos = document.querySelectorAll('.gallery__photo');
     const closeImg = document.querySelector('.viewimg__close');
     
