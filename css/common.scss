@@ -145,18 +145,21 @@ a {
     display: none;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 990px) {
+    .logo{
+      max-width: 150px;
+    }
      .nav__ul {
       display: none;
       gap:0;
       position: absolute;
-      top: 100%;
+      top: 150%;
       right: 0;
       width: 10%;
       transition: all .5s ease-in-out;
       background-color: var(--primary);
       padding-inline: 100px;
-      border-radius: 10px;
+      border-radius: 0 0 0 10px;
       z-index: 999999;
     }
     .nav__ul.active{

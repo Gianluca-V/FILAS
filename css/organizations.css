@@ -145,18 +145,21 @@ a {
   display: none;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 990px) {
+  .logo {
+    max-width: 150px;
+  }
   .nav__ul {
     display: none;
     gap: 0;
     position: absolute;
-    top: 100%;
+    top: 150%;
     right: 0;
     width: 10%;
     transition: all 0.5s ease-in-out;
     background-color: var(--primary);
     padding-inline: 100px;
-    border-radius: 10px;
+    border-radius: 0 0 0 10px;
     z-index: 999999;
   }
   .nav__ul.active {
@@ -186,9 +189,9 @@ a {
 
 #team_box-team-title {
   padding-bottom: 30px;
-  font-size: 2rem;
+  font-size: clamp(2.25rem, 6vw, 5rem);
   text-align: center;
-  color: #4a4a9e;
+  color: var(--background);
 }
 
 #team_box {
@@ -203,7 +206,7 @@ a {
   background-color: rgba(0, 0, 0, 0);
   width: 75%;
   min-height: 500px;
-  margin: 20px auto;
+  margin: auto;
   overflow: hidden;
   z-index: 900;
   border-radius: 20px;
@@ -318,9 +321,6 @@ a {
 }
 
 @media (max-width: 900px) {
-  .slider {
-    width: 100%;
-  }
   .slider .slide .info {
     position: relative;
     width: 80%;
@@ -337,17 +337,15 @@ a {
     font-size: 0.9em;
   }
 }
-@media (max-width: 550px) {
+@media (max-width: 650px) {
   #team_box-team-title {
     padding-bottom: 30px;
-    font-size: 4.5rem;
   }
   #team_box {
     padding-bottom: 0;
   }
   .slider {
     height: 100%;
-    margin: 0px;
   }
   .slider .slide {
     flex-direction: column;

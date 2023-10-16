@@ -10,9 +10,9 @@
   
   #team_box-team-title {
     padding-bottom: 30px;
-    font-size: 2rem;
+    font-size: clamp(2.25rem,6vw,5rem);
     text-align: center;
-    color: #4a4a9e;
+    color: var(--background);
   }
   
   #team_box {
@@ -27,7 +27,7 @@
     background-color: rgba(0, 0, 0, 0);
     width: 75%;
     min-height: 500px;
-    margin: 20px auto;
+    margin: auto;
     overflow: hidden;
     z-index: 900;
     border-radius: 20px;
@@ -143,9 +143,8 @@
   
   @media (max-width: 900px) {
  
-  
     .slider {
-      width: 100%;
+      //width: 100%;
     }
     .slider .slide .info {
       position: relative;
@@ -163,17 +162,15 @@
       font-size: 0.9em;
     }
   }
-  @media (max-width: 550px) {
+  @media (max-width: 650px) {
     #team_box-team-title {
       padding-bottom: 30px;
-      font-size: 4.5rem;
     }
     #team_box {
       padding-bottom: 0;
     }
     .slider {
       height: 100%;
-      margin: 0px;
     }
     .slider .slide {
       flex-direction: column;

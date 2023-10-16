@@ -1,3 +1,5 @@
+//Nav code
+
 const toggle_open = document.getElementById('toggle_open');
 toggle_open.addEventListener('click', togglemenu);
 
