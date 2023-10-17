@@ -127,6 +127,7 @@ a {
     color: var(--background);
     text-align: left;
     width: 100%;
+    padding-inline: 20px;
     
     &__social{
       grid-area: 1/1/1/1;
@@ -145,7 +146,6 @@ a {
     }
   }
   .footer__p {
-    padding: 20px;
     width: 100%;
   }
   .footer__a {

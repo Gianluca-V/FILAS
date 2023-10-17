@@ -123,6 +123,7 @@ a {
   color: var(--background);
   text-align: left;
   width: 100%;
+  padding-inline: 20px;
 }
 .footer__social {
   grid-area: 1/1/1/1;
@@ -143,7 +144,6 @@ a {
 }
 
 .footer__p {
-  padding: 20px;
   width: 100%;
 }
 
@@ -203,15 +203,11 @@ a {
   --accent: #4a4a9e;
 }
 
-svg{
-  display: none;
-}
-
 #team_box-team-title {
   padding-bottom: 30px;
   font-size: clamp(2.25rem, 6vw, 5rem);
   text-align: center;
-  color: #ffff;
+  color: var(--background);
 }
 
 #team_box {
@@ -297,7 +293,7 @@ svg{
 
 .prev-btn,
 .next-btn {
-  z-index: 1;
+  z-index: 999;
   font-size: 2em;
   color: #222;
   background: rgba(255, 255, 255, 0.397);
@@ -319,6 +315,7 @@ svg{
 }
 
 .navigation-visibility {
+  z-index: 999;
   display: flex;
   justify-content: center;
 }
@@ -340,43 +337,6 @@ svg{
 }
 
 @media (max-width: 900px) {
-   .nav__ul {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 10%;
-    transform: translatex(-100%);
-    transition: all .5s ease-in-out;
-    background-color: #4a4a9e;
-    padding: 100px;
-    border-radius: 10px;
-  }
-
-
-   .show-menu{
-    z-index: 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999;
-    transform: translatex(-100%);
-    transition: all .5s ease-in-out;
-   }
-   .nav__li{
-    margin: 2em;
-    color: black;
-   }
-   
-   .toggle-menu{
-    display: flex;
-    font-size: 3em;
-   }
-   svg{
-    display: block;
-  }
-
-  .slider {
-    width: 100%;
-  }
   .slider .slide .info {
     position: relative;
     width: 80%;
@@ -632,23 +592,7 @@ svg{
   #contact_box-form textarea {
     height: 120px;
   }
-  #map_frame{
-    display: none;
-    width: 1rem;
-    height: 10rem;
-  }
 }
-
-#map_frame{
-  display: none;
-  width: 25rem;
-  height: 10rem;
-}
-
-
 
 
 /*# sourceMappingURL=organizations.css.map */
-
-
-
