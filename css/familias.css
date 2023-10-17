@@ -61,6 +61,7 @@ a {
   color: var(--background);
   text-align: left;
   width: 100%;
+  padding-top: 5px;
 }
 .footer__p {
   padding: 20px;
