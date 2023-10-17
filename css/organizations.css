@@ -527,6 +527,23 @@ svg{
   #contact_box-form textarea {
     height: 120px;
   }
+  #map_frame{
+    display: none;
+    width: 1rem;
+    height: 10rem;
+  }
 }
 
+#map_frame{
+  display: none;
+  width: 25rem;
+  height: 10rem;
+}
+
+
+
+
 /*# sourceMappingURL=organizations.css.map */
+
+
+
