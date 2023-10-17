@@ -66,6 +66,16 @@ a {
 .footer__a :hover {
   text-decoration: underline;
 }
+.svg1{
+  font-size: 30px;
+  padding-top: 10px;
+}
+.svg2{
+  font-size: 60px;
+  padding-top: 10px;
+  padding: 20px;
+  
+}
 .footer .copyright {
   text-align: center;
   margin-top: 10px;
@@ -112,6 +122,7 @@ a {
 .nav__a:hover {
   text-decoration: underline;
 }
+
 
 .footer {
   display: grid;
