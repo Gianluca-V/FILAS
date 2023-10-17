@@ -12,6 +12,8 @@
     max-width: 100%;
     @include common.flex(column,center,center);
     &__new{
+        text-wrap: balance;
+        text-align: center;
         &--big{
             order:-1;
             margin: auto;
@@ -28,6 +30,9 @@
         transition: box-shadow .25s ease;
         &:hover{
             box-shadow: 5px 5px 6px #444a;
+        }
+        @media (width <= 400px){
+            @include common.flex(column,center,center);
         }
     }
     &__img{
