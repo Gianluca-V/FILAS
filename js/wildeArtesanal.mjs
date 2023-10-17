@@ -1,22 +1,9 @@
-(
-    () => {
-        fetch('http://localhost/filasserver/api/products/')
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                // Handle the received data (list of products)
-                // You can process and display the data here
-                displayProducts(data);
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }
-)()
+import {API} from './API.mjs';
+
+API.Products.GetAll().then((data)=>{
+    console.log(data)
+    displayProducts(data);
+})
 
 let cart = []
 // Function to generate a product card
@@ -81,8 +68,10 @@ function updateCart() {
     if (cart.length <= 0) {
         cartProductsContainer.textContent = "Agregue productos al carrito";
         cartTotalElement.textContent = totalCost;
+        document.querySelector(".cart__buy").setAttribute("disabled",true)
         return;
     }
+    document.querySelector(".cart__buy").removeAttribute("disabled")
 
     cart.forEach(product => {
         cartProduct = document.createElement("div");

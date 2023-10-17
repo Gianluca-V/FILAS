@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   padding: 0;
   margin: 0;
@@ -187,69 +188,80 @@ a {
   --accent: #118e11;
 }
 
-section {
-  margin: 0 auto;
-  width: 70%;
-}
-
-h2 {
-  text-align: center;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-}
-
-.news {
-  display: flex;
+/* VER IMÁGEN */
+.viewimg {
+  position: fixed;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 6px black;
+  display: none;
   flex-direction: column;
-  gap: 50px;
-  width: 100%;
-  padding: 20px;
-}
-
-.news__img {
-  max-width: 200px;
-  width: 100%;
-  padding: 8px;
-}
-
-.section--news__text {
-  color: #FFF;
-  text-align: center;
-}
-
-.news__events-container {
-  display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 20px;
-  width: 60%;
-  transition: 0.2s;
-  background: linear-gradient(135deg, rgb(248, 80, 50) 0%, rgb(241, 111, 92) 50%, rgb(246, 41, 12) 51%, rgb(240, 47, 23) 71%, rgb(231, 56, 39) 100%);
 }
 
-@media (width > 600px) and (prefers-reduced-motion: no-preference) {
-  .news__events-container:hover {
-    width: 90%;
-    transition: 0.2s;
-  }
+.viewimg__header {
+  height: 10%;
+  width: 100%;
+  background-color: var(--secondary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-@media (width > 600px) {
-  .news__events-container:nth-of-type(even) {
-    align-self: flex-end;
-    flex-direction: row-reverse;
-  }
+
+.viewimg__close {
+  padding: 10px;
+  border-radius: 40px;
+  cursor: pointer;
 }
-@media (width <= 950px) {
-  .news__events-container {
+
+.viewimg__photo {
+  height: 90%;
+  padding: 10px;
+  max-width: 80%;
+}
+
+/* GALERÍA */
+.gallery {
+  width: 65%;
+  margin: auto;
+  padding: 10px;
+}
+
+.gallery__header {
+  margin-bottom: 10px;
+}
+
+.gallery__title {
+  color: var(--text);
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: var(--primary);
+}
+
+.gallery__photos {
+  column-count: 3;
+  column-gap: 10px;
+}
+
+.gallery__photos .gallery__photo {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+@media (max-width: 750px) {
+  .gallery {
     width: 100%;
   }
-}
-@media (width <= 600px) {
-  .news__events-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  .gallery__photos {
+    column-count: 2;
   }
 }
 
-/*# sourceMappingURL=familias.css.map */
+/*# sourceMappingURL=gallery.css.map */

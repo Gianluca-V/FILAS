@@ -1,87 +1,5 @@
 @use "common.scss" as common;
 
-:root {
-    --text: #04042f;
-    --background: #f6f6fe;
-    --primary: #f70000;
-    --secondary: #d1d1e1;
-    --accent: #4a4a9e;
-}
-
-* {
-    padding: 0;
-    margin: 0;
-    border: 0;
-    outline: none;
-    border: none;
-    text-decoration: none;
-    box-sizing: border-box;
-    font-family: "Mulish";
-  }
-  
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-  
-  .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    background-color: var(--primary);
-  }
-  
-  .logo {
-    max-width: 250px;
-    padding: 10px;
-  }
-  
-  .nav__ul {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 30px;
-  }
-  .nav__li {
-    display: block;
-    font-size: 1.2rem;
-  }
-  .nav__a {
-    color: #fff;
-    padding: 10px;
-  }
-  .nav__a:hover {
-    text-decoration: underline;
-  }
-  
-  .footer {
-    background-color: var(--primary);
-    color: var(--background);
-    text-align: left;
-    width: 100%;
-  }
-  .footer__p {
-    padding: 20px;
-    width: 100%;
-  }
-  .footer__a {
-    text-align: center;
-    color: #fff;
-    margin: 0 10px;
-  }
-  .footer__a :hover {
-    text-decoration: underline;
-  }
-  .footer .copyright {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 14px;
-  }
-  
   :root {
     --text: #04042f;
     --background: #f6f6fe;
@@ -92,9 +10,9 @@
   
   #team_box-team-title {
     padding-bottom: 30px;
-    font-size: 2rem;
+    font-size: clamp(2.25rem,6vw,5rem);
     text-align: center;
-    color: #4a4a9e;
+    color: var(--background);
   }
   
   #team_box {
@@ -109,7 +27,7 @@
     background-color: rgba(0, 0, 0, 0);
     width: 75%;
     min-height: 500px;
-    margin: 20px auto;
+    margin: auto;
     overflow: hidden;
     z-index: 900;
     border-radius: 20px;
@@ -224,41 +142,6 @@
   }
   
   @media (max-width: 900px) {
-     .nav__ul {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 10vh;
-      width: 10%;
-      z-index: 1;
-      transform: translatex(-100%);
-      transition: all .5s ease-in-out;
-      background-color: #4a4a9e;
-      padding: 100px;
-    }
-  
-  
-     .show-menu{
-      transform: translatex(-100%);
-      transition: all .5s ease-in-out;
-     }
-     .nav__li{
-      margin: 2em;
-      color: black;
-     }
-     
-     .toggle-menu{
-      display: block;
-      font-size: 2em;
-     }
-  
-  
-    .slider {
-      width: 100%;
-    }
     .slider .slide .info {
       position: relative;
       width: 80%;
@@ -275,17 +158,15 @@
       font-size: 0.9em;
     }
   }
-  @media (max-width: 550px) {
+  @media (max-width: 650px) {
     #team_box-team-title {
       padding-bottom: 30px;
-      font-size: 4.5rem;
     }
     #team_box {
       padding-bottom: 0;
     }
     .slider {
       height: 100%;
-      margin: 0px;
     }
     .slider .slide {
       flex-direction: column;
@@ -306,7 +187,6 @@
   }
   
   #contact_box-contact-title {
-    font-family: "Outfit";
     color: black;
     font-size: 3.5rem;
     text-align: center;
@@ -359,7 +239,6 @@
   
   #contact_box-info h2 {
     font-size: 1.2rem;
-    font-family: "Outfit";
     font-weight: 400;
     color: white;
     opacity: 70%;
@@ -384,14 +263,12 @@
   }
   
   #contact_box-form h2 {
-    font-family: "Outfit";
     color: white;
     font-size: 1.7rem;
     margin-bottom: 15px;
   }
   
   #contact_box-form label {
-    font-family: "Outfit";
     color: white;
     font-weight: 400;
     font-size: 0.9rem;
@@ -434,7 +311,6 @@
     resize: none;
     padding: 7px;
     height: 60px;
-    font-family: "REM";
     transition: 0.2s;
     color: white;
   }
@@ -468,8 +344,6 @@
     #contact_box {
       background: #4a4a9e;
       width: 100%;
-      margin: 0;
-      padding: 0;
       padding: 30px;
       height: auto;
     }
@@ -482,16 +356,12 @@
     }
     #contact_box-info {
       width: 100%;
-      margin: 0;
-      padding: 0;
     }
     #contact_box-info div {
       flex-direction: column;
       margin-bottom: 22px;
     }
     #contact_box-info img {
-      margin: 0;
-      padding: 0;
       margin-bottom: 12px;
       height: 35px;
     }
@@ -503,13 +373,9 @@
     #contact_box-info,
     #contact_box-form {
       width: 100%;
-      margin: 0;
-      padding: 0;
     }
     #contact_box-form {
       width: 100%;
-      margin: 0;
-      padding: 0;
     }
     #contact_box-form h2 {
       font-size: 2.2rem;

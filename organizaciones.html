@@ -13,18 +13,19 @@
 
 <body>
   <header class="header">
-    <img class="logo" src="assets/logo.png" alt="">
+    <a href="index.html"><img class="logo" src="assets/logo.png" alt=""></a>
     <nav class="nav" id="menu">
       <ul class="nav__ul">
+        <li class="nav__li"><a href="index.html" class="nav__a">Inicio</a></li>
         <li class="nav__li"><a href="familias.html" class="nav__a">Familia</a></li>
         <li class="nav__li"><a href="organizaciones.html" class="nav__a">Organizaciones</a></li>
         <li class="nav__li"><a href="wildeArtesanal.html" class="nav__a">Productos</a></li>
-        <li class="nav__li"><a href="" class="nav__a">Noticias</a></li>
+        <li class="nav__li"><a href="noticias.html" class="nav__a">Noticias</a></li>
+        <li class="nav__li"><a href="galeria.html" class="nav__a">Galería</a></li>
       </ul>
       <div class="toggle-menu" id="toggle_open">
         <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#ffffff}</style><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg>
-        
-    </div>
+      </div>
     </nav>
   </header>
 
@@ -145,12 +146,7 @@
           <h2 id="address_text" onclick="toggleMap()">DAG, Martín Fierro 972, B1875 Wilde, Provincia de Buenos Aires</h2>
       </div>
       <iframe id="map_frame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3280.4189510488363!2d-58.3113031251088!3d-34.69461156230266!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95a3324229d28705%3A0x1491987415cede06!2sFundacion%20Filas!5e0!3m2!1ses!2sar!4v1697500591862!5m2!1ses!2sar" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      
-       
-        
       </div>
-      
-
       <form target="_blank" action="https://formsubmit.co/fundacionfilas@gmail.com" method="post" id="contact_box-form"
         action="">
         <h2 id="form-t">Emviar mensaje</h2>
@@ -168,19 +164,24 @@
       </form>
     </section>
   </section>
-    <footer>
-      <p>Seguinos en nuestras redes</p>
-      <a href="#">Facebook</a>
-      <a href="#">Twitter</a>
-      <a href="#">LinkedIn</a>
-      <a href="#">Instagram</a>
-      <div class="copyright">
+  <footer class="footer">
+    <div class="footer__container">
+        <p class="footer__p">Seguinos en nuestras redes</p>
+        <a href="#" class="footer__a">Facebook</a>
+        <a href="#" class="footer__a">Twitter</a>
+        <a href="#" class="footer__a">LinkedIn</a>
+        <a href="#" class="footer__a">Instagram</a>
+        
+    </div>
+    <div class="copyright">
         &copy; 2023 F.I.L.A.S.
       </div>
      
     </footer>
+    </div>
+</footer>
     <script src="js/slider.js"></script>
-    <script src="js/nav.js"></script>
+    <script src="js/common.js"></script>
     <script src="js/map.js"></script>
 </body>
 
