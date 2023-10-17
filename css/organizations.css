@@ -126,8 +126,8 @@ a {
 
 .footer {
   display: grid;
-  grid-template-columns: repeat(2,1fr);
-  grid-template-rows: repeat(1, 0.5fr);
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 0.5fr);
   align-items: center;
   justify-content: center;
   background-color: var(--primary);
