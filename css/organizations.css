@@ -187,11 +187,15 @@ a {
   --accent: #4a4a9e;
 }
 
+svg{
+  display: none;
+}
+
 #team_box-team-title {
   padding-bottom: 30px;
   font-size: clamp(2.25rem, 6vw, 5rem);
   text-align: center;
-  color: var(--background);
+  color: #ffff;
 }
 
 #team_box {
@@ -277,7 +281,7 @@ a {
 
 .prev-btn,
 .next-btn {
-  z-index: 999;
+  z-index: 1;
   font-size: 2em;
   color: #222;
   background: rgba(255, 255, 255, 0.397);
@@ -299,7 +303,6 @@ a {
 }
 
 .navigation-visibility {
-  z-index: 999;
   display: flex;
   justify-content: center;
 }
@@ -321,6 +324,43 @@ a {
 }
 
 @media (max-width: 900px) {
+   .nav__ul {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10%;
+    transform: translatex(-100%);
+    transition: all .5s ease-in-out;
+    background-color: #4a4a9e;
+    padding: 100px;
+    border-radius: 10px;
+  }
+
+
+   .show-menu{
+    z-index: 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999;
+    transform: translatex(-100%);
+    transition: all .5s ease-in-out;
+   }
+   .nav__li{
+    margin: 2em;
+    color: black;
+   }
+   
+   .toggle-menu{
+    display: flex;
+    font-size: 3em;
+   }
+   svg{
+    display: block;
+  }
+
+  .slider {
+    width: 100%;
+  }
   .slider .slide .info {
     position: relative;
     width: 80%;
@@ -576,7 +616,23 @@ a {
   #contact_box-form textarea {
     height: 120px;
   }
+  #map_frame{
+    display: none;
+    width: 1rem;
+    height: 10rem;
+  }
+}
+
+#map_frame{
+  display: none;
+  width: 25rem;
+  height: 10rem;
 }
 
 
+
+
 /*# sourceMappingURL=organizations.css.map */
+
+
+
