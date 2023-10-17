@@ -118,10 +118,31 @@ a {
   }
   
   .footer {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    grid-template-rows: repeat(2, .5fr);
+    align-items: center;
+    justify-content: center;
     background-color: var(--primary);
     color: var(--background);
     text-align: left;
     width: 100%;
+    
+    &__social{
+      grid-area: 1/1/1/1;
+    }
+
+    &__data{
+      grid-area: 1/2/1/2;
+      @include flex(row,flex-end,center);
+      gap:20%;
+    }
+    &__copyright{
+      grid-area: 2/1/2/3;
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+    }
   }
   .footer__p {
     padding: 20px;
@@ -135,10 +156,7 @@ a {
   .footer__a :hover {
     text-decoration: underline;
   }
-  .footer .copyright {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 14px;
+  .copyright {
   }
   
   .toggle-menu{
@@ -176,9 +194,5 @@ a {
       color: black;
      }
   }
-  
-  
-  
-  
   /*# sourceMappingURL=organizations.css.map */
   
