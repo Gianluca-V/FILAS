@@ -1,94 +1,49 @@
 class APIClass {
-    SERVER_URL = 'http://localhost/filasserver/api/';
+    SERVER_URL = 'http://localhost/filasServer/api/';
     table = "";
     apiURL = "";
 
     constructor(Table) {
         this.table = Table;
-        this.apiURL = `http://localhost/filasserver/api/${this.table}/`;
+        this.apiURL = `${this.SERVER_URL}${this.table}/`;
     }
 
-    GetAll() {
-        return fetch(this.apiURL)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-                return false;
-            });
+    async GetAll() {
+        const response = await fetch(this.apiURL);
+        return response.json();
     }
-    GetOne(id) {
-        return fetch(this.apiURL + id)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-                return false;
-            });
+    async GetOne(id) {
+        const response = await fetch(this.apiURL + id);
+        return response.json();
     }
-    Post(data) {
-        return fetch(this.apiURL, {
+    async Post(data) {
+        const response = await fetch(this.apiURL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-                return false;
-            });
+        });
+        return response.json();
     }
-    Put(id,data){
-        return fetch(this.apiURL + id, {
+    async Put(id, data){
+        const response = await fetch(this.apiURL + id, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-                return false;
-            });
+        });
+        return response.json();
     }
-    Delete(id){
-        return fetch(this.apiURL + id, {
+    async Delete(id){
+        await fetch(this.apiURL + id, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return true;
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-                return false;
-            });
+        });
+        return true;
     }
 }
 
