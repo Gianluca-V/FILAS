@@ -52,10 +52,10 @@ switch ($table) {
     case 'news':
         include('news.php'); // Include a separate script for the News table
         break;
-    case 'news':
+    case 'family':
         include('family.php'); // Include a separate script for the Family table
         break;
-    case 'news':
+    case 'admins':
         include('admins.php'); // Include a separate script for the Admins table
         break;
     default:
