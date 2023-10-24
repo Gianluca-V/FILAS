@@ -51,12 +51,14 @@ const Gallery = Object.freeze(new APIClass("gallery"));
 const Mails = Object.freeze(new APIClass("mails"));
 const News = Object.freeze(new APIClass("news"));
 const Products = Object.freeze(new APIClass("products"));
+const Family = Object.freeze(new APIClass("family"));
 
 const API = Object.freeze({
     Gallery:Gallery,
     Mails:Mails,
     News:News,
-    Products:Products
+    Products:Products,
+    Family:Family
 })
 
 export {API};
