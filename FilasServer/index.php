@@ -52,6 +52,12 @@ switch ($table) {
     case 'news':
         include('news.php'); // Include a separate script for the News table
         break;
+    case 'news':
+        include('family.php'); // Include a separate script for the Family table
+        break;
+    case 'news':
+        include('admins.php'); // Include a separate script for the Admins table
+        break;
     default:
         http_response_code(404);
         echo json_encode(array("message" => "Table not found"));
