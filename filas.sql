@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-10-2023 a las 19:03:39
+-- Tiempo de generación: 24-10-2023 a las 19:56:09
 -- Versión del servidor: 10.4.19-MariaDB
 -- Versión de PHP: 8.0.6
 
@@ -20,6 +20,26 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `filas`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `admins`
+--
+
+CREATE TABLE `admins` (
+  `ID` int(11) DEFAULT NULL,
+  `username` text DEFAULT NULL,
+  `password` text DEFAULT NULL,
+  `salt` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `admins`
+--
+
+INSERT INTO `admins` (`ID`, `username`, `password`, `salt`) VALUES
+(1543, 'FilasAdmin', '8b4abda03a7fb4eee79d8fb7c07f88497f28b0728779c84fab84a07b3f824cef', 'bcf76de2e59270b37b7e76d22b53917b');
 
 -- --------------------------------------------------------
 
