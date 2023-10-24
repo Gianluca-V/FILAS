@@ -1,12 +1,12 @@
 <?php
 switch ($request_method) {
     case 'GET':
-        // Get all Users or a specific User by ID
+        // Get all Admins or a specific User by ID
         if ($parts[4] !== "") {
-            $Users_id = intval($parts[4]);
-            getUser($Users_id);
+            $Admins_id = intval($parts[4]);
+            getUser($Admins_id);
         } else {
-            getUsers();
+            getAdmins();
         }
         break;
     case 'POST':
@@ -23,13 +23,13 @@ switch ($request_method) {
     case 'PUT':
         // Update a User by ID
         $data = json_decode(file_get_contents("php://input"));
-        $User_id = intval($parts[4]);
-        updateUser($User_id, $data);
+        $Admin_id = intval($parts[4]);
+        updateUser($Admin_id, $data);
         break;
     case 'DELETE':
         // Delete a User by ID
-        $User_id = intval($parts[4]);
-        deleteUser($User_id);
+        $Admin_id = intval($parts[4]);
+        deleteUser($Admin_id);
         break;
     default:
         http_response_code(405);
@@ -37,27 +37,27 @@ switch ($request_method) {
         break;
 }
 
-function getUsers()
+function getAdmins()
 {
     global $conn;
-    $sql = "SELECT * FROM Users";
+    $sql = "SELECT * FROM Admins";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
-        $Users = array();
+        $Admins = array();
         while ($row = $result->fetch_assoc()) {
-            $Users[] = $row;
+            $Admins[] = $row;
         }
-        echo json_encode($Users);
+        echo json_encode($Admins);
     } else {
         echo json_encode(array());
     }
 }
 
-function getUser($User_id)
+function getUser($Admin_id)
 {
     global $conn;
-    $sql = "SELECT * FROM Users WHERE ID = $User_id";
+    $sql = "SELECT * FROM Admins WHERE ID = $Admin_id";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
@@ -82,7 +82,7 @@ function createUser($data)
     // Combine the raw password and salt, and then hash it with SHA-256
     $hashedPassword = hash('sha256', $salt . $rawPassword);
 
-    $sql = "INSERT INTO Users (username, password, Salt) 
+    $sql = "INSERT INTO Admins (username, password, Salt) 
             VALUES ('$username', '$hashedPassword', '$salt')";
 
     if ($conn->query($sql) === TRUE) {
@@ -93,14 +93,14 @@ function createUser($data)
     }
 }
 
-function updateUser($User_id, $data)
+function updateUser($Admin_id, $data)
 {
     global $conn;
-    $id = intval($User_id);
+    $id = intval($Admin_id);
     $username = $conn->real_escape_string($data->username);
     $password = floatval($data->password);
 
-    $sql = "UPDATE Users SET username='$username', password='$password' WHERE ID = $id";
+    $sql = "UPDATE Admins SET username='$username', password='$password' WHERE ID = $id";
 
     if ($conn->query($sql) === TRUE) {
         echo json_encode(array("message" => "User updated successfully"));
@@ -110,11 +110,11 @@ function updateUser($User_id, $data)
     }
 }
 
-function deleteUser($User_id)
+function deleteUser($Admin_id)
 {
     global $conn;
-    $id = intval($User_id);
-    $sql = "DELETE FROM Users WHERE ID = $id";
+    $id = intval($Admin_id);
+    $sql = "DELETE FROM Admins WHERE ID = $id";
 
     if ($conn->query($sql) === TRUE) {
         echo json_encode(array("message" => "User deleted successfully"));
@@ -130,7 +130,7 @@ function checkUserForLogin($data)
     $username = $conn->real_escape_string($data->username);
     $rawPassword = $data->password;
 
-    $sql = "SELECT * FROM Users WHERE username = '$username'";
+    $sql = "SELECT * FROM Admins WHERE username = '$username'";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
