@@ -35,6 +35,7 @@
     </div>
 
     <script>
+      import {API} from './API.mjs'
         window.addEventListener("DOMContentLoaded",()=>{
             const params = new URLSearchParams(window.location.search);
             const articleId = params.get('ID');
@@ -42,13 +43,7 @@
         
         
             // Fetch the specific news article from your backend based on articleId.
-            fetch(`http://localhost/FilasServer/api/news/${articleId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+            API.news.getOne(articleId)
                 .then(article => {
                     // Populate the news template with data.
                     const newsImage = document.querySelector('.article__image');

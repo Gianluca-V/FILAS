@@ -73,23 +73,30 @@ function createUser($data)
 {
     global $conn;
     // Assuming $data contains the necessary fields for creating a User
-    $username = $conn->real_escape_string($data->username);
-    $rawPassword = $data->password;
-    
-    // Generate a random salt for each user
-    $salt = bin2hex(random_bytes(16));
-    
-    // Combine the raw password and salt, and then hash it with SHA-256
-    $hashedPassword = hash('sha256', $salt . $rawPassword);
+    if (isset($data->ID) && isset($data->username) && isset($data->password)) {
+        $ID = $data->ID;
+        $username = $conn->real_escape_string($data->username);
+        $rawPassword = $conn->real_escape_string($data->password);
 
-    $sql = "INSERT INTO Admins (username, password, Salt) 
-            VALUES ('$username', '$hashedPassword', '$salt')";
+         // Generate a random salt for each user
+        $salt = bin2hex(random_bytes(16));
+        
+        // Combine the raw password and salt, and then hash it with SHA-256
+        $hashedPassword = hash('sha256', $salt . $rawPassword);
 
-    if ($conn->query($sql) === TRUE) {
-        echo json_encode(array("message" => "User created successfully"));
-    } else {
-        http_response_code(500);
-        echo json_encode(array("message" => "Error creating User: " . $conn->error));
+        $sql = "INSERT INTO Admins (ID, username, password, Salt) 
+                VALUES ($ID,'$username', '$hashedPassword', '$salt')";
+
+        if ($conn->query($sql) === TRUE) {
+            echo json_encode(array("message" => "User created successfully"));
+        } else {
+            http_response_code(500);
+            echo json_encode(array("message" => "Error creating User: " . $conn->error));
+        }
+    }
+    else{
+        http_response_code(400);
+        echo json_encode(array("message" => "Missing ID, username or password parameters"));
     }
 }
 
