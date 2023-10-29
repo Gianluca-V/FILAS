@@ -29,10 +29,10 @@ switch ($request_method) {
 
         if (isset($data->Title) && isset($data->Image)) {
             $title = $conn->real_escape_string($data->Title);
-            $body = $conn->real_escape_string($data->Body);
+            $description = $conn->real_escape_string($data->Description);
             $image = $conn->real_escape_string($data->Image);
 
-            $sql = "INSERT INTO Organizations (Title, Body, Image) VALUES ('$title', '$body', '$image')";
+            $sql = "INSERT INTO Organizations (Title, Description, Image) VALUES ('$title', '$description', '$image')";
 
             if ($conn->query($sql) === TRUE) {
                 http_response_code(201);
@@ -55,10 +55,10 @@ switch ($request_method) {
 
             if (isset($data->Title) && isset($data->Image)) {
                 $title = $conn->real_escape_string($data->Title);
-                $body = $conn->real_escape_string($data->Body);
+                $description = $conn->real_escape_string($data->Description);
                 $image = $conn->real_escape_string($data->Image);
 
-                $sql = "UPDATE Organizations SET Title = '$title', Body = '$body', Image = '$image' WHERE ID = $organizations_id";
+                $sql = "UPDATE Organizations SET Title = '$title', Description = '$description', Image = '$image' WHERE ID = $organizations_id";
 
                 if ($conn->query($sql) === TRUE) {
                     http_response_code(200);
