@@ -143,7 +143,7 @@ function checkUserForLogin($data)
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $hashedPassword = $row['password'];
-        $salt = $row['Salt'];
+        $salt = $row['salt'];
         
         // Combine the entered password with the stored salt and hash it
         $enteredPasswordHash = hash('sha256', $salt . $rawPassword);

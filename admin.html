@@ -12,7 +12,6 @@
 </head>
 
 <body>
-    
     <nav class="nav--admin">
         <a href="index.html" class="nav--admin__logo-link"><img class="logo" src="assets/logo.png" alt=""></a>
         <ul class="nav--admin__ul">
@@ -38,6 +37,12 @@
     <main class="main">
 
     </main>
+
+    <script>
+        if (localStorage.getItem("logged") != "true") {
+            window.location.href = "login.html";
+        }
+    </script>
 
     <script type="module" src="js/adminRouter.mjs"></script>
     

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>Fundación FILAS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;600;800&display=swap" rel="stylesheet" />
+</head>
+
+<body class="page">
+    <h1 class="page__title">Login</h1>
+    <form class="form" id="login-form">
+        <label class="form__label" for="username">Usuario:</label>
+        <input class="form__input" type="text" id="username" name="username" required />
+
+        <label class="form__label" for="password">Contraseña:</label>
+        <input class="form__input" type="password" id="password" name="password" required />
+
+        <input class="form__submit" type="submit" value="Login" />
+    </form>
+
+    <p class="message" id="login-message"></p>
+
+    <script type="module">
+        import { API } from "./js/API.mjs";
+        const loginForm = document.getElementById("login-form");
+        const loginMessage = document.getElementById("login-message");
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // Make a request to your API to check credentials
+            try {
+                const response = await API.Admins.Post({
+                    username: username,
+                    password: password,
+                    login: true
+                });
+                console.log(response)
+
+                if (response.status === 200) {
+                    // Successful login
+                    loginMessage.textContent = "Bienvenido de nuevo, redireccionando...";
+
+                    // Save 'logged: true' in local storage
+                    localStorage.setItem("logged", "true");
+
+                    window.location.href = "admin.html";
+                } else {
+                    // Authentication failed
+                    loginMessage.textContent =
+                        "Autentificación fallida. Intente de nuevo";
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                loginMessage.textContent =
+                    "Ha ocurrido un error. Intente de nuevo mas tarde.";
+            }
+        });
+    </script>
+
+    <style>
+        .page {
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+
+            &__title {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+        }
+
+        .form {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+            width: 30%;
+            min-width: 250px;
+
+            &__label {
+                display: block;
+                margin-bottom: 10px;
+                font-weight: bold;
+            }
+
+            &__input {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+            }
+
+            &__submit {
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                padding: 10px 20px;
+                font-size: 16px;
+                border-radius: 3px;
+                cursor: pointer;
+
+                &:hover {
+                    background-color: #0056b3;
+                }
+            }
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            color: #ff0000;
+            font-weight: bold;
+        }
+    </style>
+</body>
+
+</html>
