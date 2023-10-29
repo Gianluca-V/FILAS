@@ -20,6 +20,10 @@ a {
   text-decoration: none;
   color: inherit;
 }
+button{
+  cursor: pointer;
+  background: none;
+}
 
 .header {
   @include flex(row, space-between, center);

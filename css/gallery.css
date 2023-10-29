@@ -15,6 +15,11 @@ a {
   color: inherit;
 }
 
+button {
+  cursor: pointer;
+  background: none;
+}
+
 .header {
   display: flex;
   flex-direction: row;

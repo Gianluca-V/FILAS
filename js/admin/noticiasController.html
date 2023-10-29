@@ -1,18 +1,39 @@
-<header class="header">
-  <h2 class="section-title"></h2>
-  <button class="add-button">+</button>
-</header>
-<table class="news-table">
-  <thead class="news-table__head">
-    <tr class="news-table__row">
-      <th class="news-table__header">ID</th>
-      <th class="news-table__header">Title</th>
-      <th class="news-table__header">Body</th>
-      <th class="news-table__header">Image</th>
-      <th class="news-table__header">Actions</th>
+<table class="table">
+  <div class="table__caption-container">
+    <h3 class="table__caption">Noticias</h3>
+    <button class="add-button">+</button>
+  </div>
+  <thead class="table__head">
+    <tr class="table__row">
+      <th class="table__header">#</th>
+      <th class="table__header">Titulo</th>
+      <th class="table__header">Cuerpo</th>
+      <th class="table__header">Imagen</th>
     </tr>
   </thead>
-  <tbody class="news-table__body">
+  <tbody class="table__body">
     <!-- News data will be inserted here dynamically -->
   </tbody>
 </table>
+
+<style>
+  .table__cell--news:nth-last-of-type(3) {
+    max-width: 33vw;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    @media (width >=1100px) {
+      max-width: 350px;
+    }
+  }
+
+  @media (width < 735px) {
+    .table__cell--news:nth-of-type(3) {
+      max-width: 75vw;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+</style>

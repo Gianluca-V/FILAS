@@ -1,0 +1,143 @@
+@use "common.scss" as common;
+
+:root {
+    --text: #000000;
+    --background: #ffffff;
+    --primary: #d31b1b;
+    --secondary: #c8690a;
+    --accent: #118e11;
+}
+
+body {
+    @include common.flex();
+    min-height: 100vh;
+}
+
+.nav--admin {
+    max-width: 200px;
+    min-height: 100%;
+    background-color: var(--primary);
+    &__ul {
+        @include common.flex(column, space-around, center);
+        gap: 1rem;
+    }
+    &__li {
+        display: block;
+        font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+    &__logo-link{
+        display: block;
+        margin-bottom: 2rem;
+    }
+    &__a {
+        width: 100%;
+        color: #fff;
+        padding: 10px;
+        transition: background-color .25s ease;
+        &:hover {
+            background-color: #f24646;
+            text-decoration: underline;
+        }
+    }
+    .logo {
+        max-width: 100%;
+    }
+}
+
+.main {
+    width: 100%;
+}
+
+.add-button{
+    background-color: var(--accent);
+    font-size: 2.5rem;
+    border-radius: 1rem;
+    width: 150px;
+    margin: 1rem;
+    transition: background-color .125s ease;
+    &:hover{
+        background-color: hsl(120, 79%, 41%);
+    }
+}
+
+.table {
+    width: calc(100% - 2rem);
+    text-align: center;
+    margin: auto;
+    border-collapse: collapse;
+    &__caption-container{
+        padding-inline:1rem; 
+        @include common.flex(row,space-between,center);
+    }
+    &__caption{
+        text-align: left;
+        font-size: clamp(1.75rem,5vw,2.5rem);
+        font-weight: 700;
+    }
+    &__head {
+        border-bottom: 1px #ccc solid;
+    }
+    &__header {
+        padding-block: 0.5rem;
+    }
+    tr {
+        border-block: 1px #ccc6 solid;
+    }
+    &__cell {
+        padding: 1rem;
+        text-wrap: balance;
+        &--actions {
+            height: 100%;
+            display: flex;
+            justify-content: space-evenly;
+            gap: 1rem;
+        }
+    }
+    &__image {
+        max-width: 100px;
+    }
+    &__svg {
+        font-size: clamp(1.33rem, 3vw, 2rem);
+        transition: fill .125s ease;
+        &--edit {
+            fill: #4682b4;
+            &:hover {
+                fill: hsl(207, 49%, 39%);
+            }
+        }
+        &--delete {
+            fill: #dc143c;
+            &:hover {
+                fill: hsl(348, 89%, 37%);
+            }
+        }
+    }
+    @media (width < 735px) {
+        text-align: left;
+        &__caption-container{
+            padding-inline:0; 
+        }
+        &__head {
+            display: none;
+        }
+        &__cell {
+            display: block;
+            &--actions {
+                height: 100%;
+                display: flex;
+                justify-content: flex-start;
+                gap: 5rem;
+            }
+            &:not(.table__cell:last-of-type)::before {
+                content: attr(data-cell) ": ";
+                font-weight: 700;
+            }
+            &--news:nth-of-type(3) {
+                max-width: 75vw;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+        }
+    }
+}
