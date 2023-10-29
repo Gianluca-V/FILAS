@@ -53,7 +53,7 @@ const News = Object.freeze(new APIClass("news"));
 const Products = Object.freeze(new APIClass("products"));
 const Family = Object.freeze(new APIClass("family"));
 const Admins = Object.freeze(new APIClass("admins"));
-const Organizations = Object.freeze(new APIClass("Organizations"));
+const Organizations = Object.freeze(new APIClass("organizations"));
 
 const API = Object.freeze({
     Gallery:Gallery,
