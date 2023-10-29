@@ -58,6 +58,9 @@ switch ($table) {
     case 'admins':
         include('admins.php'); // Include a separate script for the Admins table
         break;
+    case 'admins':
+        include('organizations.php'); // Include a separate script for the Organizations table
+        break;
     default:
         http_response_code(404);
         echo json_encode(array("message" => "Table not found"));
