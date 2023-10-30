@@ -30,3 +30,15 @@ PopulateTable();
 window.addEventListener("hashchange", ()=>{
   if(window.location.hash.slice(1) === "noticias") PopulateTable();
 });
+
+const addButton = document.querySelector(".add-button");
+const closeButton = document.querySelector(".product__form__close");
+const formBox = document.querySelector(".form__box");
+
+addButton.addEventListener("click", function() {
+  formBox.style.display = "flex";
+});
+closeButton.addEventListener("click", function() {
+  event.preventDefault();
+  formBox.style.display = "none";
+});
