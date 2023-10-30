@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.0
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-10-2023 a las 19:56:09
--- Versión del servidor: 10.4.19-MariaDB
--- Versión de PHP: 8.0.6
+-- Tiempo de generación: 30-10-2023 a las 06:55:16
+-- Versión del servidor: 10.4.24-MariaDB
+-- Versión de PHP: 8.1.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -52,6 +52,15 @@ CREATE TABLE `family` (
   `Image` text DEFAULT NULL,
   `Body` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `family`
+--
+
+INSERT INTO `family` (`ID`, `Image`, `Body`) VALUES
+(1, 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=', 'aqui va la descripcion'),
+(2, 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=', 'aqui va la descripcion 2'),
+(3, 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=', 'aqui va la descripcion 3');
 
 -- --------------------------------------------------------
 
@@ -190,7 +199,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT de la tabla `family`
 --
 ALTER TABLE `family`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `gallery`
