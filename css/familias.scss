@@ -18,7 +18,7 @@ h2{
     font-size: clamp(2rem,4vw,3.5rem);
 }
 
-.news{
+.family{
     @include common.flex(column);
     gap: 50px;
     width: 100%;
@@ -36,7 +36,7 @@ h2{
     text-align: center;
 }
 
-.news__events-container{
+.family__events-container{
     @include common.flex(row, space-between,center);
     padding: 20px;
     width: 60%;

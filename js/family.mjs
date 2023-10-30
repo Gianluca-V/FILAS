@@ -9,7 +9,7 @@ function displayFamily(family){
 
     family.forEach(element => {
         familySection.innerHTML +=`<div class="family__events-container">
-    <img src="${ element.Image != '' ? element.Image : "assets/default-img.png"}" alt="${element.Image}" loading="lazy">
+    <img src="${ element.Image != '' ? element.Image : "assets/default-img.png"}" alt="${element.Image}" loading="lazy" class="family__img">
     <p class="section--family__text">${element.Body}</p>
     </div>`;
     });

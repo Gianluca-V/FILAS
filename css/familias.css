@@ -181,7 +181,7 @@ h2 {
   font-size: clamp(2rem, 4vw, 3.5rem);
 }
 
-.news {
+.family {
   display: flex;
   flex-direction: column;
   justify-content: initial;
@@ -202,7 +202,7 @@ h2 {
   text-align: center;
 }
 
-.news__events-container {
+.family__events-container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
