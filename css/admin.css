@@ -7,6 +7,7 @@
   text-decoration: none;
   box-sizing: border-box;
   font-family: "Mulish";
+  
 }
 
 a {
@@ -247,6 +248,7 @@ body {
   font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 700;
 }
+
 .table__head {
   border-bottom: 1px #ccc solid;
 }
@@ -316,4 +318,39 @@ body {
   }
 }
 
+.form__box{
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  position: fixed;
+  display: none;
+  
+}
+.product__form--create{
+  padding: 10px;
+  position: fixed;
+  background-color: var(--secondary);
+  
+  right: 10px;
+  top: 10px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+}
+.product__form__header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.product__form__input{
+  padding: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  resize: vertical;
+}
+.product__form__input--submit:hover{
+  background-color: black;
+  color: white;
+  cursor: pointer;
+}
 /*# sourceMappingURL=admin.css.map */
