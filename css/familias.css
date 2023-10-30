@@ -190,18 +190,15 @@ h2 {
   width: 100%;
   padding: 20px;
 }
-
 .family__img {
   max-width: 200px;
   width: 100%;
   padding: 8px;
 }
-
-.section--family__text {
+.family__text {
   color: #FFF;
   text-align: center;
 }
-
 .family__events-container {
   display: flex;
   flex-direction: row;
@@ -212,7 +209,6 @@ h2 {
   transition: 0.2s;
   background: linear-gradient(135deg, rgb(248, 80, 50) 0%, rgb(241, 111, 92) 50%, rgb(246, 41, 12) 51%, rgb(240, 47, 23) 71%, rgb(231, 56, 39) 100%);
 }
-
 @media (width > 600px) and (prefers-reduced-motion: no-preference) {
   .family__events-container:hover {
     width: 90%;
