@@ -19,8 +19,7 @@ h2{
 }
 
 .news{
-    display: flex;
-    flex-direction: column;
+    @include common.flex(column);
     gap: 50px;
     width: 100%;
     padding: 20px;
@@ -38,9 +37,7 @@ h2{
 }
 
 .news__events-container{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    @include common.flex(row, space-between,center);
     padding: 20px;
     width: 60%;
     transition: 0.2s;
