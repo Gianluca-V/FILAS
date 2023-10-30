@@ -45,7 +45,7 @@
                 });
                 console.log(response)
 
-                if (response.status === 200) {
+                if (response.message === "Login successful") {
                     // Successful login
                     loginMessage.textContent = "Bienvenido de nuevo, redireccionando...";
 
@@ -59,9 +59,7 @@
                         "Autentificación fallida. Intente de nuevo";
                 }
             } catch (error) {
-                console.error("Error:", error);
-                loginMessage.textContent =
-                    "Ha ocurrido un error. Intente de nuevo mas tarde.";
+                loginMessage.textContent = "Ha ocurrido un error. Intente de nuevo mas tarde.";
             }
         });
     </script>
