@@ -191,13 +191,13 @@ h2 {
   padding: 20px;
 }
 
-.news__img {
+.family__img {
   max-width: 200px;
   width: 100%;
   padding: 8px;
 }
 
-.section--news__text {
+.section--family__text {
   color: #FFF;
   text-align: center;
 }
@@ -214,24 +214,24 @@ h2 {
 }
 
 @media (width > 600px) and (prefers-reduced-motion: no-preference) {
-  .news__events-container:hover {
+  .family__events-container:hover {
     width: 90%;
     transition: 0.2s;
   }
 }
 @media (width > 600px) {
-  .news__events-container:nth-of-type(even) {
+  .family__events-container:nth-of-type(even) {
     align-self: flex-end;
     flex-direction: row-reverse;
   }
 }
 @media (width <= 950px) {
-  .news__events-container {
+  .family__events-container {
     width: 100%;
   }
 }
 @media (width <= 600px) {
-  .news__events-container {
+  .family__events-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
