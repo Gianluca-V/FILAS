@@ -183,12 +183,10 @@ button {
 }
 .main__img {
   height: 100%;
-  margin-right: 80px;
   animation: 1s main__img-animation;
 }
 .main__textbox {
   width: 50%;
-  border-left: 2px solid var(--background);
   height: max-content;
   padding-left: 20px;
   padding-right: 30px;
