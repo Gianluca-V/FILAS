@@ -58,7 +58,7 @@ switch ($table) {
     case 'admins':
         include('admins.php'); // Include a separate script for the Admins table
         break;
-    case 'admins':
+    case 'organizations':
         include('organizations.php'); // Include a separate script for the Organizations table
         break;
     default:
