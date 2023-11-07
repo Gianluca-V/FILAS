@@ -122,7 +122,9 @@ function createUser($data)
                 VALUES ($ID,'$username', '$hashedPassword', '$salt')";
 
         if ($conn->query($sql) === TRUE) {
+            $token = CreateToken($ID);
             echo json_encode(array("message" => "User created successfully"));
+            return json_encode(array("token" => $token));
         } else {
             http_response_code(500);
             echo json_encode(array("message" => "Error creating User: " . $conn->error));

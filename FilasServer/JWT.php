@@ -28,6 +28,8 @@ function CreateToken($id)
     ];
 
     $jwt = JWT::encode($payload, GetJWTKey(), 'HS256');
+
+    return $jwt;
 }
 
 function TokenValidationResponse($token){

@@ -17,10 +17,12 @@ class APIClass {
         return response.json();
     }
     async Post(data) {
+        const token = document.cookie;
         const response = await fetch(this.apiURL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                //'Authorization': token
             },
             body: JSON.stringify(data),
         });

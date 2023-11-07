@@ -49,7 +49,7 @@
                     loginMessage.textContent = "Bienvenido de nuevo, redireccionando...";
 
                     // Save the JWT token in a cookie
-                    document.cookie = `token=${response.token}; samesite=strict; max-age=10800`; //10800s = 3 hours
+                    document.cookie = `token=${response.token}; path=/;" samesite=strict; max-age=10800`; //10800s = 3 hours
 
                     window.location.href = "admin.html";
                 } else {
