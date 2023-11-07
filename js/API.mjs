@@ -17,36 +17,49 @@ class APIClass {
         return response.json();
     }
     async Post(data) {
-        const token = document.cookie;
+        const token = getCookie("token");
         const response = await fetch(this.apiURL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                //'Authorization': token
+                'Authorization': token
             },
             body: JSON.stringify(data),
         });
         return response.json();
     }
     async Put(id, data){
+        const token = getCookie("token");
         const response = await fetch(this.apiURL + id, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': token
             },
             body: JSON.stringify(data),
         });
         return response.json();
     }
     async Delete(id){
+        const token = getCookie("token");
         await fetch(this.apiURL + id, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': token
             },
         });
         return true;
     }
+}
+
+function getCookie(name){
+    const cookies = document.cookie.split("; ");
+    cookies.forEach(cookie => {
+        if(cookie.split("=")[0] === name){
+            console.log( cookie.split("=")[1]);
+        }
+    });
 }
 
 const Gallery = Object.freeze(new APIClass("gallery"));
