@@ -26,6 +26,17 @@ switch ($request_method) {
     case 'POST':
         // Handle POST request to add a new image to the "Gallery" table
         $data = json_decode(file_get_contents("php://input"));
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
 
         if (isset($data->Image)) {
             $image = $conn->real_escape_string($data->Image);
@@ -49,6 +60,17 @@ switch ($request_method) {
         if (isset($_GET['id'])) {
             $image_id = intval($_GET['id']);
             $data = json_decode(file_get_contents("php://input"));
+            $headers = getallheaders();
+            if(!isset($headers['Authorization'])) {
+                return http_response_code(400);
+                break;
+            }
+            
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            if(!TokenValidationResponse($token)){
+                return http_response_code(401);
+                break;
+            }
 
             if (isset($data->Image)) {
                 $image = $conn->real_escape_string($data->Image);
@@ -74,6 +96,17 @@ switch ($request_method) {
     case 'DELETE':
         // Handle DELETE request to delete an image by ID from the "Gallery" table
         if (isset($_GET['id'])) {
+            $headers = getallheaders();
+            if(!isset($headers['Authorization'])) {
+                return http_response_code(400);
+                break;
+            }
+            
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            if(!TokenValidationResponse($token)){
+                return http_response_code(401);
+                break;
+            }
             $image_id = intval($_GET['id']);
             $sql = "DELETE FROM Gallery WHERE ID = $image_id";
 

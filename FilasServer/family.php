@@ -25,7 +25,17 @@ switch ($request_method) {
 
     case 'POST':
         // Handle POST request to add a new Workshops item to the "Workshops" table
-        $data = json_decode(file_get_contents("php://input"));
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
 
         if (isset($data->Body) && isset($data->Image)) {
             $body = $conn->real_escape_string($data->Body);
@@ -51,6 +61,17 @@ switch ($request_method) {
         if (isset($_GET['id'])) {
             $Workshops_id = intval($_GET['id']);
             $data = json_decode(file_get_contents("php://input"));
+            $headers = getallheaders();
+            if(!isset($headers['Authorization'])) {
+                return http_response_code(400);
+                break;
+            }
+            
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            if(!TokenValidationResponse($token)){
+                return http_response_code(401);
+                break;
+            }
 
             if (isset($data->Body) && isset($data->Image)) {
                 $body = $conn->real_escape_string($data->Body);
@@ -78,6 +99,17 @@ switch ($request_method) {
     case 'DELETE':
         // Handle DELETE request to delete a Workshops item by ID from the "Workshops" table
         if (isset($_GET['id'])) {
+            $headers = getallheaders();
+            if(!isset($headers['Authorization'])) {
+                return http_response_code(400);
+                break;
+            }
+            
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            if(!TokenValidationResponse($token)){
+                return http_response_code(401);
+                break;
+            }
             $Workshops_id = intval($_GET['id']);
             $sql = "DELETE FROM Workshops WHERE ID = $Workshops_id";
 

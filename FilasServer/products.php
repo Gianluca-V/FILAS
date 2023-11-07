@@ -12,17 +12,50 @@ switch ($request_method) {
     case 'POST':
         // Create a new product
         $data = json_decode(file_get_contents("php://input"));
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
         createProduct($data);
         break;
     case 'PUT':
         // Update a product by ID
         $data = json_decode(file_get_contents("php://input"));
         $product_id = intval($_GET['id']);
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
         updateProduct($product_id, $data);
         break;
     case 'DELETE':
         // Delete a product by ID
         $product_id = intval($_GET['id']);
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
         deleteProduct($product_id);
         break;
     default:

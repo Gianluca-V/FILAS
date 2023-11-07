@@ -17,17 +17,51 @@ switch ($request_method) {
             checkUserForLogin($data);
         } else {
             // Create a new User
+            $headers = getallheaders();
+            if(!isset($headers['Authorization'])) {
+                return http_response_code(400);
+                break;
+            }
+            
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            if(!TokenValidationResponse($token)){
+                return http_response_code(401);
+                break;
+            }
             createUser($data);
         }
         break;
     case 'PUT':
         // Update a User by ID
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
+
         $data = json_decode(file_get_contents("php://input"));
         $Admin_id = intval($parts[4]);
         updateUser($Admin_id, $data);
         break;
     case 'DELETE':
         // Delete a User by ID
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
         $Admin_id = intval($parts[4]);
         deleteUser($Admin_id);
         break;
@@ -150,7 +184,8 @@ function checkUserForLogin($data)
         
         // Compare the entered password hash with the stored hash
         if ($enteredPasswordHash === $hashedPassword) {
-            echo json_encode(array("message" => "Login successful"));
+            $jwt = CreateToken($row['ID']);
+            echo json_encode(array("token" => $jwt));
         } else {
             http_response_code(401);
             echo json_encode(array("message" => "Login failed"));

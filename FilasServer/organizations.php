@@ -26,6 +26,17 @@ switch ($request_method) {
     case 'POST':
         // Handle POST request to add a new organizations item to the "organizations" table
         $data = json_decode(file_get_contents("php://input"));
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
 
         if (isset($data->Title) && isset($data->Image)) {
             $title = $conn->real_escape_string($data->Title);
@@ -52,6 +63,17 @@ switch ($request_method) {
         if (isset($_GET['id'])) {
             $organizations_id = intval($_GET['id']);
             $data = json_decode(file_get_contents("php://input"));
+            $headers = getallheaders();
+            if(!isset($headers['Authorization'])) {
+                return http_response_code(400);
+                break;
+            }
+            
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            if(!TokenValidationResponse($token)){
+                return http_response_code(401);
+                break;
+            }
 
             if (isset($data->Title) && isset($data->Image)) {
                 $title = $conn->real_escape_string($data->Title);
@@ -80,6 +102,17 @@ switch ($request_method) {
     case 'DELETE':
         // Handle DELETE request to delete a organizations item by ID from the "organizations" table
         if (isset($_GET['id'])) {
+            $headers = getallheaders();
+            if(!isset($headers['Authorization'])) {
+                return http_response_code(400);
+                break;
+            }
+            
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            if(!TokenValidationResponse($token)){
+                return http_response_code(401);
+                break;
+            }
             $organizations_id = intval($_GET['id']);
             $sql = "DELETE FROM Organizations WHERE ID = $organizations_id";
 

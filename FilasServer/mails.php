@@ -12,10 +12,26 @@ switch ($request_method) {
     case 'POST':
         // Create a new mail
         $data = json_decode(file_get_contents("php://input"));
+        $headers = getallheaders();
+        if(isset($headers['Authorization'])) {
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            TokenValidationResponse($token);
+        }
         createMail($data);
         break;
     case 'DELETE':
         // Delete a mail by ID
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+        
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if(!TokenValidationResponse($token)){
+            return http_response_code(401);
+            break;
+        }
         $mail_id = intval($_GET['id']);
         deleteMail($mail_id);
         break;

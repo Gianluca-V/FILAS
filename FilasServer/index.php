@@ -15,6 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+require __DIR__ . '/vendor/autoload.php';
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+include('JWT.php');
+
 // Create a database connection
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 

@@ -26,6 +26,11 @@ switch ($request_method) {
     case 'POST':
         // Handle POST request to add a new news item to the "News" table
         $data = json_decode(file_get_contents("php://input"));
+        $headers = getallheaders();
+        if(isset($headers['Authorization'])) {
+            $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+            TokenValidationResponse($token);
+        }
 
         if (isset($data->Title) && isset($data->Body) && isset($data->Image)) {
             $title = $conn->real_escape_string($data->Title);
@@ -52,6 +57,11 @@ switch ($request_method) {
         if (isset($_GET['id'])) {
             $news_id = intval($_GET['id']);
             $data = json_decode(file_get_contents("php://input"));
+            $headers = getallheaders();
+            if(isset($headers['Authorization'])) {
+                $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+                TokenValidationResponse($token);
+            }
 
             if (isset($data->Title) && isset($data->Body) && isset($data->Image)) {
                 $title = $conn->real_escape_string($data->Title);
@@ -80,6 +90,11 @@ switch ($request_method) {
     case 'DELETE':
         // Handle DELETE request to delete a news item by ID from the "News" table
         if (isset($_GET['id'])) {
+            $headers = getallheaders();
+            if(isset($headers['Authorization'])) {
+                $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+                TokenValidationResponse($token);
+            }
             $news_id = intval($_GET['id']);
             $sql = "DELETE FROM News WHERE ID = $news_id";
 

@@ -43,14 +43,13 @@
                     password: password,
                     login: true
                 });
-                console.log(response)
 
-                if (response.message === "Login successful") {
+                if (response.token) {
                     // Successful login
                     loginMessage.textContent = "Bienvenido de nuevo, redireccionando...";
 
-                    // Save 'logged: true' in local storage
-                    localStorage.setItem("logged", "true");
+                    // Save the JWT token in a cookie
+                    document.cookie = `token=${response.token}; samesite=strict; max-age=10800`; //10800s = 3 hours
 
                     window.location.href = "admin.html";
                 } else {
