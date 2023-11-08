@@ -28,12 +28,33 @@ async function PopulateTable() {
 
   const addButton = document.querySelector(".add-button");
   const editButtons = document.querySelectorAll(".table__button--edit");
+  const deleteButtons = document.querySelectorAll(".table__button--delete");
   const closeButton = document.querySelector(".form__close");
   const formContainer = document.querySelector(".form-container");
 
   addButton.addEventListener("click", function () {
     document.querySelector(".form__action").textContent = "Agregar";
     formContainer.showModal();
+
+    document.querySelector(".form__input#titulo").value = ""
+    document.querySelector(".form__input#cuerpo").value = ""
+    document.querySelector(".form__input#imagen").value = ""
+
+    removeAllEventListeners(document.querySelector(".form__input--submit"));
+    const submitButton = document.querySelector(".form__input--submit");
+    submitButton.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      const object = {
+        Title: document.querySelector(".form__input#titulo").value,
+        Body: document.querySelector(".form__input#cuerpo").value,
+        Image: document.querySelector(".form__input#imagen").value,
+      }
+
+      formContainer.close();
+      await API.News.Post(object);
+      PopulateTable();
+    });
   });
 
   editButtons.forEach((editButton)=>{
@@ -67,6 +88,15 @@ async function PopulateTable() {
         await API.News.Put(id, object);
         PopulateTable();
       })
+    });
+  })
+
+  deleteButtons.forEach((deleteButton) => {
+    deleteButton.addEventListener("click", async function (e) {
+      const id = e.target.closest("[data-id]").getAttribute("data-id");
+      if(!confirm(`Estas seguro? esto eliminara el elemento ${id} para siempre`)) return;
+        await API.News.Delete(id);
+        PopulateTable();
     });
   })
 
