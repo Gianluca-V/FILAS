@@ -25,19 +25,68 @@ async function PopulateTable() {
   });
 
   const addButton = document.querySelector(".add-button");
-  const editButton = document.querySelector(".table__button--edit");
+  const editButtons = document.querySelectorAll(".table__button--edit");
+  const deleteButtons = document.querySelectorAll(".table__button--delete");
   const closeButton = document.querySelector(".form__close");
   const formContainer = document.querySelector(".form-container");
 
   addButton.addEventListener("click", function () {
     document.querySelector(".form__action").textContent = "Agregar";
     formContainer.showModal();
+
+    document.querySelector(".form__input#Imagen").value = ""
+
+    removeAllEventListeners(document.querySelector(".form__input--submit"));
+    const submitButton = document.querySelector(".form__input--submit");
+    submitButton.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      const object = {
+        Image: document.querySelector(".form__input#Imagen").value,
+      }
+
+      formContainer.close();
+      await API.Gallery.Post(object);
+      PopulateTable();
+    });
   });
 
-  editButton.addEventListener("click", function () {
-    document.querySelector(".form__action").textContent = "Editar";
-    formContainer.showModal();
-  });
+  editButtons.forEach((editButton)=>{
+    editButton.addEventListener("click", function (e) {
+      const id = e.target.closest("[data-id]").getAttribute("data-id");
+      document.querySelector(".form__action").textContent = "Editar";
+      formContainer.showModal();
+
+      const parentNode = Array.from(document.querySelectorAll('.table__cell[data-cell="#"]')).find(x => x.textContent == id).parentElement;
+      const image = parentNode.querySelector("[data-cell=Imagen]").firstElementChild.getAttribute("src");
+
+      document.querySelector(".form__input#Imagen").value = image
+
+      removeAllEventListeners(document.querySelector(".form__input--submit"));
+      const submitButton = document.querySelector(".form__input--submit");
+      console.log(submitButton);
+      submitButton.addEventListener("click",async (e)=>{
+        e.preventDefault();
+
+        const object = {
+          Image: document.querySelector(".form__input#Imagen").value,
+        }
+
+        formContainer.close();
+        await API.Gallery.Put(id, object);
+        PopulateTable();
+      })
+    });
+  })
+
+  deleteButtons.forEach((deleteButton) => {
+    deleteButton.addEventListener("click", async function (e) {
+      const id = e.target.closest("[data-id]").getAttribute("data-id");
+      if(!confirm(`Estas seguro? esto eliminara el elemento ${id} para siempre`)) return;
+        await API.Gallery.Delete(id);
+        PopulateTable();
+    });
+  })
 
   closeButton.addEventListener("click", function (e) {
     e.preventDefault();
