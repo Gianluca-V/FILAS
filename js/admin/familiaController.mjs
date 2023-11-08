@@ -1,4 +1,5 @@
 import { API } from "../API.mjs";
+
 // Function to fetch and display family data
 async function PopulateTable() {
   const familyData = await API.Family.GetAll().catch((e) => console.error(e));
@@ -13,6 +14,7 @@ async function PopulateTable() {
 
     // Add data cells
     row.innerHTML = `
+      <td class="table__cell table__cell--family" data-cell="#">${family.ID}</td>
       <td class="table__cell table__cell--family" data-cell="Cuerpo">${family.Body}</td>
       <td class="table__cell table__cell--family" data-cell="Imagen">
           <img class="table__image" src="${family.Image}" alt="${family.Title}">
