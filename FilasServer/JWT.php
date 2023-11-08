@@ -38,6 +38,6 @@ function TokenValidationResponse($token){
         echo json_encode(array("message" => "Token is invalid"));
         return false;
     }
-    echo json_encode(array("message" => "Token is valid"));
+    //echo json_encode(array("message" => "Token is valid"));
     return true;
 }

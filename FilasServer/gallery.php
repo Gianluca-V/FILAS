@@ -57,8 +57,8 @@ switch ($request_method) {
 
     case 'PUT':
         // Handle PUT request to update an image by ID in the "Gallery" table
-        if (isset($_GET['id'])) {
-            $image_id = intval($_GET['id']);
+        if (intval($parts[4]) !== "") {
+            $image_id = intval($parts[4]);
             $data = json_decode(file_get_contents("php://input"));
             $headers = getallheaders();
             if(!isset($headers['Authorization'])) {
@@ -95,7 +95,7 @@ switch ($request_method) {
 
     case 'DELETE':
         // Handle DELETE request to delete an image by ID from the "Gallery" table
-        if (isset($_GET['id'])) {
+        if (intval($parts[4]) !== "") {
             $headers = getallheaders();
             if(!isset($headers['Authorization'])) {
                 return http_response_code(400);
@@ -107,7 +107,7 @@ switch ($request_method) {
                 return http_response_code(401);
                 break;
             }
-            $image_id = intval($_GET['id']);
+            $image_id = intval($parts[4]);
             $sql = "DELETE FROM Gallery WHERE ID = $image_id";
 
             if ($conn->query($sql) === TRUE) {

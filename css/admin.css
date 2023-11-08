@@ -338,11 +338,31 @@ body {
   justify-content: space-between;
   align-items: initial;
 }
+.form__group {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: center;
+  width: 100%;
+}
 .form__input {
+  grid-area: 1/2/1/7;
+  width: 100%;
   padding: 5px;
   margin-top: 5px;
   margin-bottom: 5px;
   resize: vertical;
+  position: relative;
+}
+.form__input:not(.form__input--submit) {
+  border-bottom: 1px var(--text) solid;
+}
+.form__input:not(.form__input--submit):focus, .form__input:not(.form__input--submit):focus-within {
+  border-bottom: 1px var(--primary) solid;
+}
+.form__input--submit {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 .form__input--submit:hover {
   background-color: black;

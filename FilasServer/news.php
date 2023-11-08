@@ -54,8 +54,8 @@ switch ($request_method) {
 
     case 'PUT':
         // Handle PUT request to update a news item by ID in the "News" table
-        if (isset($_GET['id'])) {
-            $news_id = intval($_GET['id']);
+        if (intval($parts[4]) !== "") {
+            $news_id = intval($parts[4]);
             $data = json_decode(file_get_contents("php://input"));
             $headers = getallheaders();
             if(isset($headers['Authorization'])) {
@@ -89,13 +89,13 @@ switch ($request_method) {
 
     case 'DELETE':
         // Handle DELETE request to delete a news item by ID from the "News" table
-        if (isset($_GET['id'])) {
+        if (intval($parts[4]) !== "") {
             $headers = getallheaders();
             if(isset($headers['Authorization'])) {
                 $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
                 TokenValidationResponse($token);
             }
-            $news_id = intval($_GET['id']);
+            $news_id = intval($parts[4]);
             $sql = "DELETE FROM News WHERE ID = $news_id";
 
             if ($conn->query($sql) === TRUE) {

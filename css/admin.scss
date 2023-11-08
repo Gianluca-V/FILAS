@@ -157,15 +157,35 @@ body {
     &__header {
         @include common.flex(row, space-between);
     }
+    &__group{
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        align-items: center;
+        width: 100%;
+    }
     &__input {
+        grid-area: 1/2/1/7;
+        width: 100%;
         padding: 5px;
         margin-top: 5px;
         margin-bottom: 5px;
         resize: vertical;
-        &--submit:hover {
-            background-color: black;
-            color: white;
-            cursor: pointer;
+        position: relative;
+        &:not(&--submit){
+            border-bottom: 1px var(--text) solid;
+            &:focus, &:focus-within{
+                border-bottom: 1px var(--primary) solid;
+            }
+        }
+        &--submit{
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            &:hover {
+                background-color: black;
+                color: white;
+                cursor: pointer;
+            }
         }
     }
 }

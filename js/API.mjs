@@ -55,11 +55,11 @@ class APIClass {
 
 function getCookie(name){
     const cookies = document.cookie.split("; ");
-    cookies.forEach(cookie => {
-        if(cookie.split("=")[0] === name){
-            console.log( cookie.split("=")[1]);
-        }
-    });
+    let token = cookies
+      .filter(cookie => cookie.split("=")[0] === name)
+      .map(cookie => cookie.split("=")[1])
+
+    return token;
 }
 
 const Gallery = Object.freeze(new APIClass("gallery"));

@@ -28,7 +28,7 @@ switch ($request_method) {
     case 'PUT':
         // Update a product by ID
         $data = json_decode(file_get_contents("php://input"));
-        $product_id = intval($_GET['id']);
+        $product_id = intval($parts[4]);
         $headers = getallheaders();
         if(!isset($headers['Authorization'])) {
             return http_response_code(400);
@@ -44,7 +44,7 @@ switch ($request_method) {
         break;
     case 'DELETE':
         // Delete a product by ID
-        $product_id = intval($_GET['id']);
+        $product_id = intval($parts[4]);
         $headers = getallheaders();
         if(!isset($headers['Authorization'])) {
             return http_response_code(400);
@@ -125,16 +125,17 @@ function updateProduct($product_id, $data)
     $price = floatval($data->Price);
     $stock = intval($data->Stock);
     $image = $conn->real_escape_string($data->Image);
-    $description = $conn->real_escape_string($data->Description);
 
-    $sql = "INSERT INTO Products (Name, Price, Stock, Image, Description) 
-            VALUES ('$name', $price, $stock, '$image', '$description') WHERE ID = $id";
+    $sql = "UPDATE Products 
+    SET Name = '$name', Price = $price, Stock = $stock, Image = '$image'
+    WHERE ID = $id";
+
 
     if ($conn->query($sql) === TRUE) {
         echo json_encode(array("message" => "Product updated successfully"));
     } else {
         http_response_code(500);
-        echo json_encode(array("message" => "Error creating product: " . $conn->error));
+        echo json_encode(array("message" => "Error Updating product: " . $conn->error));
     }
 }
 

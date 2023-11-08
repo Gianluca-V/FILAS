@@ -58,8 +58,8 @@ switch ($request_method) {
 
     case 'PUT':
         // Handle PUT request to update a Workshops item by ID in the "Workshops" table
-        if (isset($_GET['id'])) {
-            $Workshops_id = intval($_GET['id']);
+        if (intval($parts[4]) !== "") {
+            $family_id = intval($parts[4]);
             $data = json_decode(file_get_contents("php://input"));
             $headers = getallheaders();
             if(!isset($headers['Authorization'])) {
@@ -98,7 +98,7 @@ switch ($request_method) {
 
     case 'DELETE':
         // Handle DELETE request to delete a Workshops item by ID from the "Workshops" table
-        if (isset($_GET['id'])) {
+        if (intval($parts[4]) !== "") {
             $headers = getallheaders();
             if(!isset($headers['Authorization'])) {
                 return http_response_code(400);
@@ -110,7 +110,7 @@ switch ($request_method) {
                 return http_response_code(401);
                 break;
             }
-            $Workshops_id = intval($_GET['id']);
+            $family_id = intval($parts[4]);
             $sql = "DELETE FROM Workshops WHERE ID = $Workshops_id";
 
             if ($conn->query($sql) === TRUE) {

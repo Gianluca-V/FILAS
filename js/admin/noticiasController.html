@@ -4,13 +4,21 @@
       <h3 class="form__title"> <span class="form__action"></span> noticia</h3>
       <button class="form__close">×</button>
     </div>
-    <label for="titulo" class="form__label">Titulo:</label>
-    <input class="form__input" placeholder="Título de la noticia" type="text" name="titulo" id="titulo">
-    <label for="cuerpo" class="form__label">Cuerpo:</label>
-    <textarea class="form__input" name="cuerpo" placeholder="Cuerpo de la noticia" id="cuerpo" cols="30" rows="10"></textarea>
-    <label for="imagen" class="form__label">Imagen:</label>
-    <input class="form__input" placeholder="Imagen de la noticia" type="text" name="imagen" id="imagen">
-    <input class="form__input form__input--submit" type="submit" value="Confirmar">
+    <div class="form__group">
+      <label for="titulo" class="form__label">Titulo:</label>
+      <input class="form__input" placeholder="Título de la noticia" type="text" name="titulo" id="titulo">
+    </div>
+
+    <div class="form__group">
+      <label for="cuerpo" class="form__label">Cuerpo:</label>
+      <textarea class="form__input" name="cuerpo" placeholder="Cuerpo de la noticia" id="cuerpo" cols="30" rows="10"></textarea>
+    </div>
+
+    <div class="form__group">
+      <label for="imagen" class="form__label">Imagen:</label>
+      <input class="form__input" placeholder="Imagen de la noticia" type="text" name="imagen" id="imagen">
+    </div>
+    <input class="form__input form__input--submit" value="Confirmar">
   </form>
 </dialog>
 
