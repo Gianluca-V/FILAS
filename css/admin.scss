@@ -142,18 +142,13 @@ body {
     }
 }
 
-.form__box {
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.4);
-    position: fixed;
-    display: none;
-}
 .form{
+    border: black solid 1px;
+    width: 90%;
+    max-width: 500px;
     padding: 10px;
     position: fixed;
-    background-color: var(--secondary);
-
+    background-color: var(--background);
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
