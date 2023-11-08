@@ -3,6 +3,11 @@ window.addEventListener("hashchange", loadContent);
 loadContent();
 
 async function loadContent() {
+
+  if (!document.cookie.includes('token')) {
+    window.location.href = "login.html";
+  }
+
   const mainContent = document.querySelector(".main");
   const route = window.location.hash.slice(1);
 
