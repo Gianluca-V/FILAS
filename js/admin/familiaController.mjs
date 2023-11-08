@@ -28,7 +28,7 @@ async function PopulateTable() {
 }
 PopulateTable();
 window.addEventListener("hashchange", ()=>{
-  if(window.location.hash.slice(1) === "noticias") PopulateTable();
+  if(window.location.hash.slice(1) === "familia") PopulateTable();
 });
 
 const addButton = document.querySelector(".add-button");

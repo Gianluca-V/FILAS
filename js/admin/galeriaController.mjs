@@ -26,7 +26,7 @@ async function PopulateTable() {
 }
 PopulateTable();
 window.addEventListener("hashchange", ()=>{
-  if(window.location.hash.slice(1) === "gallery") PopulateTable();
+  if(window.location.hash.slice(1) === "galeria") PopulateTable();
 });
 
 const addButton = document.querySelector(".add-button");
