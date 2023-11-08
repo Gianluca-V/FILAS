@@ -338,6 +338,13 @@ body {
   justify-content: space-between;
   align-items: initial;
 }
+.form__close {
+  font-size: 2rem;
+  transition: transform 0.125s linear;
+}
+.form__close:hover {
+  transform: scale(1.25);
+}
 .form__group {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

@@ -157,6 +157,13 @@ body {
     &__header {
         @include common.flex(row, space-between);
     }
+    &__close{
+        font-size: 2rem;
+        transition: transform .125s linear;
+        &:hover{
+            transform: scale(1.25);
+        }
+    }
     &__group{
         display: grid;
         grid-template-columns: repeat(6, 1fr);

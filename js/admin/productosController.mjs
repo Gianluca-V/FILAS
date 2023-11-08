@@ -29,15 +29,38 @@ async function PopulateTable() {
 
   const addButton = document.querySelector(".add-button");
   const editButtons = document.querySelectorAll(".table__button--edit");
+  const deleteButtons = document.querySelectorAll(".table__button--delete");
   const closeButton = document.querySelector(".form__close");
   const formContainer = document.querySelector(".form-container");
 
   addButton.addEventListener("click", function () {
     document.querySelector(".form__action").textContent = "Agregar";
     formContainer.showModal();
+
+    document.querySelector(".form__input#nombre").value = ""
+    document.querySelector(".form__input#precio").value = ""
+    document.querySelector(".form__input#imagen").value = ""
+    document.querySelector(".form__input#stock").value = ""
+
+    removeAllEventListeners(document.querySelector(".form__input--submit"));
+    const submitButton = document.querySelector(".form__input--submit");
+    submitButton.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      const object = {
+        Name: document.querySelector(".form__input#nombre").value,
+        Price: document.querySelector(".form__input#precio").value,
+        Image: document.querySelector(".form__input#imagen").value,
+        Stock: document.querySelector(".form__input#stock").value
+      }
+
+      formContainer.close();
+      await API.Products.Post(object);
+      PopulateTable();
+    });
   });
 
-  editButtons.forEach((editButton)=>{
+  editButtons.forEach((editButton) => {
     editButton.addEventListener("click", function (e) {
       const id = e.target.closest("[data-id]").getAttribute("data-id");
       document.querySelector(".form__action").textContent = "Editar";
@@ -56,12 +79,11 @@ async function PopulateTable() {
 
       removeAllEventListeners(document.querySelector(".form__input--submit"));
       const submitButton = document.querySelector(".form__input--submit");
-      console.log(submitButton);
-      submitButton.addEventListener("click",async (e)=>{
+      submitButton.addEventListener("click", async (e) => {
         e.preventDefault();
 
         const object = {
-          Name:  document.querySelector(".form__input#nombre").value,
+          Name: document.querySelector(".form__input#nombre").value,
           Price: document.querySelector(".form__input#precio").value,
           Image: document.querySelector(".form__input#imagen").value,
           Stock: document.querySelector(".form__input#stock").value
@@ -71,6 +93,15 @@ async function PopulateTable() {
         await API.Products.Put(id, object);
         PopulateTable();
       })
+    });
+  })
+
+  deleteButtons.forEach((deleteButton) => {
+    deleteButton.addEventListener("click", async function (e) {
+      const id = e.target.closest("[data-id]").getAttribute("data-id");
+      if(!confirm(`Estas seguro? esto eliminara el elemento ${id} para siempre`)) return;
+        await API.Products.Delete(id);
+        PopulateTable();
     });
   })
 
