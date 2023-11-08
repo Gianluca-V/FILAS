@@ -23,20 +23,31 @@ async function PopulateTable() {
       </td>
   `;
   });
+
+  const addButton = document.querySelector(".add-button");
+  const editButton = document.querySelector(".table__button--edit");
+  const closeButton = document.querySelector(".form__close");
+  const formContainer = document.querySelector(".form-container");
+
+  addButton.addEventListener("click", function () {
+    document.querySelector(".form__action").textContent = "Agregar";
+    formContainer.showModal();
+  });
+
+  editButton.addEventListener("click", function () {
+    document.querySelector(".form__action").textContent = "Editar";
+    formContainer.showModal();
+  });
+
+  closeButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    const hash = window.location.hash.slice(1);
+    formContainer.close();
+    window.location.hash = hash;
+  });
 }
 PopulateTable();
-window.addEventListener("hashchange", ()=>{
-  if(window.location.hash.slice(1) === "galeria") PopulateTable();
+window.addEventListener("hashchange", () => {
+  if (window.location.hash.slice(1) === "galeria") PopulateTable();
 });
 
-const addButton = document.querySelector(".add-button");
-const closeButton = document.querySelector(".product__form__close");
-const formBox = document.querySelector(".form__box");
-
-addButton.addEventListener("click", function() {
-  formBox.style.display = "flex";
-});
-closeButton.addEventListener("click", function() {
-  event.preventDefault();
-  formBox.style.display = "none";
-});

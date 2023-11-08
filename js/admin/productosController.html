@@ -1,38 +1,38 @@
-
-<div class="form__box">
-  <form action="#" class="product__form--create">
-    <div class="product__form__header">
-      <h3 class="product__form__title">Crear/Editar producto</h3>
-      <button class="product__form__close">×</button>
+<dialog class="form-container">
+  <form action="" class="form">
+    <div class="form__header">
+      <h3 class="form__title"> <span class="form__action"></span> producto</h3>
+      <button class="form__close">×</button>
     </div>
-    <label for="nombre">Nombre:</label>
-    <input class="product__form__input" placeholder="Nombre del producto" type="text" name="nombre">
-    <label for="precio">Precio:</label>
-    <input class="product__form__input" placeholder="Precio del producto" type="number" name="precio">
-    <label for="imagen">Imágen:</label>
-    <input class="product__form__input" accept="image/png, image/gif, image/jpeg" placeholder="Imágen del producto" type="file" name="imagen" id="">
-    <label for="stock">Stock:</label>
-    <input class="product__form__input" placeholder="Stock del producto" type="number" name="stock">
-    <input class="product__form__input product__form__input--submit" type="submit" value="CREAR/EDITAR PRODUCTO">
+    <label for="titulo" class="form__label">Nombre:</label>
+    <input class="form__input" placeholder="Nombre del producto" type="text" name="nombre">
+    <label for="cuerpo" class="form__label">Precio:</label>
+    <input class="form__input" type="number" name="precio" placeholder="Precio del producto" id="" min="0">
+    <label for="imagen" class="form__label">Imagen:</label>
+    <input class="form__input" placeholder="Imagen del producto" type="text" name="imagen" id="">
+    <label for="cuerpo" class="form__label">Stock:</label>
+    <input class="form__input" type="number" name="stock" placeholder="Stock del producto" id="" min="0">
+    <input class="form__input form__input--submit" type="submit" value="Confirmar">
   </form>
-</div>
-<table class="table">
-    <div class="table__caption-container">
-      <h3 class="table__caption">Productos</h3>
-      <button class="add-button">+</button>
-    </div>
+</dialog>
 
-    
-    <thead class="table__head">
-      <tr class="table__row">
-        <th class="table__header">#</th>
-        <th class="table__header">Nombre</th>
-        <th class="table__header">Precio</th>
-        <th class="table__header">Imagen</th>
-        <th class="table__header">Stock</th>
-      </tr>
-    </thead>
-    <tbody class="table__body">
-      <!-- News data will be inserted here dynamically -->
-    </tbody>
-  </table>
+<table class="table">
+  <div class="table__caption-container">
+    <h3 class="table__caption">Productos</h3>
+    <button class="add-button">+</button>
+  </div>
+
+
+  <thead class="table__head">
+    <tr class="table__row">
+      <th class="table__header">#</th>
+      <th class="table__header">Nombre</th>
+      <th class="table__header">Precio</th>
+      <th class="table__header">Imagen</th>
+      <th class="table__header">Stock</th>
+    </tr>
+  </thead>
+  <tbody class="table__body">
+    <!-- News data will be inserted here dynamically -->
+  </tbody>
+</table>

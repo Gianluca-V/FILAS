@@ -2,18 +2,18 @@ import { API } from "../API.mjs";
 
 // Function to fetch and display family data
 async function PopulateTable() {
-  const familyData = await API.Family.GetAll().catch((e) => console.error(e));
+    const familyData = await API.Family.GetAll().catch((e) => console.error(e));
 
-  const familyTableBody = document.querySelector(".table__body");
-  // Clear existing table rows
-  familyTableBody.innerHTML = "";
+    const familyTableBody = document.querySelector(".table__body");
+    // Clear existing table rows
+    familyTableBody.innerHTML = "";
 
-  // Loop through the family data and create table rows
-  familyData.forEach((family) => {
-    const row = familyTableBody.insertRow();
+    // Loop through the family data and create table rows
+    familyData.forEach((family) => {
+        const row = familyTableBody.insertRow();
 
-    // Add data cells
-    row.innerHTML = `
+        // Add data cells
+        row.innerHTML = `
       <td class="table__cell table__cell--family" data-cell="#">${family.ID}</td>
       <td class="table__cell table__cell--family" data-cell="Cuerpo">${family.Body}</td>
       <td class="table__cell table__cell--family" data-cell="Imagen">
@@ -24,21 +24,31 @@ async function PopulateTable() {
           <button class="table__button table__button--delete" data-id="${family.id}"><svg class="table__svg table__svg--delete" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg></button>
       </td>
   `;
-  });
+    });
+
+    const addButton = document.querySelector(".add-button");
+    const editButton = document.querySelector(".table__button--edit");
+    const closeButton = document.querySelector(".form__close");
+    const formContainer = document.querySelector(".form-container");
+
+    addButton.addEventListener("click", function () {
+        document.querySelector(".form__action").textContent = "Agregar";
+        formContainer.showModal();
+    });
+
+    editButton.addEventListener("click", function () {
+        document.querySelector(".form__action").textContent = "Editar";
+        formContainer.showModal();
+    });
+
+    closeButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        const hash = window.location.hash.slice(1);
+        formContainer.close();
+        window.location.hash = hash;
+      });
 }
 PopulateTable();
-window.addEventListener("hashchange", ()=>{
-  if(window.location.hash.slice(1) === "familia") PopulateTable();
-});
-
-const addButton = document.querySelector(".add-button");
-const closeButton = document.querySelector(".product__form__close");
-const formBox = document.querySelector(".form__box");
-
-addButton.addEventListener("click", function() {
-  formBox.style.display = "flex";
-});
-closeButton.addEventListener("click", function() {
-  event.preventDefault();
-  formBox.style.display = "none";
+window.addEventListener("hashchange", () => {
+    if (window.location.hash.slice(1) === "familia") PopulateTable();
 });

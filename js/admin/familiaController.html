@@ -1,16 +1,31 @@
+<dialog class="form-container">
+    <form action="" class="form">
+        <div class="form__header">
+            <h3 class="form__title"> <span class="form__action"></span> taller</h3>
+            <button class="form__close">×</button>
+        </div>
+        <label for="cuerpo" class="form__label">Cuerpo:</label>
+        <textarea class="form__input" name="cuerpo" placeholder="Cuerpo de la taller" id="" cols="30"
+            rows="10"></textarea>
+        <label for="imagen" class="form__label">Imagen:</label>
+        <input class="form__input" placeholder="Imagen del taller" type="text" name="imagen" id="">
+        <input class="form__input form__input--submit" type="submit" value="Confirmar">
+    </form>
+</dialog>
+
 <table class="table">
-  <div class="table__caption-container">
-    <h3 class="table__caption">Familias (CD/TP)</h3>
-    <button class="add-button">+</button>
-  </div>
-  <thead class="table__head">
-    <tr class="table__row">
-      <th class="table__header">#</th>
-      <th class="table__header">Cuerpo</th>
-      <th class="table__header">Imagen</th>
-    </tr>
-  </thead>
-  <tbody class="table__body">
-    <!-- News data will be inserted here dynamically -->
-  </tbody>
+    <div class="table__caption-container">
+        <h3 class="table__caption">Familias (CD/TP)</h3>
+        <button class="add-button">+</button>
+    </div>
+    <thead class="table__head">
+        <tr class="table__row">
+            <th class="table__header">#</th>
+            <th class="table__header">Cuerpo</th>
+            <th class="table__header">Imagen</th>
+        </tr>
+    </thead>
+    <tbody class="table__body">
+        <!-- family data will be inserted here dynamically -->
+    </tbody>
 </table>

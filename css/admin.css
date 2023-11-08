@@ -7,7 +7,6 @@
   text-decoration: none;
   box-sizing: border-box;
   font-family: "Mulish";
-  
 }
 
 a {
@@ -248,7 +247,6 @@ body {
   font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 700;
 }
-
 .table__head {
   border-bottom: 1px #ccc solid;
 }
@@ -318,39 +316,43 @@ body {
   }
 }
 
-.form__box{
+.form__box {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.4);
   position: fixed;
   display: none;
-  
 }
-.product__form--create{
+
+.form {
   padding: 10px;
   position: fixed;
   background-color: var(--secondary);
-  
-  right: 10px;
-  top: 10px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   border-radius: 5px;
   display: flex;
   flex-direction: column;
+  justify-content: initial;
+  align-items: initial;
 }
-.product__form__header{
+.form__header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: initial;
 }
-.product__form__input{
+.form__input {
   padding: 5px;
   margin-top: 5px;
   margin-bottom: 5px;
   resize: vertical;
 }
-.product__form__input--submit:hover{
+.form__input--submit:hover {
   background-color: black;
   color: white;
   cursor: pointer;
 }
+
 /*# sourceMappingURL=admin.css.map */

@@ -25,7 +25,7 @@ body {
         display: block;
         font-size: clamp(1rem, 2vw, 1.2rem);
     }
-    &__logo-link{
+    &__logo-link {
         display: block;
         margin-bottom: 2rem;
     }
@@ -33,7 +33,7 @@ body {
         width: 100%;
         color: #fff;
         padding: 10px;
-        transition: background-color .25s ease;
+        transition: background-color 0.25s ease;
         &:hover {
             background-color: #f24646;
             text-decoration: underline;
@@ -48,14 +48,14 @@ body {
     width: 100%;
 }
 
-.add-button{
+.add-button {
     background-color: var(--accent);
     font-size: 2.5rem;
     border-radius: 1rem;
     width: 150px;
     margin: 1rem;
-    transition: background-color .125s ease;
-    &:hover{
+    transition: background-color 0.125s ease;
+    &:hover {
         background-color: hsl(120, 79%, 41%);
     }
 }
@@ -65,13 +65,13 @@ body {
     text-align: center;
     margin: auto;
     border-collapse: collapse;
-    &__caption-container{
-        padding-inline:1rem; 
-        @include common.flex(row,space-between,center);
+    &__caption-container {
+        padding-inline: 1rem;
+        @include common.flex(row, space-between, center);
     }
-    &__caption{
+    &__caption {
         text-align: left;
-        font-size: clamp(1.75rem,5vw,2.5rem);
+        font-size: clamp(1.75rem, 5vw, 2.5rem);
         font-weight: 700;
     }
     &__head {
@@ -98,7 +98,7 @@ body {
     }
     &__svg {
         font-size: clamp(1.33rem, 3vw, 2rem);
-        transition: fill .125s ease;
+        transition: fill 0.125s ease;
         &--edit {
             fill: #4682b4;
             &:hover {
@@ -114,8 +114,8 @@ body {
     }
     @media (width < 735px) {
         text-align: left;
-        &__caption-container{
-            padding-inline:0; 
+        &__caption-container {
+            padding-inline: 0;
         }
         &__head {
             display: none;
@@ -138,6 +138,39 @@ body {
                 white-space: nowrap;
                 text-overflow: ellipsis;
             }
+        }
+    }
+}
+
+.form__box {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    display: none;
+}
+.form{
+    padding: 10px;
+    position: fixed;
+    background-color: var(--secondary);
+
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 5px;
+    @include common.flex(column);
+    &__header {
+        @include common.flex(row, space-between);
+    }
+    &__input {
+        padding: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        resize: vertical;
+        &--submit:hover {
+            background-color: black;
+            color: white;
+            cursor: pointer;
         }
     }
 }
