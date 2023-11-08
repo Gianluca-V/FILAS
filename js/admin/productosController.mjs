@@ -1,4 +1,4 @@
-import { API } from "../API.mjs";
+import { API, removeAllEventListeners } from "../API.mjs";
 // Function to fetch and display products data
 async function PopulateTable() {
   const productsData = await API.Products.GetAll().catch((e) => console.error(e));
@@ -86,11 +86,3 @@ PopulateTable();
 window.addEventListener("hashchange", () => {
   if (window.location.hash.slice(1) === "productos") PopulateTable();
 });
-
-
-function removeAllEventListeners(element) {
-  const clonedElement = element.cloneNode(true); // Create a clone of the element
-
-  // Replace the element with its clone to remove all event listeners
-  element.parentNode.replaceChild(clonedElement, element);
-}

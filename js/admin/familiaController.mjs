@@ -1,4 +1,4 @@
-import { API } from "../API.mjs";
+import { API, removeAllEventListeners } from "../API.mjs";
 
 // Function to fetch and display family data
 async function PopulateTable() {

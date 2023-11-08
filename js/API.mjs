@@ -81,3 +81,9 @@ const API = Object.freeze({
 })
 
 export {API};
+export function removeAllEventListeners(element) {
+    const clonedElement = element.cloneNode(true); // Create a clone of the element
+  
+    // Replace the element with its clone to remove all event listeners
+    element.parentNode.replaceChild(clonedElement, element);
+  }

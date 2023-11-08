@@ -1,4 +1,4 @@
-import { API } from "../API.mjs";
+import { API, removeAllEventListeners } from "../API.mjs";
 // Function to fetch and display Organization data
 async function PopulateTable() {
     const OrganizationsData = await API.Organizations.GetAll().catch((e) => console.error(e));
@@ -44,7 +44,7 @@ async function PopulateTable() {
         const hash = window.location.hash.slice(1);
         formContainer.close();
         window.location.hash = hash;
-      });
+    });
 }
 PopulateTable();
 window.addEventListener("hashchange", () => {

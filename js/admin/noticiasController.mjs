@@ -1,4 +1,4 @@
-import { API } from "../API.mjs";
+import { API, removeAllEventListeners } from "../API.mjs";
 // Function to fetch and display news data
 async function PopulateTable() {
   const newsData = await API.News.GetAll().catch((e) => console.error(e));
@@ -27,7 +27,7 @@ async function PopulateTable() {
   });
 
   const addButton = document.querySelector(".add-button");
-  const editButton = document.querySelector(".table__button--edit");
+  const editButtons = document.querySelectorAll(".table__button--edit");
   const closeButton = document.querySelector(".form__close");
   const formContainer = document.querySelector(".form-container");
 
@@ -36,10 +36,39 @@ async function PopulateTable() {
     formContainer.showModal();
   });
 
-  editButton.addEventListener("click", function () {
-    document.querySelector(".form__action").textContent = "Editar";
-    formContainer.showModal();
-  });
+  editButtons.forEach((editButton)=>{
+    editButton.addEventListener("click", function (e) {
+      const id = e.target.closest("[data-id]").getAttribute("data-id");
+      document.querySelector(".form__action").textContent = "Editar";
+      formContainer.showModal();
+
+      const parentNode = Array.from(document.querySelectorAll('.table__cell[data-cell="#"]')).find(x => x.textContent == id).parentElement;
+      const name = parentNode.querySelector("[data-cell=Titulo]").textContent;
+      const price = parentNode.querySelector("[data-cell=Cuerpo]").textContent;
+      const image = parentNode.querySelector("[data-cell=Imagen]").firstElementChild.getAttribute("src");
+
+      document.querySelector(".form__input#titulo").value = name
+      document.querySelector(".form__input#cuerpo").value = price
+      document.querySelector(".form__input#imagen").value = image
+
+      removeAllEventListeners(document.querySelector(".form__input--submit"));
+      const submitButton = document.querySelector(".form__input--submit");
+      console.log(submitButton);
+      submitButton.addEventListener("click",async (e)=>{
+        e.preventDefault();
+
+        const object = {
+          Title:  document.querySelector(".form__input#titulo").value,
+          Body: document.querySelector(".form__input#cuerpo").value,
+          Image: document.querySelector(".form__input#imagen").value,
+        }
+
+        formContainer.close();
+        await API.News.Put(id, object);
+        PopulateTable();
+      })
+    });
+  })
 
   closeButton.addEventListener("click", function (e) {
     e.preventDefault();
