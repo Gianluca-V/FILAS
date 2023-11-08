@@ -152,7 +152,7 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    border-radius: 5px;
+    border-radius: .5rem;
     @include common.flex(column);
     &__header {
         @include common.flex(row, space-between);
@@ -165,12 +165,10 @@ body {
     }
     &__input {
         grid-area: 1/2/1/7;
-        width: 100%;
-        padding: 5px;
-        margin-top: 5px;
-        margin-bottom: 5px;
+        width: auto;
+        padding-block: 5px;
+        margin-block: 5px;
         resize: vertical;
-        position: relative;
         &:not(&--submit){
             border-bottom: 1px var(--text) solid;
             &:focus, &:focus-within{

@@ -144,7 +144,7 @@ CREATE TABLE `products` (
 
 INSERT INTO `products` (`ID`, `Name`, `Price`, `Stock`, `Image`, `Description`) VALUES
 (1, 'Mermelada de pera', 600, 1, '', ''),
-(2, 'Mermelada de naranja inglesa', 600, 1, 'assetsmermnaranja.jpg', ''),
+(2, 'Mermelada de naranja inglesa', 600, 1, 'assets\\mermnaranja.jpg', ''),
 (3, 'Mermelada de tomate', 600, 1, '', ''),
 (4, 'Mermelada de zapallo', 600, 1, '', ''),
 (5, 'Mermelada de ciruela', 800, 1, '', ''),
@@ -165,7 +165,7 @@ INSERT INTO `products` (`ID`, `Name`, `Price`, `Stock`, `Image`, `Description`) 
 (20, 'Budin', 800, 1, 'assets\\budin.jpeg', NULL),
 (21, 'Pan dulce', 800, 1, 'assets\\pandulce.jpeg', NULL),
 (22, 'Fugazzeta', 850, 1, 'assets\\fugazzeta.jpg', NULL),
-(23, 'Galletas (6 u.)', 850, 1, 'assetsgalletitas.jpeg', NULL);
+(23, 'Galletas (6 u.)', 850, 1, 'assets\\galletitas.jpeg', NULL);
 
 --
 -- Índices para tablas volcadas

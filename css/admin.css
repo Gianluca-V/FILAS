@@ -326,7 +326,7 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  border-radius: 5px;
+  border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
   justify-content: initial;
@@ -346,12 +346,10 @@ body {
 }
 .form__input {
   grid-area: 1/2/1/7;
-  width: 100%;
-  padding: 5px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  width: auto;
+  padding-block: 5px;
+  margin-block: 5px;
   resize: vertical;
-  position: relative;
 }
 .form__input:not(.form__input--submit) {
   border-bottom: 1px var(--text) solid;
