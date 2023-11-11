@@ -331,6 +331,9 @@ body {
 .cart__buy:hover:not(:disabled) {
   background-color: var(--accent-hover);
 }
+.cart__buy:hover:disabled {
+  cursor: not-allowed;
+}
 @media (width <= 620px) {
   .cart {
     margin-top: 5rem;

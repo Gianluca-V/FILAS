@@ -167,6 +167,9 @@ body {
     &:hover:not(:disabled) {
       background-color: var(--accent-hover);
     }
+    &:hover:disabled{
+      cursor: not-allowed;
+    }
   }
 
   @media (width <= 620px) {
