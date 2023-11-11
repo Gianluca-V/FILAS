@@ -22,7 +22,7 @@ const populateSlider = async (data) => {
 
       </div>
       <div class="info">
-        <h2>${slide.Name}</h2>
+        <h2>${slide.Title}</h2>
         <p id="p-equipo5">
           ${slide.Description}
         </p>

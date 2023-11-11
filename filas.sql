@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.1.0
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-11-2023 a las 03:20:07
--- Versión del servidor: 10.4.27-MariaDB
--- Versión de PHP: 8.2.0
+-- Tiempo de generación: 11-11-2023 a las 21:46:56
+-- Versión del servidor: 10.4.19-MariaDB
+-- Versión de PHP: 8.0.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -32,7 +32,7 @@ CREATE TABLE `admins` (
   `username` text DEFAULT NULL,
   `password` text DEFAULT NULL,
   `salt` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `admins`
@@ -51,7 +51,7 @@ CREATE TABLE `family` (
   `ID` int(11) NOT NULL,
   `Image` text DEFAULT NULL,
   `Body` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `family`
@@ -71,7 +71,7 @@ INSERT INTO `family` (`ID`, `Image`, `Body`) VALUES
 CREATE TABLE `gallery` (
   `ID` int(11) NOT NULL,
   `Image` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `gallery`
@@ -97,7 +97,7 @@ INSERT INTO `gallery` (`ID`, `Image`) VALUES
 CREATE TABLE `mails` (
   `ID` int(11) NOT NULL,
   `Mail` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -110,7 +110,7 @@ CREATE TABLE `news` (
   `Title` varchar(99) NOT NULL,
   `Body` text DEFAULT NULL,
   `Image` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `news`
@@ -126,6 +126,28 @@ INSERT INTO `news` (`ID`, `Title`, `Body`, `Image`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `organizations`
+--
+
+CREATE TABLE `organizations` (
+  `ID` int(11) NOT NULL,
+  `Title` text NOT NULL,
+  `Description` text DEFAULT NULL,
+  `Image` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `organizations`
+--
+
+INSERT INTO `organizations` (`ID`, `Title`, `Description`, `Image`) VALUES
+(1, 'organizacions de prueba 1', 'Descripcion de prueba 1', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
+(2, 'organizacions de prueba 2', 'Descripcion de prueba 2', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
+(3, 'organizacions de prueba 3', 'Descripcion de prueba 3', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `products`
 --
 
@@ -136,7 +158,7 @@ CREATE TABLE `products` (
   `Stock` int(11) NOT NULL,
   `Image` text DEFAULT NULL,
   `Description` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `products`
@@ -196,6 +218,12 @@ ALTER TABLE `news`
   ADD PRIMARY KEY (`ID`);
 
 --
+-- Indices de la tabla `organizations`
+--
+ALTER TABLE `organizations`
+  ADD PRIMARY KEY (`ID`);
+
+--
 -- Indices de la tabla `products`
 --
 ALTER TABLE `products`
@@ -215,7 +243,7 @@ ALTER TABLE `family`
 -- AUTO_INCREMENT de la tabla `gallery`
 --
 ALTER TABLE `gallery`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `mails`
@@ -227,13 +255,19 @@ ALTER TABLE `mails`
 -- AUTO_INCREMENT de la tabla `news`
 --
 ALTER TABLE `news`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `organizations`
+--
+ALTER TABLE `organizations`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `products`
 --
 ALTER TABLE `products`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
