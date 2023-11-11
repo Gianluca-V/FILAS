@@ -178,7 +178,9 @@ body {
 
 .title {
   text-align: center;
-  font-size: 3rem;
+  display: block;
+  width: 100%;
+  max-height: 300px;
 }
 
 .product {

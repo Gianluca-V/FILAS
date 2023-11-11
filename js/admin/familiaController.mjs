@@ -27,26 +27,80 @@ async function PopulateTable() {
     });
 
     const addButton = document.querySelector(".add-button");
-    const editButton = document.querySelector(".table__button--edit");
+    const editButtons = document.querySelectorAll(".table__button--edit");
+    const deleteButtons = document.querySelectorAll(".table__button--delete");
     const closeButton = document.querySelector(".form__close");
     const formContainer = document.querySelector(".form-container");
-
+  
     addButton.addEventListener("click", function () {
-        document.querySelector(".form__action").textContent = "Agregar";
-        formContainer.showModal();
-    });
+      document.querySelector(".form__action").textContent = "Agregar";
+      formContainer.showModal();
 
-    editButton.addEventListener("click", function () {
+      document.querySelector(".form__input#cuerpo").value = ""
+      document.querySelector(".form__input#imagen").value = ""
+  
+      removeAllEventListeners(document.querySelector(".form__input--submit"));
+      const submitButton = document.querySelector(".form__input--submit");
+      submitButton.addEventListener("click", async (e) => {
+        e.preventDefault();
+  
+        const object = {
+          Body: document.querySelector(".form__input#cuerpo").value,
+          Image: document.querySelector(".form__input#imagen").value,
+        }
+  
+        formContainer.close();
+        await API.Family.Post(object);
+        PopulateTable();
+      });
+    });
+  
+    editButtons.forEach((editButton)=>{
+      editButton.addEventListener("click", function (e) {
+        const id = e.target.closest("[data-id]").getAttribute("data-id");
         document.querySelector(".form__action").textContent = "Editar";
         formContainer.showModal();
-    });
+  
+        const parentNode = Array.from(document.querySelectorAll('.table__cell[data-cell="#"]')).find(x => x.textContent == id).parentElement;
+        const price = parentNode.querySelector("[data-cell=Cuerpo]").textContent;
+        const image = parentNode.querySelector("[data-cell=Imagen]").firstElementChild.getAttribute("src");
+  
+        document.querySelector(".form__input#cuerpo").value = price
+        document.querySelector(".form__input#imagen").value = image
+  
+        removeAllEventListeners(document.querySelector(".form__input--submit"));
+        const submitButton = document.querySelector(".form__input--submit");
+        console.log(submitButton);
+        submitButton.addEventListener("click",async (e)=>{
+          e.preventDefault();
+  
+          const object = {
+            Body: document.querySelector(".form__input#cuerpo").value,
+            Image: document.querySelector(".form__input#imagen").value,
+          }
+  
+          formContainer.close();
+          await API.Family.Put(id, object);
+          PopulateTable();
+        })
+      });
+    })
+  
+    deleteButtons.forEach((deleteButton) => {
+      deleteButton.addEventListener("click", async function (e) {
+        const id = e.target.closest("[data-id]").getAttribute("data-id");
+        if(!confirm(`Estas seguro? esto eliminara el elemento ${id} para siempre`)) return;
+          await API.family.Delete(id);
+          PopulateTable();
+      });
+    })
 
     closeButton.addEventListener("click", function (e) {
         e.preventDefault();
         const hash = window.location.hash.slice(1);
         formContainer.close();
         window.location.hash = hash;
-      });
+    });
 }
 PopulateTable();
 window.addEventListener("hashchange", () => {
