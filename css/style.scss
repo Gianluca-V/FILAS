@@ -33,10 +33,10 @@
         font-size: 2rem;
     }
     &__description {
-        font-size: 1.1rem;
+        font-size: clamp(.9rem,1.55vw,1.125rem);
     }
 
-    @media (max-width: 750px) {
+    @media (max-width: 990px) {
         @include common.flex(column, center, center);
         height: auto;
         &__img {

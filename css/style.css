@@ -183,10 +183,12 @@ button {
 }
 .main__img {
   height: 100%;
+  margin-right: 80px;
   animation: 1s main__img-animation;
 }
 .main__textbox {
   width: 50%;
+  border-left: 2px solid var(--background);
   height: max-content;
   padding-left: 20px;
   padding-right: 30px;
@@ -197,9 +199,9 @@ button {
   font-size: 2rem;
 }
 .main__description {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 1.55vw, 1.125rem);
 }
-@media (max-width: 1031px) {
+@media (max-width: 990px) {
   .main {
     display: flex;
     flex-direction: column;
