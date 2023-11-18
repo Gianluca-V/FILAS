@@ -53,6 +53,35 @@ class APIClass {
     }
 }
 
+class APIClassSecure extends APIClass{
+    constructor(Table) {
+        super(Table);
+    }
+
+    async GetAll() {
+        const token = getCookie("token");
+        const response = await fetch(this.apiURL,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        return response.json();
+    }
+    async GetOne(id) {
+        const token = getCookie("token");
+        const response = await fetch(this.apiURL + id,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        return response.json();
+    }
+}
+
 function getCookie(name){
     const cookies = document.cookie.split("; ");
     let token = cookies
@@ -67,8 +96,9 @@ const Mails = Object.freeze(new APIClass("mails"));
 const News = Object.freeze(new APIClass("news"));
 const Products = Object.freeze(new APIClass("products"));
 const Family = Object.freeze(new APIClass("family"));
-const Admins = Object.freeze(new APIClass("admins"));
 const Organizations = Object.freeze(new APIClass("organizations"));
+const Admins = Object.freeze(new APIClassSecure("admins"));
+const Orders = Object.freeze(new APIClassSecure("orders"));
 
 const API = Object.freeze({
     Gallery:Gallery,
@@ -77,7 +107,8 @@ const API = Object.freeze({
     Products:Products,
     Family:Family,
     Admins:Admins,
-    Organizations:Organizations
+    Organizations:Organizations,
+    Orders:Orders
 })
 
 export {API};
