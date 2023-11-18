@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 11-11-2023 a las 21:46:56
+-- Tiempo de generación: 18-11-2023 a las 21:48:18
 -- Versión del servidor: 10.4.19-MariaDB
 -- Versión de PHP: 8.0.6
 
@@ -126,6 +126,111 @@ INSERT INTO `news` (`ID`, `Title`, `Body`, `Image`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `orderproduct`
+--
+
+CREATE TABLE `orderproduct` (
+  `ID` int(11) NOT NULL,
+  `orderID` int(11) NOT NULL,
+  `productID` int(11) NOT NULL,
+  `productQuantity` int(11) NOT NULL,
+  `orderPrice` double NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `orderproduct`
+--
+
+INSERT INTO `orderproduct` (`ID`, `orderID`, `productID`, `productQuantity`, `orderPrice`) VALUES
+(16, 10, 1, 2, 600),
+(17, 10, 2, 1, 600),
+(18, 10, 3, 3, 600),
+(19, 11, 2, 2, 600),
+(20, 11, 3, 3, 1800),
+(21, 11, 1, 3, 600),
+(25, 14, 1, 2, 1200),
+(26, 14, 8, 1, 1000),
+(27, 14, 13, 3, 1050);
+
+--
+-- Disparadores `orderproduct`
+--
+DELIMITER $$
+CREATE TRIGGER `after_orderProduct_insert` AFTER INSERT ON `orderproduct` FOR EACH ROW BEGIN
+    UPDATE orders
+    SET total = (
+        SELECT SUM(orderPrice)
+        FROM orderProduct
+        WHERE orderID = NEW.orderID
+    )
+    WHERE ID = NEW.orderID;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_orderProduct_update` AFTER UPDATE ON `orderproduct` FOR EACH ROW BEGIN
+    UPDATE orders
+    SET total = (
+        SELECT SUM(orderPrice)
+        FROM orderProduct
+        WHERE orderID = NEW.orderID
+    )
+    WHERE ID = NEW.orderID;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_orderProduct_insert` BEFORE INSERT ON `orderproduct` FOR EACH ROW BEGIN
+    DECLARE productPrice DOUBLE;
+
+    SELECT price * NEW.productQuantity INTO productPrice
+    FROM products
+    WHERE ID = NEW.productID;
+
+    SET NEW.orderPrice = productPrice;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_orderProduct_update` BEFORE UPDATE ON `orderproduct` FOR EACH ROW BEGIN
+    DECLARE productPrice DOUBLE;
+
+    SELECT price * NEW.productQuantity INTO productPrice
+    FROM products
+    WHERE ID = NEW.productID;
+
+    SET NEW.OrderPrice = productPrice;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `orders`
+--
+
+CREATE TABLE `orders` (
+  `ID` int(11) NOT NULL,
+  `total` double DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `orders`
+--
+
+INSERT INTO `orders` (`ID`, `total`) VALUES
+(10, 3600),
+(11, 3000),
+(12, 4000),
+(13, NULL),
+(14, 3250),
+(15, NULL),
+(16, NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `organizations`
 --
 
@@ -143,7 +248,8 @@ CREATE TABLE `organizations` (
 INSERT INTO `organizations` (`ID`, `Title`, `Description`, `Image`) VALUES
 (1, 'organizacions de prueba 1', 'Descripcion de prueba 1', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
 (2, 'organizacions de prueba 2', 'Descripcion de prueba 2', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
-(3, 'organizacions de prueba 3', 'Descripcion de prueba 3', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=');
+(3, 'organizacions de prueba 3', 'Descripcion de prueba 3', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
+(4, 'TITULO', 'awdawdwad', 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg');
 
 -- --------------------------------------------------------
 
@@ -218,6 +324,20 @@ ALTER TABLE `news`
   ADD PRIMARY KEY (`ID`);
 
 --
+-- Indices de la tabla `orderproduct`
+--
+ALTER TABLE `orderproduct`
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `orderID` (`orderID`),
+  ADD KEY `productID` (`productID`);
+
+--
+-- Indices de la tabla `orders`
+--
+ALTER TABLE `orders`
+  ADD PRIMARY KEY (`ID`);
+
+--
 -- Indices de la tabla `organizations`
 --
 ALTER TABLE `organizations`
@@ -258,16 +378,39 @@ ALTER TABLE `news`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT de la tabla `orderproduct`
+--
+ALTER TABLE `orderproduct`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT de la tabla `orders`
+--
+ALTER TABLE `orders`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
 -- AUTO_INCREMENT de la tabla `organizations`
 --
 ALTER TABLE `organizations`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `products`
 --
 ALTER TABLE `products`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `orderproduct`
+--
+ALTER TABLE `orderproduct`
+  ADD CONSTRAINT `orderproduct_ibfk_1` FOREIGN KEY (`orderID`) REFERENCES `orders` (`ID`),
+  ADD CONSTRAINT `orderproduct_ibfk_2` FOREIGN KEY (`productID`) REFERENCES `products` (`ID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
