@@ -45,12 +45,12 @@ async function PopulateTable() {
 
       const object = {
         Title: document.querySelector(".form__input#titulo").value,
-        Body: document.querySelector(".form__input#cuerpo").value,
+        Description: document.querySelector(".form__input#cuerpo").value,
         Image: document.querySelector(".form__input#imagen").value,
       }
 
       formContainer.close();
-      await API.News.Post(object);
+      await API.Organizations.Post(object);
       PopulateTable();
     });
   });
@@ -78,12 +78,12 @@ async function PopulateTable() {
 
         const object = {
           Title:  document.querySelector(".form__input#titulo").value,
-          Body: document.querySelector(".form__input#cuerpo").value,
+          Description: document.querySelector(".form__input#cuerpo").value,
           Image: document.querySelector(".form__input#imagen").value,
         }
 
         formContainer.close();
-        await API.News.Put(id, object);
+        await API.Organizations.Put(id, object);
         PopulateTable();
       })
     });
@@ -93,7 +93,7 @@ async function PopulateTable() {
     deleteButton.addEventListener("click", async function (e) {
       const id = e.target.closest("[data-id]").getAttribute("data-id");
       if(!confirm(`Estas seguro? esto eliminara el elemento ${id} para siempre`)) return;
-        await API.News.Delete(id);
+        await API.Organizations.Delete(id);
         PopulateTable();
     });
   })

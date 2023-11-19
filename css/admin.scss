@@ -92,6 +92,21 @@ body {
             justify-content: space-evenly;
             gap: 1rem;
         }
+        &--orders[data-cell=products]{
+            @include common.flex(column,center,center);
+        }
+    }
+    &__ticket{
+        //@include common.flex(row,space-between,center);
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap:10px;
+        span{
+            width: 100%;
+        }
+        &:not(:last-child){
+            border-bottom: 1px #0008 solid;
+        }
     }
     &__image {
         max-width: 100px;
@@ -112,13 +127,16 @@ body {
             }
         }
     }
-    @media (width < 735px) {
+    @media (width < 880px) {
         text-align: left;
         &__caption-container {
             padding-inline: 0;
         }
         &__head {
             display: none;
+        }
+        &__image{
+            display: block;
         }
         &__cell {
             display: block;

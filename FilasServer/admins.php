@@ -1,6 +1,18 @@
 <?php
 switch ($request_method) {
     case 'GET':
+        $headers = getallheaders();
+        if (!isset($headers['Authorization'])) {
+            return http_response_code(400);
+            break;
+        }
+
+        $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+        if (!TokenValidationResponse($token)) {
+            return http_response_code(401);
+            break;
+        }
+
         // Get all Admins or a specific User by ID
         if ($parts[4] !== "") {
             $Admins_id = intval($parts[4]);

@@ -266,6 +266,23 @@ body {
   justify-content: space-evenly;
   gap: 1rem;
 }
+.table__cell--orders[data-cell=products] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.table__ticket {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.table__ticket span {
+  width: 100%;
+}
+.table__ticket:not(:last-child) {
+  border-bottom: 1px rgba(0, 0, 0, 0.5333333333) solid;
+}
 .table__image {
   max-width: 100px;
 }
@@ -285,7 +302,7 @@ body {
 .table__svg--delete:hover {
   fill: hsl(348, 89%, 37%);
 }
-@media (width < 735px) {
+@media (width < 880px) {
   .table {
     text-align: left;
   }
@@ -294,6 +311,9 @@ body {
   }
   .table__head {
     display: none;
+  }
+  .table__image {
+    display: block;
   }
   .table__cell {
     display: block;

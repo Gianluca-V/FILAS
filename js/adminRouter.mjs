@@ -17,28 +17,30 @@ async function loadContent() {
     "productos": ["js/admin/productosController.html", "js/admin/productosController.mjs"],
     "noticias": ["js/admin/noticiasController.html", "js/admin/noticiasController.mjs"],
     "galeria": ["js/admin/galeriaController.html", "js/admin/galeriaController.mjs"],
+    "ordenes": ["js/admin/ordenesController.html", "js/admin/ordenesController.mjs"],
   };
 
   try {
     if (Routes[route][0]) {
       const response = await fetch(Routes[route][0]);
+  
       if (response.ok) {
         const htmlContent = await response.text();
         mainContent.innerHTML = htmlContent;
-        document.querySelector(".section-script")?.remove();
+        await document.querySelector(".section-script")?.remove();
         const script = document.createElement("script");
-        script.setAttribute("src", Routes[route][1]);
-        script.setAttribute("type", "module");
-        script.classList.add("section-script");
-        document.body.appendChild(script);
+        await script.setAttribute("src", Routes[route][1]);
+        await script.setAttribute("type", "module");
+        await script.classList.add("section-script");
+        await document.body.appendChild(script);
       } else {
-        throw new Error(`Failed to load ${route} content.`);
+        throw new Error(`Failed to load ${route} content. HTTP status: ${response.status}`);
       }
     } else {
       mainContent.innerHTML = "404 - Page Not Found";
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error loading content:", error);
     mainContent.innerHTML = "Error loading content.";
   }
 }

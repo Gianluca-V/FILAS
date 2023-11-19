@@ -28,7 +28,7 @@ class APIClass {
         });
         return response.json();
     }
-    async Put(id, data){
+    async Put(id, data) {
         const token = getCookie("token");
         const response = await fetch(this.apiURL + id, {
             method: 'PUT',
@@ -40,7 +40,7 @@ class APIClass {
         });
         return response.json();
     }
-    async Delete(id){
+    async Delete(id) {
         const token = getCookie("token");
         await fetch(this.apiURL + id, {
             method: 'DELETE',
@@ -53,14 +53,14 @@ class APIClass {
     }
 }
 
-class APIClassSecure extends APIClass{
+class APIClassSecure extends APIClass {
     constructor(Table) {
         super(Table);
     }
 
     async GetAll() {
         const token = getCookie("token");
-        const response = await fetch(this.apiURL,{
+        const response = await fetch(this.apiURL, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ class APIClassSecure extends APIClass{
     }
     async GetOne(id) {
         const token = getCookie("token");
-        const response = await fetch(this.apiURL + id,{
+        const response = await fetch(this.apiURL + id, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -82,11 +82,58 @@ class APIClassSecure extends APIClass{
     }
 }
 
-function getCookie(name){
+class APIClassOrders extends APIClassSecure {
+    constructor(Table) {
+        super(Table);
+    }
+
+    async Post(data) {
+        const response = await fetch(this.apiURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        return response.json();
+    }
+
+    async cancel(id) {
+        const token = getCookie("token");
+        const response = await fetch(this.apiURL + id, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify({
+                state: "canceled"
+            }),
+        });
+        return response.json();
+    }
+
+    async finish(id) {
+        const token = getCookie("token");
+        const response = await fetch(this.apiURL + id, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify({
+                state: "finished"
+            }),
+        });
+        return response.json();
+    }
+}
+
+function getCookie(name) {
     const cookies = document.cookie.split("; ");
     let token = cookies
-      .filter(cookie => cookie.split("=")[0] === name)
-      .map(cookie => cookie.split("=")[1])
+        .filter(cookie => cookie.split("=")[0] === name)
+        .map(cookie => cookie.split("=")[1])
 
     return token;
 }
@@ -98,23 +145,23 @@ const Products = Object.freeze(new APIClass("products"));
 const Family = Object.freeze(new APIClass("family"));
 const Organizations = Object.freeze(new APIClass("organizations"));
 const Admins = Object.freeze(new APIClassSecure("admins"));
-const Orders = Object.freeze(new APIClassSecure("orders"));
+const Orders = Object.freeze(new APIClassOrders("orders"));
 
 const API = Object.freeze({
-    Gallery:Gallery,
-    Mails:Mails,
-    News:News,
-    Products:Products,
-    Family:Family,
-    Admins:Admins,
-    Organizations:Organizations,
-    Orders:Orders
+    Gallery: Gallery,
+    Mails: Mails,
+    News: News,
+    Products: Products,
+    Family: Family,
+    Admins: Admins,
+    Organizations: Organizations,
+    Orders: Orders
 })
 
-export {API};
+export { API };
 export function removeAllEventListeners(element) {
     const clonedElement = element.cloneNode(true); // Create a clone of the element
-  
+
     // Replace the element with its clone to remove all event listeners
     element.parentNode.replaceChild(clonedElement, element);
-  }
+}
