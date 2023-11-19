@@ -12,6 +12,7 @@ async function loadContent() {
   const route = window.location.hash.slice(1);
 
   const Routes = {
+    "":["js/admin/defaultController.html"],
     "familia": ["js/admin/familiaController.html", "js/admin/familiaController.mjs"],
     "organizaciones": ["js/admin/organizacionesController.html", "js/admin/organizacionesController.mjs"],
     "productos": ["js/admin/productosController.html", "js/admin/productosController.mjs"],
@@ -28,11 +29,13 @@ async function loadContent() {
         const htmlContent = await response.text();
         mainContent.innerHTML = htmlContent;
         await document.querySelector(".section-script")?.remove();
-        const script = document.createElement("script");
-        await script.setAttribute("src", Routes[route][1]);
-        await script.setAttribute("type", "module");
-        await script.classList.add("section-script");
-        await document.body.appendChild(script);
+        if(route !== ""){
+          const script = document.createElement("script");
+          await script.setAttribute("src", Routes[route][1]);
+          await script.setAttribute("type", "module");
+          await script.classList.add("section-script");
+          await document.body.appendChild(script);
+        }
       } else {
         throw new Error(`Failed to load ${route} content. HTTP status: ${response.status}`);
       }

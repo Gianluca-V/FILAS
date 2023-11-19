@@ -216,6 +216,42 @@ body {
 .main {
   width: 100%;
 }
+.main:has(.section--warning) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.section--warning {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--background);
+  padding: 20px;
+  height: 50%;
+  width: 50%;
+  min-width: 250px;
+  min-height: 250px;
+  box-shadow: 0 0 25px #222;
+  border-radius: 20px;
+  margin: auto;
+}
+.section--warning__h2 {
+  color: var(--text);
+  font-size: 2rem;
+  text-align: center;
+}
+.section--warning__svg {
+  height: auto;
+  width: 100%;
+  padding-top: 25px;
+}
+.section--warning__svg svg {
+  height: 100px;
+  width: 100%;
+}
 
 .add-button {
   background-color: var(--accent);
