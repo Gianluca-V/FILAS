@@ -58,6 +58,6 @@ async function PopulateTable() {
 }
 PopulateTable();
 window.addEventListener("hashchange", () => {
-    if (window.location.hash.slice(1) === "organizaciones") PopulateTable();
+    if (window.location.hash.slice(1) === "ordenes") PopulateTable();
 });
 
