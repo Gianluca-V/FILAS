@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-11-2023 a las 21:48:18
+-- Tiempo de generación: 20-11-2023 a las 03:30:11
 -- Versión del servidor: 10.4.19-MariaDB
 -- Versión de PHP: 8.0.6
 
@@ -145,9 +145,9 @@ INSERT INTO `orderproduct` (`ID`, `orderID`, `productID`, `productQuantity`, `or
 (16, 10, 1, 2, 600),
 (17, 10, 2, 1, 600),
 (18, 10, 3, 3, 600),
-(19, 11, 2, 2, 600),
+(19, 11, 9, 2, 1400),
 (20, 11, 3, 3, 1800),
-(21, 11, 1, 3, 600),
+(21, 11, 1, 3, 1800),
 (25, 14, 1, 2, 1200),
 (26, 14, 8, 1, 1000),
 (27, 14, 13, 3, 1050);
@@ -212,21 +212,32 @@ DELIMITER ;
 
 CREATE TABLE `orders` (
   `ID` int(11) NOT NULL,
-  `total` double DEFAULT NULL
+  `total` double DEFAULT NULL,
+  `startDate` datetime NOT NULL DEFAULT current_timestamp(),
+  `finishDate` datetime DEFAULT NULL,
+  `state` enum('pending','finished','canceled') NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `orders`
 --
 
-INSERT INTO `orders` (`ID`, `total`) VALUES
-(10, 3600),
-(11, 3000),
-(12, 4000),
-(13, NULL),
-(14, 3250),
-(15, NULL),
-(16, NULL);
+INSERT INTO `orders` (`ID`, `total`, `startDate`, `finishDate`, `state`) VALUES
+(10, 3600, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending'),
+(11, 5000, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending'),
+(14, 3250, '2023-11-18 20:09:58', '2023-11-18 20:42:33', 'finished');
+
+--
+-- Disparadores `orders`
+--
+DELIMITER $$
+CREATE TRIGGER `before_update_orders` BEFORE UPDATE ON `orders` FOR EACH ROW BEGIN
+    IF NEW.state = 'finished' AND OLD.state != 'finished' THEN
+        SET NEW.finishDate = CURRENT_TIMESTAMP;
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
