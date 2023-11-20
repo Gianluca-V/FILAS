@@ -167,6 +167,7 @@ button {
   --text: #000000;
   --background: #ffffff;
   --primary: #d31b1b;
+  --primary-hover: #ed1717;
   --secondary: #c8690a;
   --accent: #118e11;
 }
@@ -437,5 +438,46 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+/*table ordenes*/
+.table__products-btn{
+  background-color: var(--primary);
+  padding: 20px;
+  color: var(--background);
+  font-weight: bold;
+  border-radius: 15px;
+}
+
+.table__products-btn:hover{
+  background-color: var(--primary-hover);
+}
+
+.products-dialog{
+  box-shadow: 0 0 25px #222;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.products-dialog__close{
+  background-color: var(--primary);
+  padding: 8px;
+  color: var(--background);
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.products-dialog__close:hover{
+  background-color: var(--primary-hover);
+}
+
+.products-dialog__container{
+  margin-top: 20px;
+}
+
+.table__ticket span{
+
+  margin: 20px 0px 20px 0px;
+}
+/*table ordenes*/
 
 /*# sourceMappingURL=admin.css.map */
