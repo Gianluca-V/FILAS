@@ -14,8 +14,8 @@ async function PopulateTable() {
         // Add data cells
         row.innerHTML = `
       <td class="table__cell table__cell--Organization" data-cell="#">${Organization.ID}</td>
-      <td class="table__cell table__cell--Organization" data-cell="Titulo">${Organization.Description}</td>
-      <td class="table__cell table__cell--Organization" data-cell="Cuerpo">${Organization.Body}</td>
+      <td class="table__cell table__cell--Organization" data-cell="Titulo">${Organization.Title}</td>
+      <td class="table__cell table__cell--Organization" data-cell="Cuerpo">${Organization.Description}</td>
       <td class="table__cell table__cell--Organization" data-cell="Imagen">
           <img class="table__image" src="${Organization.Image}" alt="${Organization.Title}">
       </td>
