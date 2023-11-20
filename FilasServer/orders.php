@@ -225,19 +225,21 @@ function patchOrder($order_id, $data)
 {
     global $conn;
     $state = mysqli_real_escape_string($conn, $data->state);
-    if($state != "finished" || $state != "canceled"){
+    if($state != "finished" && $state != "canceled"){
         http_response_code(400);
         echo json_encode(array("message" => "Error patching order: invalid state"));
     }
     else{
-        $deleteOrderProductsQuery = "UPDATE orders SET state = $state WHERE ID = $order_id";
-        mysqli_query($conn, $deleteOrderProductsQuery);
+        $patchOrderProductsQuery = <<<SQL
+             UPDATE orders SET state = "$state" WHERE ID = $order_id 
+        SQL;
+        mysqli_query($conn, $patchOrderProductsQuery);
 
         if (mysqli_affected_rows($conn) > 0) {
             echo json_encode(array("message" => "Order patched successfully"));
         } else {
             http_response_code(500);
-            echo json_encode(array("message" => "Error patching order: " . mysqli_error($conn)));
+            echo json_encode(array("message" => "Error patching order: " . mysqli_error($conn) . " La consulta fue: ".$patchOrderProductsQuery));
         }
     }
 }
