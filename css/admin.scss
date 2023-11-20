@@ -147,7 +147,6 @@ body {
     }
 
     &__ticket {
-        //@include common.flex(row,space-between,center);
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
@@ -161,16 +160,21 @@ body {
             border-bottom: 1px #0008 solid;
         }
     }
+    &__client{
+        @include common.flex(column,space-between);
+        min-height: 100px;
+        min-width: 200px;
+    }
 
     &__image {
         max-width: 100px;
     }
 
     &__svg {
-        font-size: clamp(1.33rem, 3vw, 2rem);
+        font-size: 2.25rem;
         transition: fill 0.125s ease;
 
-        &--edit {
+        &--edit,&--finish {
             fill: #4682b4;
 
             &:hover {
@@ -178,7 +182,7 @@ body {
             }
         }
 
-        &--delete {
+        &--delete,&--cancel {
             fill: #dc143c;
 
             &:hover {
@@ -186,7 +190,7 @@ body {
             }
         }
     }
-    &__products-btn {
+    &__products-btn, &__client-btn {
         background-color: var(--primary);
         padding: 20px;
         color: var(--background);
@@ -300,7 +304,7 @@ body {
     }
 }
 
-.products-dialog {
+.products-dialog, .client-dialog {
     position: absolute;
     top: 50%;
     left: 50%;

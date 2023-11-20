@@ -55,7 +55,18 @@
       Total: <span class="cart__total">0</span>
     </div>
 
-    <button disabled class="cart__buy">Finalizar compra</button>
+    <form class="form">
+      <div class="form__group">
+        <label for="name">Nombre y apellido:</label>
+        <input type="text" name="name" id="name" required placeholder="Ingrese su nombre y apellido">
+      </div>
+      <div class="form__group">
+        <label for="phone">Teléfono:</label>
+        <input type="tel" name="phone" id="phone" required placeholder="Ingrese su numero de teléfono">
+      </div>
+
+      <button type="submit" disabled class="cart__buy">Finalizar compra</button>
+    </form>
   </section>
 
   <footer class="footer">

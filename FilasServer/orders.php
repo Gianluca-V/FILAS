@@ -76,6 +76,8 @@ function getOrders()
             o.state AS orderState,
             o.startDate AS orderStartDate,
             o.finishDate AS orderFinishDate,
+            o.name AS orderName,
+            o.phone AS orderPhone,
             CONCAT(
                 '[',
                 GROUP_CONCAT(
@@ -123,7 +125,9 @@ function getOrder($order_id)
             o.total AS orderTotal,
             o.state AS orderState,
             o.startDate AS orderStartDate,
-             o.finishDate AS orderFinishDate,
+            o.finishDate AS orderFinishDate,
+            o.name AS orderName,
+            o.phone AS orderPhone,
             CONCAT(
                '[',
                 GROUP_CONCAT(
@@ -165,10 +169,17 @@ function createOrder($data)
 {
     global $conn;
     // Assuming $data contains the necessary information for creating an order
+    if(!isset($data->orderProducts) || !isset($data->name) || !isset($data->phone)){
+        http_response_code(400);
+        echo json_encode(array("message" => "Parameters missing (OrderProducts, name or phone)"));
+        return;
+    }
     $orderProducts = $data->orderProducts;
+    $orderName = $data->name;
+    $phone = $data->phone;
 
     // Insert the order
-    $orderInsertQuery = "INSERT INTO orders (total) VALUES (null)";
+    $orderInsertQuery = "INSERT INTO orders (name, phone, total) VALUES ('$orderName', '$phone', null)";
     mysqli_query($conn, $orderInsertQuery);
 
     // Get the ID of the newly inserted order

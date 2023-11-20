@@ -321,33 +321,41 @@ body {
 .table__ticket:not(:last-child) {
   border-bottom: 1px rgba(0, 0, 0, 0.5333333333) solid;
 }
+.table__client {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: initial;
+  min-height: 100px;
+  min-width: 200px;
+}
 .table__image {
   max-width: 100px;
 }
 .table__svg {
-  font-size: clamp(1.33rem, 3vw, 2rem);
+  font-size: 2.25rem;
   transition: fill 0.125s ease;
 }
-.table__svg--edit {
+.table__svg--edit, .table__svg--finish {
   fill: #4682b4;
 }
-.table__svg--edit:hover {
+.table__svg--edit:hover, .table__svg--finish:hover {
   fill: hsl(207, 49%, 39%);
 }
-.table__svg--delete {
+.table__svg--delete, .table__svg--cancel {
   fill: #dc143c;
 }
-.table__svg--delete:hover {
+.table__svg--delete:hover, .table__svg--cancel:hover {
   fill: hsl(348, 89%, 37%);
 }
-.table__products-btn {
+.table__products-btn, .table__client-btn {
   background-color: var(--primary);
   padding: 20px;
   color: var(--background);
   font-weight: bold;
   border-radius: 15px;
 }
-.table__products-btn:hover {
+.table__products-btn:hover, .table__client-btn:hover {
   background-color: var(--primary-hover);
 }
 @media (width < 880px) {
@@ -443,7 +451,7 @@ body {
   cursor: pointer;
 }
 
-.products-dialog {
+.products-dialog, .client-dialog {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -452,7 +460,7 @@ body {
   border-radius: 15px;
   padding: 20px;
 }
-.products-dialog__close {
+.products-dialog__close, .client-dialog__close {
   background-color: var(--primary);
   padding: 8px;
   color: var(--background);
@@ -461,10 +469,10 @@ body {
   margin: 0;
   margin-left: 95%;
 }
-.products-dialog__close:hover {
+.products-dialog__close:hover, .client-dialog__close:hover {
   background-color: var(--primary-hover);
 }
-.products-dialog__container {
+.products-dialog__container, .client-dialog__container {
   margin-top: 20px;
 }
 

@@ -68,7 +68,7 @@ function updateCart() {
     if (cart.length <= 0) {
         cartProductsContainer.textContent = "Agregue productos al carrito";
         cartTotalElement.textContent = totalCost;
-        document.querySelector(".cart__buy").setAttribute("disabled",true)
+        document.querySelector(".cart__buy").setAttribute("disabled",true);
         return;
     }
     document.querySelector(".cart__buy").removeAttribute("disabled")
@@ -115,12 +115,26 @@ function updateCart() {
 
 }
 
-document.querySelector(".cart__buy").addEventListener("click",async ()=>{
-    const order = {orderProducts:[]};
+document.querySelector(".form").addEventListener("submit",async (e)=>{
+    e.preventDefault();
+
+    const name = document.querySelector("#name").value;
+    const phone = document.querySelector("#phone").value;
+    if(name.trim() === "" || phone.trim() === ""){
+        alert("Valores de nombre o teléfono inválidos");
+        return;
+    }
+
+    const order = {name:name,phone:phone,orderProducts:[]};
     cart.forEach((product)=>{
         order.orderProducts.push({productID:product.ID, quantity:product.quantity});
     });
-    await API.Orders.Post(order);
+    await API.Orders.Post(order)
+    .catch(()=>{
+        alert("Ocurrió un problema con su compra, vuelva a intentarlo");
+        return;
+    });
+
     alert("Muchas gracias, su orden a sido enviada");
     cart = [];
     updateCart();
