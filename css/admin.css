@@ -167,9 +167,9 @@ button {
   --text: #000000;
   --background: #ffffff;
   --primary: #d31b1b;
-  --primary-hover: #ed1717;
   --secondary: #c8690a;
   --accent: #118e11;
+  --primary-hover: #ed1717;
 }
 
 body {
@@ -315,6 +315,7 @@ body {
   gap: 10px;
 }
 .table__ticket span {
+  margin: 20px 0px 20px 0px;
   width: 100%;
 }
 .table__ticket:not(:last-child) {
@@ -338,6 +339,16 @@ body {
 }
 .table__svg--delete:hover {
   fill: hsl(348, 89%, 37%);
+}
+.table__products-btn {
+  background-color: var(--primary);
+  padding: 20px;
+  color: var(--background);
+  font-weight: bold;
+  border-radius: 15px;
+}
+.table__products-btn:hover {
+  background-color: var(--primary-hover);
 }
 @media (width < 880px) {
   .table {
@@ -437,47 +448,24 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-/*table ordenes*/
-.table__products-btn{
-  background-color: var(--primary);
-  padding: 20px;
-  color: var(--background);
-  font-weight: bold;
-  border-radius: 15px;
-}
-
-.table__products-btn:hover{
-  background-color: var(--primary-hover);
-}
-
-.products-dialog{
   box-shadow: 0 0 25px #222;
   border-radius: 15px;
   padding: 20px;
 }
-
-.products-dialog__close{
+.products-dialog__close {
   background-color: var(--primary);
   padding: 8px;
   color: var(--background);
   font-weight: bold;
   border-radius: 5px;
+  margin: 0;
+  margin-left: 95%;
 }
-
-.products-dialog__close:hover{
+.products-dialog__close:hover {
   background-color: var(--primary-hover);
 }
-
-.products-dialog__container{
+.products-dialog__container {
   margin-top: 20px;
 }
-
-.table__ticket span{
-
-  margin: 20px 0px 20px 0px;
-}
-/*table ordenes*/
 
 /*# sourceMappingURL=admin.css.map */
