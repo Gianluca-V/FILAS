@@ -38,7 +38,7 @@ function generateProductCard(product) {
         if (existingProduct) {
             existingProduct.quantity++;
         } else {
-            cart.push({ name: product.Name, quantity: 1, price: product.Price });
+            cart.push({ID:product.ID, name: product.Name, quantity: 1, price: product.Price });
         }
         updateCart();
     })
@@ -115,8 +115,15 @@ function updateCart() {
 
 }
 
-document.querySelector(".cart__buy").addEventListener("click",()=>{
-    
+document.querySelector(".cart__buy").addEventListener("click",async ()=>{
+    const order = {orderProducts:[]};
+    cart.forEach((product)=>{
+        order.orderProducts.push({productID:product.ID, quantity:product.quantity});
+    });
+    await API.Orders.Post(order);
+    alert("Muchas gracias, su orden a sido enviada");
+    cart = [];
+    updateCart();
 })
 
 // Function to display products in the product grid
