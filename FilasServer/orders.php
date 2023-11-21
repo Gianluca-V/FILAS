@@ -189,6 +189,11 @@ function createOrder($data)
     foreach ($orderProducts as $product) {
         $productId = mysqli_real_escape_string($conn, $product->productID);
         $quantity = mysqli_real_escape_string($conn, $product->quantity);
+        if($quantity < 0){
+            http_response_code(400);
+            echo json_encode(array("message" => "Quantity can not be less than 1"));
+            return;
+        }
 
         $orderProductInsertQuery = "INSERT INTO orderProduct (orderID, productID, productQuantity) 
                                     VALUES ($orderId, $productId, $quantity)";
