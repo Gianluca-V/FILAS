@@ -35,7 +35,7 @@ async function PopulateTable() {
 
         <td class="table__cell table__cell--orders" data-cell="Productos"><button class="table__products-btn">Ver productos</button></td>
 
-        <td class="table__cell table__cell--orders" data-cell="Total">${Order.orderTotal}</td>
+        <td class="table__cell table__cell--orders" data-cell="Total">$ ${Order.orderTotal}</td>
         <td class="table__cell table__cell--orders" data-cell="Estado">${Order.orderState}</td>
         <td class="table__cell table__cell--orders" data-cell="Estado"><button class="table__client-btn">Ver datos de cliente</button></td>
         <td class="table__cell table__cell--orders" data-cell="Fecha de Inicio">${Order.orderStartDate}</td>
