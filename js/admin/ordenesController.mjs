@@ -1,7 +1,19 @@
 import { API } from "../API.mjs";
 // Function to fetch and display Order data
 async function PopulateTable() {
-  const OrdersData = await API.Orders.GetAll().catch((e) => console.error(e));
+  let OrdersData = await API.Orders.GetAll().catch((e) => console.error(e));
+
+   if(filter.value == "finished"){
+    OrdersData = OrdersData.filter(x => x.orderState == "finished")
+   }
+
+  if(filter.value == "canceled"){
+    OrdersData = OrdersData.filter(x => x.orderState == "canceled")
+   }
+
+   if(filter.value == "pending"){
+    OrdersData = OrdersData.filter(x => x.orderState == "pending")
+   }
 
   const OrdersTableBody = document.querySelector(".table__body");
   // Clear existing table rows
@@ -86,3 +98,7 @@ window.addEventListener("hashchange", () => {
   if (window.location.hash.slice(1) === "ordenes") PopulateTable();
 });
 
+
+const filter = document.querySelector('#option')
+
+filter.addEventListener('change', PopulateTable)
