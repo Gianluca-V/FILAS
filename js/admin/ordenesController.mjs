@@ -3,6 +3,18 @@ import { API } from "../API.mjs";
 async function PopulateTable() {
   let OrdersData = await API.Orders.GetAll().catch((e) => console.error(e));
 
+  if (filter.value == "finished") {
+    OrdersData = OrdersData.filter(x => x.orderState == "finished")
+  }
+
+  if (filter.value == "canceled") {
+    OrdersData = OrdersData.filter(x => x.orderState == "canceled")
+  }
+
+  if (filter.value == "pending") {
+    OrdersData = OrdersData.filter(x => x.orderState == "pending")
+  }
+
   const OrdersTableBody = document.querySelector(".table__body");
   // Clear existing table rows
   OrdersTableBody.innerHTML = "";
@@ -23,7 +35,7 @@ async function PopulateTable() {
 
         <td class="table__cell table__cell--orders" data-cell="Productos"><button class="table__products-btn">Ver productos</button></td>
 
-        <td class="table__cell table__cell--orders" data-cell="Total">${Order.orderTotal}</td>
+        <td class="table__cell table__cell--orders" data-cell="Total">$ ${Order.orderTotal}</td>
         <td class="table__cell table__cell--orders" data-cell="Estado">${Order.orderState}</td>
         <td class="table__cell table__cell--orders" data-cell="Estado"><button class="table__client-btn">Ver datos de cliente</button></td>
         <td class="table__cell table__cell--orders" data-cell="Fecha de Inicio">${Order.orderStartDate}</td>
@@ -61,7 +73,7 @@ async function PopulateTable() {
       const id = e.target.closest("[data-id]").getAttribute("data-id");
       if (!confirm(`Estas seguro? esto cancelara la orden ${id} para siempre`)) return;
       const response = await API.Orders.cancel(id);
-      if(response.message === "Error patching order: order not pending"){
+      if (response.message === "Error patching order: order not pending") {
         alert("No se pudo modificar la orden, es posible que ya este finalizada/cancelada");
       }
       PopulateTable();
@@ -73,7 +85,7 @@ async function PopulateTable() {
       const id = e.target.closest("[data-id]").getAttribute("data-id");
       if (!confirm(`Estas seguro? esto dará la orden ${id} por finalizada`)) return;
       const response = await API.Orders.finish(id);
-      if(response.message === "Error patching order: order not pending"){
+      if (response.message === "Error patching order: order not pending") {
         alert("No se pudo modificar la orden, es posible que ya este finalizada/cancelada");
       }
       PopulateTable();
@@ -92,3 +104,7 @@ window.addEventListener("hashchange", () => {
   if (window.location.hash.slice(1) === "ordenes") PopulateTable();
 });
 
+
+const filter = document.querySelector('#option')
+
+filter.addEventListener('change', PopulateTable)
