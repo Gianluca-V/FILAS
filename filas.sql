@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-11-2023 a las 01:19:36
+-- Tiempo de generación: 21-11-2023 a las 04:13:21
 -- Versión del servidor: 10.4.19-MariaDB
 -- Versión de PHP: 8.0.6
 
@@ -157,7 +157,12 @@ INSERT INTO `orderproduct` (`ID`, `orderID`, `productID`, `productQuantity`, `or
 (56, 27, 16, 1, 850),
 (57, 27, 15, 2, 1200),
 (58, 27, 17, 4, 4800),
-(59, 27, 18, 3, 2100);
+(59, 27, 18, 3, 2100),
+(60, 28, 1, 5, 3000),
+(61, 29, 1, 5, 3000),
+(62, 30, 1, 200, 120000),
+(63, 31, 23, -100000, -85000000),
+(64, 32, 22, 3, 2550);
 
 --
 -- Disparadores `orderproduct`
@@ -232,14 +237,19 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`ID`, `total`, `startDate`, `finishDate`, `state`, `name`, `phone`) VALUES
-(10, 3600, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending', '', ''),
+(10, 3600, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'canceled', '', ''),
 (11, 5000, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending', '', ''),
 (14, 3250, '2023-11-18 20:09:58', '2023-11-18 20:42:33', 'finished', '', ''),
 (21, 2000, '2023-11-20 00:22:57', NULL, 'pending', '', ''),
 (22, 14650, '2023-11-20 00:25:08', NULL, 'pending', '', ''),
 (23, 1600, '2023-11-20 00:27:01', '2023-11-20 00:41:45', 'canceled', '', ''),
-(26, 77350, '2023-11-20 18:28:39', NULL, 'pending', 'Gianluca Vespe', '32133423342421'),
-(27, 13100, '2023-11-20 18:30:02', NULL, 'pending', 'Turco agustin', '32142432546');
+(26, 77350, '2023-11-20 18:28:39', NULL, 'canceled', 'Gianluca Vespe', '32133423342421'),
+(27, 13100, '2023-11-20 18:30:02', NULL, 'pending', 'Turco agustin', '32142432546'),
+(28, 3000, '2023-11-20 21:58:04', NULL, 'canceled', 'Gianluca Vespe', '352435234234'),
+(29, 3000, '2023-11-20 22:01:20', NULL, 'canceled', 'Gianluca Vespe', '352435234234'),
+(30, 120000, '2023-11-20 22:21:06', NULL, 'canceled', 'gianluca', 'd323213'),
+(31, -85000000, '2023-11-20 22:24:24', NULL, 'pending', 'gianluca', '352435234234'),
+(32, 2550, '2023-11-20 22:28:45', NULL, 'pending', 'HoneyCorp', '1432546753');
 
 --
 -- Disparadores `orders`
@@ -295,9 +305,9 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`ID`, `Name`, `Price`, `Stock`, `Image`, `Description`) VALUES
-(1, 'Mermelada de pera', 600, 1, '', ''),
-(2, 'Mermelada de naranja inglesa', 600, 1, 'assets\\mermnaranja.jpg', ''),
-(3, 'Mermelada de tomate', 600, 1, '', ''),
+(1, 'Mermelada de pera', 600, 112, 'assets/default-img.png', ''),
+(2, 'Mermelada de naranja inglesa', 600, 2, 'assets\\mermnaranja.jpg', ''),
+(3, 'Mermelada de tomate', 600, 4, '', ''),
 (4, 'Mermelada de zapallo', 600, 1, '', ''),
 (5, 'Mermelada de ciruela', 800, 1, '', ''),
 (6, 'Mermelada de higo', 800, 1, '', ''),
@@ -316,8 +326,8 @@ INSERT INTO `products` (`ID`, `Name`, `Price`, `Stock`, `Image`, `Description`) 
 (19, 'Bandeja de alfajores de chocolate (6 u.)', 850, 1, 'assets\\alfajores-chocolate.jpeg', NULL),
 (20, 'Budin', 800, 1, 'assets\\budin.jpeg', NULL),
 (21, 'Pan dulce', 800, 1, 'assets\\pandulce.jpeg', NULL),
-(22, 'Fugazzeta', 850, 1, 'assets\\fugazzeta.jpg', NULL),
-(23, 'Galletas (6 u.)', 850, 1, 'assets\\galletitas.jpeg', NULL);
+(22, 'Fugazzeta', 850, -2, 'assets\\fugazzeta.jpg', NULL),
+(23, 'Galletas (6 u.)', 850, 100092, 'assets\\galletitas.jpeg', NULL);
 
 --
 -- Índices para tablas volcadas
@@ -333,6 +343,12 @@ ALTER TABLE `family`
 -- Indices de la tabla `gallery`
 --
 ALTER TABLE `gallery`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indices de la tabla `news`
+--
+ALTER TABLE `news`
   ADD PRIMARY KEY (`ID`);
 
 --
@@ -387,13 +403,13 @@ ALTER TABLE `news`
 -- AUTO_INCREMENT de la tabla `orderproduct`
 --
 ALTER TABLE `orderproduct`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT de la tabla `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `organizations`
