@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-11-2023 a las 03:30:11
+-- Tiempo de generación: 21-11-2023 a las 01:19:36
 -- Versión del servidor: 10.4.19-MariaDB
 -- Versión de PHP: 8.0.6
 
@@ -150,7 +150,25 @@ INSERT INTO `orderproduct` (`ID`, `orderID`, `productID`, `productQuantity`, `or
 (21, 11, 1, 3, 1800),
 (25, 14, 1, 2, 1200),
 (26, 14, 8, 1, 1000),
-(27, 14, 13, 3, 1050);
+(27, 14, 13, 3, 1050),
+(31, 21, 10, 2, 2000),
+(32, 22, 16, 2, 1700),
+(33, 22, 17, 2, 2400),
+(34, 22, 18, 1, 700),
+(35, 22, 23, 2, 1700),
+(36, 22, 22, 3, 2550),
+(37, 22, 20, 7, 5600),
+(38, 23, 21, 2, 1600),
+(50, 26, 23, 91, 77350),
+(51, 27, 23, 1, 850),
+(52, 27, 22, 1, 850),
+(53, 27, 21, 1, 800),
+(54, 27, 19, 1, 850),
+(55, 27, 20, 1, 800),
+(56, 27, 16, 1, 850),
+(57, 27, 15, 2, 1200),
+(58, 27, 17, 4, 4800),
+(59, 27, 18, 3, 2100);
 
 --
 -- Disparadores `orderproduct`
@@ -215,17 +233,24 @@ CREATE TABLE `orders` (
   `total` double DEFAULT NULL,
   `startDate` datetime NOT NULL DEFAULT current_timestamp(),
   `finishDate` datetime DEFAULT NULL,
-  `state` enum('pending','finished','canceled') NOT NULL DEFAULT 'pending'
+  `state` enum('pending','finished','canceled') NOT NULL DEFAULT 'pending',
+  `name` varchar(50) NOT NULL,
+  `phone` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `orders`
 --
 
-INSERT INTO `orders` (`ID`, `total`, `startDate`, `finishDate`, `state`) VALUES
-(10, 3600, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending'),
-(11, 5000, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending'),
-(14, 3250, '2023-11-18 20:09:58', '2023-11-18 20:42:33', 'finished');
+INSERT INTO `orders` (`ID`, `total`, `startDate`, `finishDate`, `state`, `name`, `phone`) VALUES
+(10, 3600, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending', '', ''),
+(11, 5000, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending', '', ''),
+(14, 3250, '2023-11-18 20:09:58', '2023-11-18 20:42:33', 'finished', '', ''),
+(21, 2000, '2023-11-20 00:22:57', NULL, 'pending', '', ''),
+(22, 14650, '2023-11-20 00:25:08', NULL, 'pending', '', ''),
+(23, 1600, '2023-11-20 00:27:01', '2023-11-20 00:41:45', 'canceled', '', ''),
+(26, 77350, '2023-11-20 18:28:39', NULL, 'pending', 'Gianluca Vespe', '32133423342421'),
+(27, 13100, '2023-11-20 18:30:02', NULL, 'pending', 'Turco agustin', '32142432546');
 
 --
 -- Disparadores `orders`
@@ -259,8 +284,7 @@ CREATE TABLE `organizations` (
 INSERT INTO `organizations` (`ID`, `Title`, `Description`, `Image`) VALUES
 (1, 'organizacions de prueba 1', 'Descripcion de prueba 1', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
 (2, 'organizacions de prueba 2', 'Descripcion de prueba 2', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
-(3, 'organizacions de prueba 3', 'Descripcion de prueba 3', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
-(4, 'TITULO', 'awdawdwad', 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg');
+(3, 'organizacions de prueba 3', 'Descripcion de prueba 3', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=');
 
 -- --------------------------------------------------------
 
@@ -392,13 +416,13 @@ ALTER TABLE `news`
 -- AUTO_INCREMENT de la tabla `orderproduct`
 --
 ALTER TABLE `orderproduct`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT de la tabla `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT de la tabla `organizations`
