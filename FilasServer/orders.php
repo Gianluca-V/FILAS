@@ -118,7 +118,7 @@ function getOrders()
 function getOrder($order_id)
 {
     global $conn;
-    
+
     $sql = <<<SQL
         SELECT
             o.ID AS orderID,
@@ -169,7 +169,7 @@ function createOrder($data)
 {
     global $conn;
     // Assuming $data contains the necessary information for creating an order
-    if(!isset($data->orderProducts) || !isset($data->name) || !isset($data->phone)){
+    if (!isset($data->orderProducts) || !isset($data->name) || !isset($data->phone)) {
         http_response_code(400);
         echo json_encode(array("message" => "Parameters missing (OrderProducts, name or phone)"));
         return;
@@ -193,6 +193,27 @@ function createOrder($data)
         $orderProductInsertQuery = "INSERT INTO orderProduct (orderID, productID, productQuantity) 
                                     VALUES ($orderId, $productId, $quantity)";
         mysqli_query($conn, $orderProductInsertQuery);
+
+        // Get current product stock
+        $productStockQuery = "SELECT stock FROM Products WHERE ID = $productId";
+        $productStockResult = mysqli_query($conn, $productStockQuery);
+
+        if ($productStockResult) {
+            $row = mysqli_fetch_assoc($productStockResult);
+            $currentStock = $row['stock'];
+
+            // Calculate new stock
+            $newStock = $currentStock - $quantity;
+
+            // Update product stock
+            $updateProductStock = "UPDATE Products 
+                                SET stock = $newStock
+                                WHERE ID = $productId";
+            mysqli_query($conn, $updateProductStock);
+        } else {
+            // Handle error when querying current stock
+            echo "Error: " . mysqli_error($conn);
+        }
     }
 
     if (mysqli_affected_rows($conn) > 0) {
@@ -236,21 +257,66 @@ function patchOrder($order_id, $data)
 {
     global $conn;
     $state = mysqli_real_escape_string($conn, $data->state);
-    if($state != "finished" && $state != "canceled"){
+    if ($state != "finished" && $state != "canceled") {
         http_response_code(400);
         echo json_encode(array("message" => "Error patching order: invalid state"));
-    }
-    else{
+    } else {
+        $selectOrderStateQuery = "SELECT state FROM orders WHERE ID = $order_id";
+        $selectOrderStateResult = mysqli_query($conn, $selectOrderStateQuery);
+        if($selectOrderStateResult){
+            $currentState = mysqli_fetch_assoc($selectOrderStateResult)['state'];
+            if($currentState !== "pending"){
+                http_response_code(409);
+                echo json_encode(array("message" => "Error patching order: order not pending"));
+                return;
+            }
+        }
+
         $patchOrderProductsQuery = <<<SQL
              UPDATE orders SET state = "$state" WHERE ID = $order_id 
         SQL;
         mysqli_query($conn, $patchOrderProductsQuery);
 
+
         if (mysqli_affected_rows($conn) > 0) {
             echo json_encode(array("message" => "Order patched successfully"));
         } else {
             http_response_code(500);
-            echo json_encode(array("message" => "Error patching order: " . mysqli_error($conn) . " La consulta fue: ".$patchOrderProductsQuery));
+            echo json_encode(array("message" => "Error patching order: " . mysqli_error($conn)));
+        }
+
+        if ($state === "canceled") {
+            $selectProductsFromOrderQuery = "SELECT productID, productQuantity FROM orderProduct WHERE orderID = $order_id";
+            $selectProductsFromOrderResult = mysqli_query($conn, $selectProductsFromOrderQuery);
+        
+            if ($selectProductsFromOrderResult) {
+                while ($product = mysqli_fetch_assoc($selectProductsFromOrderResult)) {
+                    // Get current product stock
+                    $productId = mysqli_real_escape_string($conn, $product['productID']);
+                    $productStockQuery = "SELECT stock FROM Products WHERE ID = $productId";
+                    $productStockResult = mysqli_query($conn, $productStockQuery);
+        
+                    if ($productStockResult) {
+                        $row = mysqli_fetch_assoc($productStockResult);
+                        $currentStock = $row['stock'];
+        
+                        // Calculate new stock
+                        $newStock = $currentStock + $product['productQuantity'];
+        
+                        // Update product stock
+                        $updateProductStock = "UPDATE Products 
+                                SET stock = $newStock
+                                WHERE ID = $productId";
+                        mysqli_query($conn, $updateProductStock);
+                    } else {
+                        // Handle error when querying current stock
+                        echo "Error: " . mysqli_error($conn);
+                    }
+                }
+            } else {
+                // Handle error when querying order products
+                echo "Error: " . mysqli_error($conn);
+            }
         }
     }
 }
