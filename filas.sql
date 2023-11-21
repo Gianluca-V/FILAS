@@ -336,12 +336,6 @@ ALTER TABLE `gallery`
   ADD PRIMARY KEY (`ID`);
 
 --
--- Indices de la tabla `mails`
---
-ALTER TABLE `mails`
-  ADD PRIMARY KEY (`ID`);
-
---
 -- Indices de la tabla `orderproduct`
 --
 ALTER TABLE `orderproduct`

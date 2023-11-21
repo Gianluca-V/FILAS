@@ -29,6 +29,15 @@ async function PopulateTable() {
       products += `<div class="table__ticket"> <span>${product.productName}</span>  <span>X${product.productQuantity}</span> <span>Subtotal: ${product.productPrice * product.productQuantity}</span> </div>`
     });
 
+    switch (Order.orderState) {
+      case "":
+        
+        break;
+    
+      default:
+        break;
+    }
+
     // Add data cells
     row.innerHTML = `
         <td class="table__cell table__cell--orders" data-cell="#">${Order.orderID}</td>
