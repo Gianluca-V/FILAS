@@ -26,7 +26,7 @@ class APIClass {
             },
             body: JSON.stringify(data),
         });
-        return response.json();
+        return response.json(); 
     }
     async Put(id, data) {
         const token = getCookie("token");
