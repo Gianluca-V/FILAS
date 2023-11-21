@@ -29,11 +29,18 @@ async function PopulateTable() {
       products += `<div class="table__ticket"> <span>${product.productName}</span>  <span>X${product.productQuantity}</span> <span>Subtotal: ${product.productPrice * product.productQuantity}</span> </div>`
     });
 
+    let translatedStatus;
+
     switch (Order.orderState) {
-      case "":
-        
+      case "pending":
+        translatedStatus = "Pendiente";
         break;
-    
+      case "finished":
+        translatedStatus = "Finalizado";
+        break;
+      case "canceled":
+        translatedStatus = "Cancelada";
+        break;
       default:
         break;
     }
@@ -45,10 +52,10 @@ async function PopulateTable() {
         <td class="table__cell table__cell--orders" data-cell="Productos"><button class="table__products-btn">Ver productos</button></td>
 
         <td class="table__cell table__cell--orders" data-cell="Total">$ ${Order.orderTotal}</td>
-        <td class="table__cell table__cell--orders" data-cell="Estado">${Order.orderState}</td>
+        <td class="table__cell table__cell--orders" data-cell="Estado">${translatedStatus}</td>
         <td class="table__cell table__cell--orders" data-cell="Estado"><button class="table__client-btn">Ver datos de cliente</button></td>
         <td class="table__cell table__cell--orders" data-cell="Fecha de Inicio">${Order.orderStartDate}</td>
-        <td class="table__cell table__cell--orders" data-cell="Fecha de Finalización">${Order.orderFinishDate}</td>
+        <td class="table__cell table__cell--orders" data-cell="Fecha de Finalización">${Order.orderFinishDate == null? "Pendiente" : Order.orderFinishDate}</td>
         <td class="table__cell table__cell--actions">
             <button class="table__button table__button--finish" data-id="${Order.orderID}"><svg class="table__svg table__svg--finish" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zM337 209L209 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L303 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg></button>
             <button class="table__button table__button--cancel" data-id="${Order.orderID}"><svg class="table__svg table__svg--cancel" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm79 143c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"/></svg></button>
