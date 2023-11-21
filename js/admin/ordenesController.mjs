@@ -72,7 +72,10 @@ async function PopulateTable() {
     cancelButton.addEventListener("click", async function (e) {
       const id = e.target.closest("[data-id]").getAttribute("data-id");
       if (!confirm(`Estas seguro? esto cancelara la orden ${id} para siempre`)) return;
-      await API.Orders.cancel(id);
+      const response = await API.Orders.cancel(id);
+      if(response.message === "Error patching order: order not pending"){
+        alert("No se pudo modificar la orden, es posible que ya este finalizada/cancelada");
+      }
       PopulateTable();
     });
   })
@@ -81,7 +84,10 @@ async function PopulateTable() {
     finishButton.addEventListener("click", async function (e) {
       const id = e.target.closest("[data-id]").getAttribute("data-id");
       if (!confirm(`Estas seguro? esto dará la orden ${id} por finalizada`)) return;
-      await API.Orders.finish(id);
+      const response = await API.Orders.finish(id);
+      if(response.message === "Error patching order: order not pending"){
+        alert("No se pudo modificar la orden, es posible que ya este finalizada/cancelada");
+      }
       PopulateTable();
     });
   })
