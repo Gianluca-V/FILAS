@@ -1,7 +1,7 @@
 import { API } from "../API.mjs";
 // Function to fetch and display Order data
 async function PopulateTable() {
-  const OrdersData = await API.Orders.GetAll().catch((e) => console.error(e));
+  let OrdersData = await API.Orders.GetAll().catch((e) => console.error(e));
 
   const OrdersTableBody = document.querySelector(".table__body");
   // Clear existing table rows
