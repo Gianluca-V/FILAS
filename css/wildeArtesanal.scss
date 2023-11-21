@@ -200,3 +200,28 @@ body {
     }
   }
 }
+
+.form{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  gap: 20px;
+}
+
+input[type="text"]{
+  border-radius: 2px;
+  padding: 5px;
+  width: 50%;
+  margin-left: 10px;
+}
+
+input[type="tel"]{
+  border-radius: 2px;
+  padding: 5px;
+  width: 50%;
+  margin-left: 80px;
+}
+
+.cart__product-quantity{
+  text-align: center;
+}
