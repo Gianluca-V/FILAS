@@ -91,17 +91,6 @@ INSERT INTO `gallery` (`ID`, `Image`) VALUES
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `mails`
---
-
-CREATE TABLE `mails` (
-  `ID` int(11) NOT NULL,
-  `Mail` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `news`
 --
 
@@ -353,12 +342,6 @@ ALTER TABLE `mails`
   ADD PRIMARY KEY (`ID`);
 
 --
--- Indices de la tabla `news`
---
-ALTER TABLE `news`
-  ADD PRIMARY KEY (`ID`);
-
---
 -- Indices de la tabla `orderproduct`
 --
 ALTER TABLE `orderproduct`
@@ -399,12 +382,6 @@ ALTER TABLE `family`
 --
 ALTER TABLE `gallery`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
-
---
--- AUTO_INCREMENT de la tabla `mails`
---
-ALTER TABLE `mails`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `news`

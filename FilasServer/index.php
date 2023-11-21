@@ -54,9 +54,6 @@ switch ($table) {
     case 'gallery':
         include('gallery.php'); // Include a separate script for the Gallery table
         break;
-    case 'news':
-        include('news.php'); // Include a separate script for the News table
-        break;
     case 'family':
         include('family.php'); // Include a separate script for the Family table
         break;
