@@ -7,8 +7,15 @@
         <div class="form__group">
             <label for="cuerpo" class="form__label">Cuerpo:</label>
             <textarea class="form__input" name="cuerpo" placeholder="Cuerpo de la taller" id="cuerpo" cols="30"
-                rows="10"></textarea>
+                rows="10" required></textarea>
         </div>
+        <div class="form__group">
+            <label for="categoria" class="form__label">Categoría:</label>
+            <select class="form__input" name="categoria" id="categoria" required>
+              <option value="Centro de dia" selected>Centro de dia</option>
+              <option value="Taller protegido">Taller protegido</option>
+            </select>
+          </div>
         <div class="form__group">
             <label for="imagen" class="form__label">Imagen:</label>
             <input class="form__input" placeholder="Imagen del taller" type="text" name="imagen" id="imagen">
@@ -26,6 +33,7 @@
         <tr class="table__row">
             <th class="table__header">#</th>
             <th class="table__header">Cuerpo</th>
+            <th class="table__header">Categoría</th>
             <th class="table__header">Imagen</th>
         </tr>
     </thead>

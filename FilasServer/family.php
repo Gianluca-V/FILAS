@@ -37,22 +37,30 @@ switch ($request_method) {
             break;
         }
 
-        if (isset($data->Body) && isset($data->Image)) {
+        $data = json_decode(file_get_contents("php://input"));
+        if (isset($data->Body) && isset($data->Category)) {
             $body = $conn->real_escape_string($data->Body);
-            $image = $conn->real_escape_string($data->Image);
+            $category = $conn->real_escape_string($data->Category);
+            if($category === "Centro de dia" || $category === "Taller protegido"){
+                $image = $conn->real_escape_string($data->Image);
 
-            $sql = "INSERT INTO family (Body, Image) VALUES ('$body', '$image')";
+                $sql = "INSERT INTO family (Body, Image, Category) VALUES ('$body', '$image','$category')";
 
-            if ($conn->query($sql) === TRUE) {
-                http_response_code(201);
-                echo json_encode(array("message" => "Workshops added successfully"));
-            } else {
-                http_response_code(500);
-                echo json_encode(array("message" => "Error adding Workshops: " . $conn->error));
+                if ($conn->query($sql) === TRUE) {
+                    http_response_code(201);
+                    echo json_encode(array("message" => "Workshops added successfully"));
+                } else {
+                    http_response_code(500);
+                    echo json_encode(array("message" => "Error adding Workshops: " . $conn->error));
+                }
+            }
+            else{
+                http_response_code(400);
+                echo json_encode(array("message" => "Invalid category parameter"));
             }
         } else {
             http_response_code(400);
-            echo json_encode(array("message" => "Missing Body or Image parameter"));
+            echo json_encode(array("message" => "Missing Body, or Category parameter"));
         }
         break;
 
@@ -73,11 +81,12 @@ switch ($request_method) {
                 break;
             }
 
-            if (isset($data->Body) && isset($data->Image)) {
+            if (isset($data->Body) && isset($data->Category)) {
                 $body = $conn->real_escape_string($data->Body);
+                $category = $conn->real_escape_string($data->Category);
                 $image = $conn->real_escape_string($data->Image);
 
-                $sql = "UPDATE Workshops SET Body = '$body', Image = '$image' WHERE ID = $Workshops_id";
+                $sql = "UPDATE family SET Body = '$body', Category = '$category', Image = '$image' WHERE ID = $family_id";
 
                 if ($conn->query($sql) === TRUE) {
                     http_response_code(200);
@@ -88,7 +97,7 @@ switch ($request_method) {
                 }
             } else {
                 http_response_code(400);
-                echo json_encode(array("message" => "Missing Body or Image parameter"));
+                echo json_encode(array("message" => "Missing Body or Category parameter"));
             }
         } else {
             http_response_code(400);
@@ -111,7 +120,7 @@ switch ($request_method) {
                 break;
             }
             $family_id = intval($parts[4]);
-            $sql = "DELETE FROM Workshops WHERE ID = $Workshops_id";
+            $sql = "DELETE FROM family WHERE ID = $family_id";
 
             if ($conn->query($sql) === TRUE) {
                 http_response_code(200);

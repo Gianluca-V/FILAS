@@ -65,11 +65,11 @@ async function PopulateTable() {
 
       const parentNode = Array.from(document.querySelectorAll('.table__cell[data-cell="#"]')).find(x => x.textContent == id).parentElement;
       const name = parentNode.querySelector("[data-cell=Titulo]").textContent;
-      const price = parentNode.querySelector("[data-cell=Cuerpo]").textContent;
+      const body = parentNode.querySelector("[data-cell=Cuerpo]").textContent;
       const image = parentNode.querySelector("[data-cell=Imagen]").firstElementChild.getAttribute("src");
 
       document.querySelector(".form__input#titulo").value = name
-      document.querySelector(".form__input#cuerpo").value = price
+      document.querySelector(".form__input#cuerpo").value = body
       document.querySelector(".form__input#imagen").value = image
 
       removeAllEventListeners(document.querySelector(".form__input--submit"));

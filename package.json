@@ -11,9 +11,11 @@
     "compile:news": "cd css && sass news.scss news.css --watch",
     "compile:gallery": "cd css && sass gallery.scss gallery.css --watch",
     "compile:admin": "cd css && sass admin.scss admin.css --watch",
-    "compile:login": "cd css && sass login.scss login.css --watch"
+    "compile:login": "cd css && sass login.scss login.css --watch",
+    "dev": "vite"
   },
   "devDependencies": {
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "vite": "^5.0.4"
   }
 }

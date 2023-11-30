@@ -16,6 +16,7 @@ async function PopulateTable() {
         row.innerHTML = `
       <td class="table__cell table__cell--family" data-cell="#">${family.ID}</td>
       <td class="table__cell table__cell--family" data-cell="Cuerpo">${family.Body}</td>
+      <td class="table__cell table__cell--family" data-cell="Categoria">${family.Category}</td>
       <td class="table__cell table__cell--family" data-cell="Imagen">
           <img class="table__image" src="${family.Image}" alt="${family.Title}">
       </td>
@@ -47,6 +48,7 @@ async function PopulateTable() {
         const object = {
           Body: document.querySelector(".form__input#cuerpo").value,
           Image: document.querySelector(".form__input#imagen").value,
+          Category: document.querySelector(".form__input#categoria").value
         }
   
         formContainer.close();
@@ -62,11 +64,13 @@ async function PopulateTable() {
         formContainer.showModal();
   
         const parentNode = Array.from(document.querySelectorAll('.table__cell[data-cell="#"]')).find(x => x.textContent == id).parentElement;
-        const price = parentNode.querySelector("[data-cell=Cuerpo]").textContent;
+        const body = parentNode.querySelector("[data-cell=Cuerpo]").textContent;
+        const category = parentNode.querySelector("[data-cell=Categoria]").textContent;
         const image = parentNode.querySelector("[data-cell=Imagen]").firstElementChild.getAttribute("src");
   
-        document.querySelector(".form__input#cuerpo").value = price
+        document.querySelector(".form__input#cuerpo").value = body
         document.querySelector(".form__input#imagen").value = image
+        document.querySelector(".form__input#categoria").value = category
   
         removeAllEventListeners(document.querySelector(".form__input--submit"));
         const submitButton = document.querySelector(".form__input--submit");
@@ -77,6 +81,7 @@ async function PopulateTable() {
           const object = {
             Body: document.querySelector(".form__input#cuerpo").value,
             Image: document.querySelector(".form__input#imagen").value,
+            Category: document.querySelector(".form__input#categoria").value,
           }
   
           formContainer.close();
@@ -90,7 +95,7 @@ async function PopulateTable() {
       deleteButton.addEventListener("click", async function (e) {
         const id = e.target.closest("[data-id]").getAttribute("data-id");
         if(!confirm(`Estas seguro? esto eliminara el elemento ${id} para siempre`)) return;
-          await API.family.Delete(id);
+          await API.Family.Delete(id);
           PopulateTable();
       });
     })
