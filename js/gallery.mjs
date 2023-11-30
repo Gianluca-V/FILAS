@@ -10,6 +10,7 @@ API.Gallery.GetAll().then((data)=>{
             imgElement.setAttribute('src', image.Image)
             imgElement.setAttribute('alt', 'Imagen ' + (index + 1));
             imgElement.setAttribute('loading', 'lazy');
+            imgElement.setAttribute('draggable', 'false');
             imageContainer.appendChild(imgElement);
             index++;
         });
