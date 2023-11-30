@@ -183,6 +183,7 @@ button {
 
 body {
   background-color: var(--secondary);
+  display: block;
 }
 
 .title {
