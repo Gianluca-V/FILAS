@@ -10,6 +10,14 @@
   font-family: "Mulish";
 }
 
+body {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: initial;
+  align-items: initial;
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -68,6 +76,7 @@ button {
   text-align: left;
   width: 100%;
   padding-top: 5px;
+  margin-top: auto;
 }
 .footer__p {
   padding: 20px;
@@ -189,6 +198,7 @@ button {
 .viewimg__header {
   height: 10%;
   width: 100%;
+  background-color: var(--secondary);
   display: flex;
   justify-content: center;
   align-items: center;
