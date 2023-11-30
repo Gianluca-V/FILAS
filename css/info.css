@@ -1,46 +1,215 @@
-*{
-    padding: 0;
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  box-sizing: border-box;
+  font-family: "Mulish";
+}
+
+body {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: initial;
+  align-items: initial;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: var(--primary);
+}
+
+.logo {
+  max-width: 250px;
+  padding: 10px;
+}
+
+.nav {
+  position: relative;
+}
+.nav__ul {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  gap: 1rem;
+  padding: 30px;
+}
+.nav__li {
+  display: block;
+  font-size: 1.2rem;
+}
+.nav__a {
+  color: #fff;
+  padding: 10px;
+}
+.nav__a:hover {
+  text-decoration: underline;
+}
+
+.footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0;
+  background-color: var(--primary);
+  color: var(--background);
+  text-align: left;
+  width: 100%;
+  padding-top: 5px;
+  margin-top: auto;
+}
+.footer__p {
+  padding: 20px;
+  width: 100%;
+}
+.footer__a {
+  width: 100px;
+  font-size: 2rem;
+  text-align: center;
+  color: #fff;
+}
+.footer__a :hover {
+  text-decoration: underline;
+}
+.footer__container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  width: 40%;
+}
+.footer__container--2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: 1rem;
+  gap: 3rem;
+}
+@media (width <= 400px) {
+  .footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .footer__container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+  }
+  .footer__container--2 {
     margin: 0;
-    border: 0;
-    outline: none;
-    border: none;
-    box-sizing: border-box;
-    font-family: "Mulish";
-}
-  
-:root {
-    --text: #000000;
-    --background: #ffffff;
-    --primary: #d31b1b;
-    --secondary: #c8690a;
-    --accent: #118e11;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+  }
 }
 
-.about{
-    width: 65%;
-    margin: auto;
-    padding: 20px;
+.svg1 {
+  width: 100%;
 }
-.about__title{
-    font-size: 2rem;
-    color: var(--primary);
-    margin-bottom: 15px;
+
+.toggle-menu {
+  display: none;
 }
-.about__highlight{
-    padding: 5px;
+
+@media (max-width: 990px) {
+  .logo {
+    max-width: 150px;
+  }
+  .nav__ul {
+    display: none;
+    gap: 0;
+    position: absolute;
+    top: 150%;
+    right: 0;
+    width: 10%;
+    transition: all 0.5s ease-in-out;
     background-color: var(--primary);
-    margin-bottom: 8px;
-    color: white;
-    border-radius: 5px;
+    padding-inline: 100px;
+    border-radius: 0 0 0 10px;
+    z-index: 999999;
+  }
+  .nav__ul.active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .toggle-menu {
+    display: block;
+    padding-right: 0.5rem;
+    font-size: 2rem;
+  }
+  .nav__li {
+    margin: 2rem;
+    color: black;
+  }
+}
+:root {
+  --text: #000000;
+  --background: #ffffff;
+  --primary: #d31b1b;
+  --secondary: #c8690a;
+  --accent: #118e11;
 }
 
-@media (max-width: 1100px){
-    .about{
-        width: 90%;
-    }
+.about {
+  width: 65%;
+  margin: 0;
+  margin-inline: auto;
+  padding: 20px;
 }
-@media (max-width: 550px){
-    .about{
-        width: 95%;
-    }
+
+.about__title {
+  font-size: 2rem;
+  color: var(--primary);
+  margin-bottom: 15px;
 }
+
+.about__highlight {
+  padding: 5px;
+  background-color: var(--primary);
+  margin-bottom: 8px;
+  color: white;
+  border-radius: 5px;
+}
+
+@media (max-width: 1100px) {
+  .about {
+    width: 90%;
+  }
+}
+@media (max-width: 550px) {
+  .about {
+    width: 95%;
+  }
+}
+
+/*# sourceMappingURL=info.css.map */

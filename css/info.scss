@@ -1,0 +1,39 @@
+@use "common.scss" as common;
+
+:root {
+    --text: #000000;
+    --background: #ffffff;
+    --primary: #d31b1b;
+    --secondary: #c8690a;
+    --accent: #118e11;
+}
+
+.about{
+    width: 65%;
+    margin: 0;
+    margin-inline: auto;
+    padding: 20px;
+}
+.about__title{
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 15px;
+}
+.about__highlight{
+    padding: 5px;
+    background-color: var(--primary);
+    margin-bottom: 8px;
+    color: white;
+    border-radius: 5px;
+}
+
+@media (max-width: 1100px){
+    .about{
+        width: 90%;
+    }
+}
+@media (max-width: 550px){
+    .about{
+        width: 95%;
+    }
+}

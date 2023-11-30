@@ -48,8 +48,8 @@ switch ($table) {
     case 'products':
         include('products.php'); // Include a separate script for the Products table
         break;
-    case 'mails':
-        include('mails.php'); // Include a separate script for the Mails table
+    case 'news':
+        include('news.php'); // Include a separate script for the Mails table
         break;
     case 'gallery':
         include('gallery.php'); // Include a separate script for the Gallery table

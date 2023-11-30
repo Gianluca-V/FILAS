@@ -16,6 +16,11 @@
   align-items: $align;
 }
 
+body{
+  min-height: 100svh;
+  @include flex(column);
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -64,6 +69,7 @@ button{
   text-align: left;
   width: 100%;
   padding-top: 5px;
+  margin-top: auto;
   &__p {
     padding: 20px;
     width: 100%;

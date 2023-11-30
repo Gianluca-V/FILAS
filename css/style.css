@@ -9,6 +9,14 @@
   font-family: "Mulish";
 }
 
+body {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: initial;
+  align-items: initial;
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -67,6 +75,7 @@ button {
   text-align: left;
   width: 100%;
   padding-top: 5px;
+  margin-top: auto;
 }
 .footer__p {
   padding: 20px;
@@ -200,9 +209,6 @@ button {
 }
 .main__description {
   font-size: clamp(0.9rem, 1.55vw, 1.125rem);
-}
-.main__description:hover{
-  background-color: #00000065;
 }
 @media (max-width: 990px) {
   .main {
