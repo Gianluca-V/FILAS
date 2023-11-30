@@ -34,6 +34,9 @@
     }
     &__description {
         font-size: clamp(.9rem,1.55vw,1.125rem);
+        &:hover{
+            background-color: #0003;
+        }
     }
 
     @media (max-width: 990px) {

@@ -210,6 +210,9 @@ button {
 .main__description {
   font-size: clamp(0.9rem, 1.55vw, 1.125rem);
 }
+.main__description:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
 @media (max-width: 990px) {
   .main {
     display: flex;
