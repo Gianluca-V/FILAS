@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-11-2023 a las 04:13:21
+-- Tiempo de generación: 30-11-2023 a las 21:19:52
 -- Versión del servidor: 10.4.19-MariaDB
 -- Versión de PHP: 8.0.6
 
@@ -50,17 +50,26 @@ INSERT INTO `admins` (`ID`, `username`, `password`, `salt`) VALUES
 CREATE TABLE `family` (
   `ID` int(11) NOT NULL,
   `Image` text DEFAULT NULL,
-  `Body` text NOT NULL
+  `Body` text NOT NULL,
+  `Category` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `family`
 --
 
-INSERT INTO `family` (`ID`, `Image`, `Body`) VALUES
-(1, 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=', 'aqui va la descripcion'),
-(2, 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=', 'aqui va la descripcion 2'),
-(3, 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=', 'aqui va la descripcion 3');
+INSERT INTO `family` (`ID`, `Image`, `Body`, `Category`) VALUES
+(3, 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=', 'aqui va la descripcion 3', 'Taller protegido'),
+(5, 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg', '', 'Taller protegido'),
+(6, '', 'Taller de música: Ritmo – canto- uso y confección de instrumentos', 'Centro de dia'),
+(7, '', 'Taller de educación física: Actividades y juegos con distintos materiales y elementos', 'Centro de dia'),
+(8, '', 'Taller de cocina: Lavado de manos, Planificación de receta, Compras, Uso de delantal, Reconocimiento de utensilios, Acciones, cortar, mezclar, amasar, batir; Reconocer y utilizar correctamente los dispositivos, usos y cuidados.', 'Centro de dia'),
+(9, '', 'Taller de estimulación cognitiva: Se pretende activar, estimular y entrenar determinadas capacidades cognitivas y los componentes que la integran, de forma adecuada y sistemática, para transformarlas en una habilidad, hábito o destreza. Todo ello parece desligarse de otras dimensiones tales como la emocional y/o la conductual, pero no es así dado que también se trabajan para poder ser transferidas al entorno cotidiano general.\nPropuestas lúdicas.', 'Centro de dia'),
+(10, '', 'Taller de manualidades: Diversas artesanías; Utilización de técnicas plásticas y grafo plásticas; Diversos materiales y texturas.', 'Centro de dia'),
+(11, '', 'Taller de expresión corporal: La expresión corporal es un medio de comunicación a través del cual las personas comunican ideas, sensaciones, emociones, sentimientos y pensamientos, esta es la unidad del lenguaje gestual. Las personas comunican sus representaciones mentales sobre el ambiente a través del cuerpo. En consecuencia, las diferentes formas de expresión corporal son aprovechadas para construir significados de acuerdo con los contextos donde se manifiestan.', 'Centro de dia'),
+(12, '', 'Expresión facial: Es el tipo de expresión corporal que se distingue por utilizar principalmente las diferentes partes del rostro para expresar sentimientos. Muchas veces ponemos en práctica esta forma de expresión si darnos cuenta, ya que es un elemento de uso común en el lenguaje humano.\nDiferentes propuestas para estimular la expresión corporal.', 'Centro de dia'),
+(13, '', 'Expresión teatral: Como mencionamos antes, en el teatro la expresión corporal es fundamental, porque aunque podamos hablar, en este arte los movimientos de nuestro cuerpo dicen más que las palabras. Quienes logran manejar esta forma de expresión corporal logran transmitir muchas emociones.\nPor lo general, comunicarse a través de la expresión teatral significa utilizar todo el cuerpo..', 'Centro de dia'),
+(14, '', 'Taller de relajación corporal: Las técnicas de relajación implican centrar la atención en algo que calme y aumente la conciencia del propio  cuerpo, favoreciendo la estimulación de las funciones ejecutivas. Ejercicios de relajación brindan  muchos beneficios, algunos son: Disminuir la frecuencia cardíaca; Disminuir la presión arterial; Disminuir la frecuencia respiratoria; Mejorar la digestión; Controlar los niveles de glucosa en la sangre; Reducir la actividad de las hormonas del estrés; Incrementar el flujo sanguíneo hacia los músculos más grandes; Reducir la tensión muscular y el dolor crónico; Mejorar la atención y el estado de ánimo; Mejorar la calidad del sueño; Disminuir la fatiga; Reducir la ira y la frustración; Desarrollar la confianza para resolver problemas;', 'Centro de dia');
 
 -- --------------------------------------------------------
 
@@ -325,7 +334,7 @@ INSERT INTO `products` (`ID`, `Name`, `Price`, `Stock`, `Image`, `Description`) 
 (18, 'Encurtido de ajo', 700, 1, 'assets\\ajo.jpg', NULL),
 (19, 'Bandeja de alfajores de chocolate (6 u.)', 850, 1, 'assets\\alfajores-chocolate.jpeg', NULL),
 (20, 'Budin', 800, 1, 'assets\\budin.jpeg', NULL),
-(21, 'Pan dulce', 800, 1, 'assets\\pandulce.jpeg', NULL),
+(21, 'Pan dulce', 800, 0, 'assets\\pandulce.jpeg', NULL),
 (22, 'Fugazzeta', 850, -2, 'assets\\fugazzeta.jpg', NULL),
 (23, 'Galletas (6 u.)', 850, 100092, 'assets\\galletitas.jpeg', NULL);
 
@@ -385,13 +394,13 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT de la tabla `family`
 --
 ALTER TABLE `family`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `gallery`
 --
 ALTER TABLE `gallery`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `news`
@@ -403,7 +412,7 @@ ALTER TABLE `news`
 -- AUTO_INCREMENT de la tabla `orderproduct`
 --
 ALTER TABLE `orderproduct`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT de la tabla `orders`
