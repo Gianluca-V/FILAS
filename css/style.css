@@ -33,7 +33,7 @@ button {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background-color: var(--primary);
+  background-color: white;
 }
 
 .logo {
@@ -49,16 +49,15 @@ button {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   padding: 30px;
 }
 .nav__li {
   display: block;
-  font-size: 1.2rem;
+  font-size: 1.125rem;
 }
 .nav__a {
-  color: #fff;
-  padding: 10px;
+  color: #000;
 }
 .nav__a:hover {
   text-decoration: underline;
@@ -139,7 +138,7 @@ button {
   display: none;
 }
 
-@media (max-width: 990px) {
+@media (max-width: 995px) {
   .logo {
     max-width: 150px;
   }
@@ -162,14 +161,20 @@ button {
     justify-content: center;
     align-items: center;
   }
+  .nav__li {
+    margin-block: 2rem;
+    color: black;
+  }
+  .nav__a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
   .toggle-menu {
     display: block;
     padding-right: 0.5rem;
     font-size: 2rem;
-  }
-  .nav__li {
-    margin: 2rem;
-    color: black;
   }
 }
 :root {
@@ -286,8 +291,9 @@ button {
 .sections__section {
   width: 25%;
   margin: 7px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 0.8fr 1fr;
   justify-content: center;
   align-items: center;
   background-color: var(--primary);
@@ -307,19 +313,16 @@ button {
 .sections__img {
   margin-right: 10px;
   height: 45px;
+  margin: auto;
   filter: grayscale(100%) saturate(0%) sepia(100%);
 }
 .sections__name {
-  font-size: clamp(1rem, 2vw, 1.66rem);
-}
-@media (max-width: 1200px) {
-  .sections__section {
-    flex-direction: column;
-  }
-  .sections__img {
-    margin: 0;
-    margin-bottom: 10px;
-  }
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  padding-inline: 16px;
+  padding-bottom: 5px;
+  text-wrap: balance;
+  text-transform: uppercase;
+  text-align: center;
 }
 @media (max-width: 768px) {
   .sections {
@@ -344,18 +347,11 @@ button {
   .sections__section {
     width: auto;
     padding-block: 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
     margin: 5px;
   }
   .sections__section:hover {
     transform: scale(1);
     height: 120px;
-  }
-  .sections__img {
-    margin-right: 10px;
   }
 }
 

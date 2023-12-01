@@ -3,10 +3,15 @@
 :root {
   --text: #000000;
   --background: #ffffff;
-  --primary: #f67575;
-  --secondary: #f6b677;
-  --accent: #99e999;
+  --primary: #c51a1b;
+  --secondary: #ee7501;
+  --accent: #8ba912;
   --accent-hover: hsl(120, 85%, 48%);
+
+  --primary: #3cc17c;
+  --secondary: hsl(192, 67%, 69%); 
+  --accent: #fff;
+  --accent-hover: hsl(0, 85%, 48%);
 }
 
 body {
@@ -20,6 +25,14 @@ body {
   display: block;
   width: 100%;
   max-height: 300px;
+}
+
+.description{
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 24px;
+  margin: auto;
+  font-weight: 600;
 }
 
 .product {
