@@ -33,7 +33,7 @@ button {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background-color: var(--primary);
+  background-color: white;
 }
 
 .logo {
@@ -49,16 +49,15 @@ button {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   padding: 30px;
 }
 .nav__li {
   display: block;
-  font-size: 1.2rem;
+  font-size: 1.125rem;
 }
 .nav__a {
-  color: #fff;
-  padding: 10px;
+  color: #000;
 }
 .nav__a:hover {
   text-decoration: underline;
@@ -139,7 +138,7 @@ button {
   display: none;
 }
 
-@media (max-width: 990px) {
+@media (max-width: 995px) {
   .logo {
     max-width: 150px;
   }
@@ -162,14 +161,20 @@ button {
     justify-content: center;
     align-items: center;
   }
+  .nav__li {
+    margin-block: 2rem;
+    color: black;
+  }
+  .nav__a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
   .toggle-menu {
     display: block;
     padding-right: 0.5rem;
     font-size: 2rem;
-  }
-  .nav__li {
-    margin: 2rem;
-    color: black;
   }
 }
 :root {

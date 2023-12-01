@@ -8,7 +8,16 @@
     --accent: #118e11;
 }
 
+
 .news{
+    &-title{
+        font-size: 3rem;
+        text-align: center;
+        width: 100%;
+        color: var(--background);
+        background-color: var(--primary);
+        margin-bottom: 16px;
+    }
     max-width: 100%;
     @include common.flex(column,center,center);
     &__new{

@@ -33,7 +33,7 @@ button {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background-color: var(--primary);
+  background-color: white;
 }
 
 .logo {
@@ -49,16 +49,15 @@ button {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   padding: 30px;
 }
 .nav__li {
   display: block;
-  font-size: 1.2rem;
+  font-size: 1.125rem;
 }
 .nav__a {
-  color: #fff;
-  padding: 10px;
+  color: #000;
 }
 .nav__a:hover {
   text-decoration: underline;
@@ -139,7 +138,7 @@ button {
   display: none;
 }
 
-@media (max-width: 990px) {
+@media (max-width: 995px) {
   .logo {
     max-width: 150px;
   }
@@ -162,23 +161,33 @@ button {
     justify-content: center;
     align-items: center;
   }
+  .nav__li {
+    margin-block: 2rem;
+    color: black;
+  }
+  .nav__a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
   .toggle-menu {
     display: block;
     padding-right: 0.5rem;
     font-size: 2rem;
   }
-  .nav__li {
-    margin: 2rem;
-    color: black;
-  }
 }
 :root {
   --text: #000000;
   --background: #ffffff;
-  --primary: #f67575;
-  --secondary: #f6b677;
-  --accent: #99e999;
+  --primary: #c51a1b;
+  --secondary: #ee7501;
+  --accent: #8ba912;
   --accent-hover: hsl(120, 85%, 48%);
+  --primary: #3cc17c;
+  --secondary: hsl(192, 67%, 69%);
+  --accent: #fff;
+  --accent-hover: hsl(0, 85%, 48%);
 }
 
 body {
@@ -191,6 +200,14 @@ body {
   display: block;
   width: 100%;
   max-height: 300px;
+}
+
+.description {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 24px;
+  margin: auto;
+  font-weight: 600;
 }
 
 .product {

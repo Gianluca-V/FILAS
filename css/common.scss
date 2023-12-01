@@ -33,7 +33,7 @@ button{
 .header {
   @include flex(row, space-between, center);
   width: 100%;
-  background-color: var(--primary);
+  background-color: white;
 }
 
 .logo {
@@ -45,16 +45,15 @@ button{
   position: relative;
   &__ul {
     @include flex(row, space-around, center);
-    gap: 1rem;
+    gap: 1.25rem;
     padding: 30px;
   }
   &__li {
     display: block;
-    font-size: 1.2rem;
+    font-size: 1.125rem;
   }
   &__a {
-    color: #fff;
-    padding: 10px;
+    color: #000;
     &:hover {
       text-decoration: underline;
     }
@@ -96,8 +95,6 @@ button{
   @media (width <= 400px) {
     @include flex(column,space-between,center);
     gap:1rem;
-    &__a{
-    }
     &__container{
       @include flex(row,center,center);
       width: 100%;
@@ -120,34 +117,39 @@ button{
   display: none;
 }
 
-@media (max-width: 990px) {
+@media (max-width: 995px) {
   .logo {
     max-width: 150px;
   }
-  .nav__ul {
-    display: none;
-    gap: 0;
-    position: absolute;
-    top: 150%;
-    right: 0;
-    width: 10%;
-    transition: all 0.5s ease-in-out;
-    background-color: var(--primary);
-    padding-inline: 100px;
-    border-radius: 0 0 0 10px;
-    z-index: 999999;
-  }
-  .nav__ul.active {
-    @include flex(column, center, center);
+  .nav{
+    &__ul {
+      display: none;
+      gap: 0;
+      position: absolute;
+      top: 150%;
+      right: 0;
+      width: 10%;
+      transition: all 0.5s ease-in-out;
+      background-color: var(--primary);
+      padding-inline: 100px;
+      border-radius: 0 0 0 10px;
+      z-index: 999999;
+    }
+    &__ul.active {
+      @include flex(column, center, center);
+    }
+    &__li {
+      margin-block: 2rem;
+      color: black;
+    }
+    &__a{
+      @include flex(column,center,center);
+    }
   }
 
   .toggle-menu {
     display: block;
     padding-right: 0.5rem;
     font-size: 2rem;
-  }
-  .nav__li {
-    margin: 2rem;
-    color: black;
   }
 }
