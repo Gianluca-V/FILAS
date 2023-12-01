@@ -329,3 +329,21 @@ body {
         margin-top: 20px;
     }
 }
+
+.option{
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+    gap: 20px;
+    padding-right: 25px;
+    padding-bottom: 20px;
+  }
+  
+  select{
+    border: 2px solid var(--text);
+    border-radius: 10px;
+    height: 40px;
+    width: 250px;
+    font-weight: bold;
+  }

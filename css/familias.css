@@ -180,32 +180,6 @@ button {
   --accent: #118e11;
 }
 
-section {
-  margin: 0 auto;
-  width: 70%;
-}
-
-h2 {
-  text-align: center;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  color: var(--background);
-  background-color: var(--primary);
-}
-
-.family__description-container {
-  width: auto;
-  text-align: center;
-  margin: 20px 0px;
-}
-
-.family__nav-container {
-  padding: 20px;
-}
-
-.family__li {
-  margin-bottom: 10px;
-}
-
 .family {
   display: flex;
   flex-direction: column;
@@ -214,24 +188,75 @@ h2 {
   gap: 20px;
   width: 100%;
   padding: 20px;
+  margin: 0 auto;
 }
-
+.family__li {
+  margin-bottom: 10px;
+}
+.family__nav-container {
+  padding: 20px;
+}
+.family__description-container {
+  width: auto;
+  text-align: center;
+  margin: 20px 0px;
+}
+.family__title-container {
+  text-align: center;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  color: var(--background);
+  background-color: var(--primary);
+}
 .family__cards-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
-
 .family__card {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   background-color: var(--secondary);
   text-align: center;
   padding: 10px;
 }
+.family__card--TP {
+  max-width: 400px;
+  height: 200px;
+  margin: auto;
+  width: 100%;
+}
+.family__body {
+  padding-inline: 16px;
+  color: var(--background);
+  font-weight: bold;
+  max-height: 200px;
+  overflow-y: scroll;
+}
+.family__body::-webkit-scrollbar {
+  width: 0.125rem;
+}
+.family__body::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  outline: 1px solid var(--primary);
+  border-radius: 16px;
+}
+.family__img {
+  max-width: 300px;
+  width: 100%;
+  padding: 8px;
+  margin-inline: auto;
+}
+.family__img-container--TP {
+  height: 100%;
+  width: 100%;
+}
+.family__img--TP {
+  max-width: 100%;
+  width: 100%;
+  height: 100%;
+}
 
-@media (width < 600px) {
+@media (width < 800px) {
   .family__cards-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -244,16 +269,6 @@ h2 {
     grid-template-columns: repeat(1, 1fr);
     gap: 20px;
   }
-}
-.family__body {
-  color: var(--background);
-  font-weight: bold;
-}
-
-.family__img {
-  max-width: 200px;
-  width: 100%;
-  padding: 8px;
 }
 
 /*# sourceMappingURL=familias.css.map */
