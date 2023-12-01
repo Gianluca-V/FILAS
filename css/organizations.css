@@ -181,7 +181,7 @@ button {
 }
 
 #team_box-team-title {
-  padding-bottom: 30px;
+  padding: 30px 0px;
   font-size: clamp(2.25rem, 6vw, 5rem);
   text-align: center;
   color: var(--background);
@@ -380,7 +380,7 @@ button {
 }
 
 #contact_box-info {
-  padding: 40px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -425,11 +425,9 @@ button {
 }
 
 #contact_box-form {
-  padding: 20px;
+  padding: 20px 30px;
   display: flex;
   flex-direction: column;
-  padding-left: 60px;
-  padding-right: 60px;
 }
 
 #contact_box-form h2 {
@@ -449,17 +447,27 @@ button {
   margin-bottom: 10px;
   height: 35px;
   padding: 5px;
-  border-radius: 2px;
   transition: 0.2s ease-in-out;
   background-color: rgba(54, 118, 145, 0);
   border: 2px solid #367591;
+  border-radius: 10px;
   color: white;
   font-size: 1rem;
+}
+
+#contact_box-form input::placeholder {
+  color: #9d9c9c;
+  font-weight: bold;
 }
 
 #contact_box-form input:focus {
   height: 40px;
   transition: 0.2s;
+}
+
+#contact_box-info-num, #contact_box-info-mail {
+  display: flex;
+  gap: 20px;
 }
 
 #contact_box-form input[type=submit] {
@@ -475,13 +483,18 @@ button {
 #contact_box-form textarea {
   background-color: rgba(54, 118, 145, 0);
   border: 2px solid #367591;
+  border-radius: 10px;
   font-size: 1rem;
-  border-radius: 2px;
   resize: none;
   padding: 7px;
   height: 60px;
   transition: 0.2s;
   color: white;
+}
+
+#contact_box-form textarea::placeholder {
+  color: #9d9c9c;
+  font-weight: bold;
 }
 
 #contact_box-form textarea:focus {
@@ -527,7 +540,8 @@ button {
     width: 100%;
   }
   #contact_box-info div {
-    flex-direction: column;
+    justify-content: center;
+    flex-direction: row;
     margin-bottom: 22px;
   }
   #contact_box-info img {
