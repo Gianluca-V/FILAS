@@ -8,54 +8,81 @@
     --accent: #118e11;
 }
 
-section{
+section {
     margin: 0 auto;
     width: 70%;
 }
 
-h2{
+h2 {
     text-align: center;
-    font-size: clamp(2rem,4vw,3.5rem);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    color: var(--background);
+    background-color: var(--primary);
 }
 
-.family{
-    @include common.flex(column);
-    gap: 50px;
+.family__description-container {
+    width: auto;
+    text-align: center;
+    margin: 20px 0px;
+}
+
+.family__nav-container {
+    padding: 20px;
+}
+
+.family__li {
+    margin-bottom: 10px;
+}
+
+.family {
+    display: flex;
+    flex-direction: column;
+    justify-content: initial;
+    align-items: initial;
+    gap: 20px;
     width: 100%;
     padding: 20px;
-    &__img{
-        max-width: 200px;
-        width: 100%;
-        padding: 8px;
-    }
-    &__text{
-        color: #FFF;
-        text-align: center;
-    }
-    &__events-container{
-        @include common.flex(row, space-between,center);
-        padding: 20px;
-        width: 60%;
-        transition: 0.2s;
-        background: linear-gradient(135deg, rgba(248,80,50,1) 0%, rgba(241,111,92,1) 50%, rgba(246,41,12,1) 51%, rgba(240,47,23,1) 71%, rgba(231,56,39,1) 100%);
-        @media (width > 600px) and (prefers-reduced-motion: no-preference) {
-            &:hover{
-                width: 90%;
-                transition: 0.2s;
-            }
-        }
-        @media (width > 600px) {
-            &:nth-of-type(even){
-                align-self: flex-end;
-                flex-direction: row-reverse;
-            }
-        }
-        @media (width <= 950px) {
-            width: 100%;
-        }
-        @media (width <= 600px) {
-            @include common.flex(column,center,center);
-        }
-    }
+}
+
+.family__cards-container{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.family__card{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: var(--secondary);
+    text-align: center;
+    padding: 10px;
     
+}
+
+@media (width < 600px){
+    .family__cards-container{
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (width < 500px){
+    .family__cards-container{
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 20px;
+    }
+}
+
+.family__body{
+   color: var(--background);
+   font-weight: bold;
+}
+
+.family__img {
+    max-width: 200px;
+    width: 100%;
+    padding: 8px;
 }
