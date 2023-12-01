@@ -130,12 +130,16 @@ button {
   }
 }
 
-.svg1 {
+.svg1, .svg2 {
   width: 100%;
+  fill: white;
 }
 
 .toggle-menu {
   display: none;
+}
+.toggle-menu svg {
+  fill: #000;
 }
 
 @media (max-width: 995px) {
@@ -150,7 +154,9 @@ button {
     right: 0;
     width: 10%;
     transition: all 0.5s ease-in-out;
-    background-color: var(--primary);
+    background-color: white;
+    border-left: 1px solid rgba(0, 0, 0, 0.2666666667);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2666666667);
     padding-inline: 100px;
     border-radius: 0 0 0 10px;
     z-index: 999999;
@@ -184,10 +190,10 @@ button {
   --secondary: #ee7501;
   --accent: #8ba912;
   --accent-hover: hsl(120, 85%, 48%);
-  --primary: #3cc17c;
-  --secondary: hsl(192, 67%, 69%);
-  --accent: #fff;
-  --accent-hover: hsl(0, 85%, 48%);
+  --primary: hsl(72, 61%, 57%);
+  --secondary: hsl(29, 89%, 67%);
+  --accent: hsl(187, 70%, 55%);
+  --accent-hover: hsl(187, 100%, 30%);
 }
 
 body {

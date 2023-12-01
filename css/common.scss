@@ -108,13 +108,15 @@ button{
   }
 }
 
-.svg1 {
+.svg1,.svg2 {
   width: 100%;
+  fill: white;
 }
 
 
 .toggle-menu {
   display: none;
+  svg{fill: #000;}
 }
 
 @media (max-width: 995px) {
@@ -130,7 +132,9 @@ button{
       right: 0;
       width: 10%;
       transition: all 0.5s ease-in-out;
-      background-color: var(--primary);
+      background-color: white;
+      border-left: 1px solid #0004;  
+      border-bottom: 1px solid #0004;  
       padding-inline: 100px;
       border-radius: 0 0 0 10px;
       z-index: 999999;
