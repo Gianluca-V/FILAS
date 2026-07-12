@@ -1,0 +1,14 @@
+# Environment
+.env
+
+# Go
+backend/api
+backend/*.exe
+backend/bin/
+
+# Node (existing frontend)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
