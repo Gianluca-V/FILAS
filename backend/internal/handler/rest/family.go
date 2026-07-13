@@ -15,6 +15,9 @@ import (
 type FamilyService interface {
 	List(ctx context.Context) ([]domain.FamilyItem, error)
 	Get(ctx context.Context, id int) (domain.FamilyItem, error)
+	Create(ctx context.Context, f domain.FamilyItem) (domain.FamilyItem, error)
+	Update(ctx context.Context, id int, f domain.FamilyItem) error
+	Delete(ctx context.Context, id int) error
 }
 
 // FamilyHandler serves GET /api/family[/:id], reproducing family.php's
@@ -58,4 +61,53 @@ func (h *FamilyHandler) Get(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, []dto.FamilyResponse{dto.NewFamilyResponse(item)})
+}
+
+// familyRequest is the shared inbound shape for POST/PUT, matching legacy's
+// $data->Body/$data->Category/$data->Image fields. Image is a pointer:
+// legacy never isset()-checks it (optional), unlike Body/Category.
+type familyRequest struct {
+	Body     string  `json:"Body"`
+	Category string  `json:"Category"`
+	Image    *string `json:"Image"`
+}
+
+// Create handles POST /api/family (auth-gated via router.go), returning
+// legacy's 201 status. usecase.FamilyService.Create enforces Body/Category
+// presence and the Category enum (see validateFamilyItem).
+func (h *FamilyHandler) Create(c *gin.Context) {
+	var req familyRequest
+	_ = c.ShouldBindJSON(&req)
+
+	f := domain.FamilyItem{Body: req.Body, Category: req.Category, Image: req.Image}
+	if _, err := h.svc.Create(c.Request.Context(), f); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Workshops added successfully"})
+}
+
+// Update handles PUT /api/family/:id (auth-gated via router.go).
+func (h *FamilyHandler) Update(c *gin.Context) {
+	id := parseLegacyID(c.Param("id"))
+	var req familyRequest
+	_ = c.ShouldBindJSON(&req)
+
+	f := domain.FamilyItem{Body: req.Body, Category: req.Category, Image: req.Image}
+	if err := h.svc.Update(c.Request.Context(), id, f); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Workshops updated successfully"})
+}
+
+// Delete handles DELETE /api/family/:id (auth-gated via router.go). Same
+// no-existence-check quirk as legacy.
+func (h *FamilyHandler) Delete(c *gin.Context) {
+	id := parseLegacyID(c.Param("id"))
+	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Workshops deleted successfully"})
 }

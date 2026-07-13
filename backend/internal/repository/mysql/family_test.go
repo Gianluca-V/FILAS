@@ -117,3 +117,95 @@ func TestFamilyRepository_Get_PropagatesQueryError(t *testing.T) {
 		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }
+
+const familyInsertSQL = "INSERT INTO family (Body, Category, Image) VALUES (?, ?, ?)"
+const familyUpdateSQL = "UPDATE family SET Body = ?, Category = ?, Image = ? WHERE ID = ?"
+const familyDeleteSQL = "DELETE FROM family WHERE ID = ?"
+
+func TestFamilyRepository_Create_AssignsAutoIncrementID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(familyInsertSQL)).
+		WithArgs("cuerpo", "Centro de dia", (*string)(nil)).
+		WillReturnResult(sqlmock.NewResult(9001, 1))
+
+	got, err := repo.Create(context.Background(), domain.FamilyItem{Body: "cuerpo", Category: "Centro de dia"})
+	if err != nil {
+		t.Fatalf("Create() error = %v, want nil", err)
+	}
+	if got.ID != 9001 {
+		t.Errorf("Create() ID = %d, want 9001 (from LastInsertId)", got.ID)
+	}
+}
+
+func TestFamilyRepository_Create_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	dbErr := errors.New("duplicate entry")
+	mock.ExpectExec(regexp.QuoteMeta(familyInsertSQL)).
+		WithArgs("cuerpo", "Centro de dia", (*string)(nil)).
+		WillReturnError(dbErr)
+
+	_, err := repo.Create(context.Background(), domain.FamilyItem{Body: "cuerpo", Category: "Centro de dia"})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestFamilyRepository_Update_ExecutesWithBodyCategoryImage(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(familyUpdateSQL)).
+		WithArgs("renombrado", "Taller protegido", (*string)(nil), 5).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Update(context.Background(), 5, domain.FamilyItem{Body: "renombrado", Category: "Taller protegido"}); err != nil {
+		t.Fatalf("Update() error = %v, want nil", err)
+	}
+}
+
+func TestFamilyRepository_Update_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(familyUpdateSQL)).
+		WithArgs("renombrado", "Taller protegido", (*string)(nil), 5).
+		WillReturnError(dbErr)
+
+	err := repo.Update(context.Background(), 5, domain.FamilyItem{Body: "renombrado", Category: "Taller protegido"})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Update() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestFamilyRepository_Delete_ExecutesWithID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(familyDeleteSQL)).
+		WithArgs(7).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Delete(context.Background(), 7); err != nil {
+		t.Fatalf("Delete() error = %v, want nil", err)
+	}
+}
+
+func TestFamilyRepository_Delete_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(familyDeleteSQL)).
+		WithArgs(7).
+		WillReturnError(dbErr)
+
+	err := repo.Delete(context.Background(), 7)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Delete() error = %v, want it to wrap %v", err, dbErr)
+	}
+}

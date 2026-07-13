@@ -63,3 +63,42 @@ func (r *FamilyRepository) Get(ctx context.Context, id int) (domain.FamilyItem, 
 	}
 	return row.toDomain(), nil
 }
+
+const familyInsert = "INSERT INTO family (Body, Category, Image) VALUES (?, ?, ?)"
+const familyUpdate = "UPDATE family SET Body = ?, Category = ?, Image = ? WHERE ID = ?"
+const familyDelete = "DELETE FROM family WHERE ID = ?"
+
+// Create inserts a new family item WITHOUT supplying an ID — the seed
+// schema's AUTO_INCREMENT PRIMARY KEY assigns it. The assigned ID is read
+// back via LastInsertId() and populated on the returned domain.FamilyItem.
+func (r *FamilyRepository) Create(ctx context.Context, f domain.FamilyItem) (domain.FamilyItem, error) {
+	res, err := r.db.ExecContext(ctx, familyInsert, f.Body, f.Category, f.Image)
+	if err != nil {
+		return domain.FamilyItem{}, fmt.Errorf("mysql: create family item: %w", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return domain.FamilyItem{}, fmt.Errorf("mysql: read new family item id: %w", err)
+	}
+	f.ID = int(id)
+	return f, nil
+}
+
+// Update overwrites Body, Category, and Image for the given ID (legacy
+// updateFamily includes all three columns, unlike products' Update). Like
+// legacy, it does not check row existence first.
+func (r *FamilyRepository) Update(ctx context.Context, id int, f domain.FamilyItem) error {
+	if _, err := r.db.ExecContext(ctx, familyUpdate, f.Body, f.Category, f.Image, id); err != nil {
+		return fmt.Errorf("mysql: update family item %d: %w", id, err)
+	}
+	return nil
+}
+
+// Delete removes the family item with the given ID, same
+// no-existence-check quirk as Update.
+func (r *FamilyRepository) Delete(ctx context.Context, id int) error {
+	if _, err := r.db.ExecContext(ctx, familyDelete, id); err != nil {
+		return fmt.Errorf("mysql: delete family item %d: %w", id, err)
+	}
+	return nil
+}
