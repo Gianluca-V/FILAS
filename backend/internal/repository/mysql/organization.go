@@ -64,3 +64,42 @@ func (r *OrganizationRepository) Get(ctx context.Context, id int) (domain.Organi
 	}
 	return row.toDomain(), nil
 }
+
+const organizationInsert = "INSERT INTO organizations (Title, Description, Image) VALUES (?, ?, ?)"
+const organizationUpdate = "UPDATE organizations SET Title = ?, Description = ?, Image = ? WHERE ID = ?"
+const organizationDelete = "DELETE FROM organizations WHERE ID = ?"
+
+// Create inserts a new organization WITHOUT supplying an ID — the seed
+// schema's AUTO_INCREMENT PRIMARY KEY assigns it. The assigned ID is read
+// back via LastInsertId() and populated on the returned domain.Organization.
+func (r *OrganizationRepository) Create(ctx context.Context, o domain.Organization) (domain.Organization, error) {
+	res, err := r.db.ExecContext(ctx, organizationInsert, o.Title, o.Description, o.Image)
+	if err != nil {
+		return domain.Organization{}, fmt.Errorf("mysql: create organization: %w", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return domain.Organization{}, fmt.Errorf("mysql: read new organization id: %w", err)
+	}
+	o.ID = int(id)
+	return o, nil
+}
+
+// Update overwrites Title, Description, and Image for the given ID (legacy
+// updateOrganization includes all three columns, unlike products' Update).
+// Like legacy, it does not check row existence first.
+func (r *OrganizationRepository) Update(ctx context.Context, id int, o domain.Organization) error {
+	if _, err := r.db.ExecContext(ctx, organizationUpdate, o.Title, o.Description, o.Image, id); err != nil {
+		return fmt.Errorf("mysql: update organization %d: %w", id, err)
+	}
+	return nil
+}
+
+// Delete removes the organization with the given ID, same
+// no-existence-check quirk as Update.
+func (r *OrganizationRepository) Delete(ctx context.Context, id int) error {
+	if _, err := r.db.ExecContext(ctx, organizationDelete, id); err != nil {
+		return fmt.Errorf("mysql: delete organization %d: %w", id, err)
+	}
+	return nil
+}

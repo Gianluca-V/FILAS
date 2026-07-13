@@ -114,3 +114,95 @@ func TestOrganizationRepository_Get_PropagatesQueryError(t *testing.T) {
 		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }
+
+const organizationInsertSQL = "INSERT INTO organizations (Title, Description, Image) VALUES (?, ?, ?)"
+const organizationUpdateSQL = "UPDATE organizations SET Title = ?, Description = ?, Image = ? WHERE ID = ?"
+const organizationDeleteSQL = "DELETE FROM organizations WHERE ID = ?"
+
+func TestOrganizationRepository_Create_AssignsAutoIncrementID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrganizationRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(organizationInsertSQL)).
+		WithArgs("Nueva organizacion", (*string)(nil), "https://example.com/n.jpg").
+		WillReturnResult(sqlmock.NewResult(9001, 1))
+
+	got, err := repo.Create(context.Background(), domain.Organization{Title: "Nueva organizacion", Image: "https://example.com/n.jpg"})
+	if err != nil {
+		t.Fatalf("Create() error = %v, want nil", err)
+	}
+	if got.ID != 9001 {
+		t.Errorf("Create() ID = %d, want 9001 (from LastInsertId)", got.ID)
+	}
+}
+
+func TestOrganizationRepository_Create_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrganizationRepository(db)
+
+	dbErr := errors.New("duplicate entry")
+	mock.ExpectExec(regexp.QuoteMeta(organizationInsertSQL)).
+		WithArgs("Nueva organizacion", (*string)(nil), "https://example.com/n.jpg").
+		WillReturnError(dbErr)
+
+	_, err := repo.Create(context.Background(), domain.Organization{Title: "Nueva organizacion", Image: "https://example.com/n.jpg"})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestOrganizationRepository_Update_ExecutesWithTitleDescriptionImage(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrganizationRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(organizationUpdateSQL)).
+		WithArgs("renombrada", (*string)(nil), "https://example.com/r.jpg", 5).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Update(context.Background(), 5, domain.Organization{Title: "renombrada", Image: "https://example.com/r.jpg"}); err != nil {
+		t.Fatalf("Update() error = %v, want nil", err)
+	}
+}
+
+func TestOrganizationRepository_Update_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrganizationRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(organizationUpdateSQL)).
+		WithArgs("renombrada", (*string)(nil), "https://example.com/r.jpg", 5).
+		WillReturnError(dbErr)
+
+	err := repo.Update(context.Background(), 5, domain.Organization{Title: "renombrada", Image: "https://example.com/r.jpg"})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Update() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestOrganizationRepository_Delete_ExecutesWithID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrganizationRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(organizationDeleteSQL)).
+		WithArgs(7).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Delete(context.Background(), 7); err != nil {
+		t.Fatalf("Delete() error = %v, want nil", err)
+	}
+}
+
+func TestOrganizationRepository_Delete_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrganizationRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(organizationDeleteSQL)).
+		WithArgs(7).
+		WillReturnError(dbErr)
+
+	err := repo.Delete(context.Background(), 7)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Delete() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
