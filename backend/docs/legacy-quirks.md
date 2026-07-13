@@ -326,9 +326,12 @@ Invariant" requirements before implementing):
 
 1. **`createOrder` (orders.php:168) -> `OrderService.Create`.** Requires
    `orderProducts`/`name`/`phone` (else `ErrValidation`, mirrors the 400
-   "Parameters missing" message). Per line: inserts and decrements product
-   stock — ported from the inline `$newStock = $currentStock - $quantity`
-   (orders.php:211), but now guarded:
+   "Parameters missing" message). Per line: computes orderPrice and
+   aggregates per-product demand, then hands the repository the order +
+   its lines + the computed stock deltas in ONE atomic call (see the
+   "Atomicity contract" subsection below) — ported from the inline
+   `$newStock = $currentStock - $quantity` (orders.php:211), but now
+   guarded:
    - **Quantity > 0, not just >= 0.** Legacy only rejected `quantity < 0`
      (orders.php:192), so `quantity == 0` silently passed despite the
      error message reading "Quantity can not be less than 1" — a bug
@@ -337,8 +340,9 @@ Invariant" requirements before implementing):
      unconditionally, with no floor check — directly responsible for the
      seed's `orderproduct` row 63 (`productQuantity=-100000`,
      `orderPrice=-85000000`) and `orders` row 31 (`total=-85000000`,
-     `01-schema.sql`). The Go usecase rejects a line if
-     `product.Stock < item.Quantity` before persisting anything.
+     `01-schema.sql`). The Go usecase rejects the WHOLE order if any
+     distinct product's AGGREGATED demand across all its lines exceeds
+     current stock, before calling the repository at all.
 2. **`updateOrder` (orders.php:232) -> `OrderService.Update`.** Recomputes
    orderPrice/total for the replacement line items (same computation as
    Create) and replaces them via `OrderRepository.ReplaceProducts`.
@@ -354,17 +358,72 @@ Invariant" requirements before implementing):
    scope is a deliberate, reviewed decision, not a silent behavior shift.
 3. **`patchOrder` (orders.php:261) -> `OrderService.PatchState`.**
    Preserved as-is (not a divergence): target state must be `finished` or
-   `canceled` (else `ErrValidation`, 400 "invalid state"); the order must
-   currently be `pending` (else `ErrConflict`, 409 "order not pending").
-   On `pending -> canceled`, restores each line's quantity back to product
-   stock — ported from the inline restore loop (orders.php:293-325),
-   symmetric with Create's guarded decrement.
+   `canceled` (else `ErrValidation`, 400 "invalid state", via
+   `domain.ValidOrderTransitionTarget`); the order must currently be
+   `pending` (else `ErrConflict`, 409 "order not pending"). On
+   `pending -> canceled`, restores each DISTINCT product's aggregated
+   line-item quantity back to stock — ported from the inline restore loop
+   (orders.php:293-325), symmetric with Create's guarded decrement, and
+   applied atomically with the state flip (see below).
+
+### Atomicity contract — corrective (PR6 gate re-run)
+
+The first PR6 pass orchestrated persistence as SEPARATE calls from the
+usecase: `orders.Create(order)` followed by a loop of
+`products.Update(...)` for Create; `orders.UpdateState(...)` followed by a
+restore loop for PatchState's cancel path. A 3-lens gate review (risk +
+resilience + reliability) failed this shape for three converged reasons —
+an order could persist with only SOME of its stock decremented if the loop
+failed partway (orphan order), a cancel could flip state without fully
+restoring stock (partial restore), and a read-then-write state check
+(`if order.State != pending`) was a check-then-act race two concurrent
+PATCH calls could both pass — plus a **separate, pure-logic bug**: two
+line items referencing the SAME product each validated against the SAME
+un-mutated `products.Get()` snapshot independently, so their COMBINED
+demand was never checked (e.g. two `{ProductID:1, Quantity:3}` lines vs
+`Stock:5` each individually "fit" but 3+3=6 > 5 — a lost update that would
+have driven stock negative exactly like the divergence #1 fix was meant to
+prevent).
+
+**Fix, in two parts:**
+
+1. **Aggregate-before-check.** `usecase.aggregateStockDeltas` sums each
+   line's quantity per DISTINCT `ProductID` before any stock check or
+   delta is built — both `Create` (decrement) and `PatchState`'s cancel
+   path (restore) call it. See
+   `TestOrderService_Create_RejectsInsufficientStockForCombinedDuplicateDemand`
+   and `TestOrderService_PatchState_AggregatesDuplicateProductLinesOnCancel`.
+2. **Reshape `domain.OrderRepository` around atomic composite operations.**
+   The usecase now computes a PLAN (prices, total, aggregated
+   `[]domain.StockAdjustment` deltas, finishDate) and hands it to the
+   repository as ONE call per mutation:
+   - `Create(ctx, order, deltas)` — MUST atomically insert the order, its
+     lines, AND apply every delta in a single transaction (PR7). No
+     separate `products.Update()` loop from the usecase.
+   - `TransitionState(ctx, orderID, target, finishDate, deltas)` — MUST
+     atomically perform a CONDITIONAL update (`UPDATE orders SET ... WHERE
+     ID=? AND state='pending'`) and, only if that succeeds, apply
+     finishDate/deltas in the SAME transaction. Returns `ok=false, err=nil`
+     when the conditional update affected zero rows — the CAS failure the
+     usecase maps to `domain.ErrConflict`, closing the TOCTOU gap: the
+     usecase no longer authorizes the transition itself from a stale
+     `Get()`, it only asks the repository to attempt it atomically and
+     trusts the boolean result. See
+     `TestOrderService_PatchState_ReturnsConflictWhenTransitionNotOK`.
+
+Both methods' doc comments on `domain.OrderRepository` spell out this
+atomicity/CAS contract explicitly so PR7 cannot land a non-atomic
+implementation that still happens to pass the usecase's unit tests (which
+only exercise the CONTRACT via fakes, not real transactional behavior).
 
 **Not yet built (PR7 scope, explicitly out of bounds for this port):**
 `repository/mysql/order.go` (the transactional repo implementing
-`domain.OrderRepository`), `handler/rest/order.go` + DTOs (including the
-`GROUP_CONCAT` JSON shape from §12), router wiring, and dropping the 5
-triggers from `01-schema.sql`. `usecase.OrderService` and
-`domain.OrderRepository` are verified with table-driven unit tests against
-fake repositories only — there is no live/Docker verification for this
-PR, since there is no DB-backed order path yet to verify against.
+`domain.OrderRepository`'s atomic `Create`/`TransitionState` contracts —
+see above), `handler/rest/order.go` + DTOs (including the `GROUP_CONCAT`
+JSON shape from §12), router wiring, and dropping the 5 triggers from
+`01-schema.sql`. `usecase.OrderService` and `domain.OrderRepository` are
+verified with table-driven unit tests against fake repositories only —
+there is no live/Docker verification for this PR, since there is no
+DB-backed order path yet to verify against; the fakes prove the usecase
+calls the atomic contract correctly, not that PR7's real implementation
+IS atomic (that is PR7's own test responsibility).
