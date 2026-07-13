@@ -1,4 +1,4 @@
-package http_test
+package rest_test
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	handlerhttp "github.com/gianluca-v/filas-backend/internal/handler/http"
+	"github.com/gianluca-v/filas-backend/internal/handler/rest"
 )
 
 type fakePinger struct {
@@ -26,7 +26,7 @@ func newHealthRouter(pinger interface {
 }) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.GET("/health", handlerhttp.NewHealthHandler(pinger))
+	r.GET("/health", rest.NewHealthHandler(pinger))
 	return r
 }
 
@@ -57,5 +57,22 @@ func TestHealthHandler_ReturnsServiceUnavailableWhenDBUnreachable(t *testing.T) 
 	}
 	if !strings.Contains(rec.Body.String(), `"status":"down"`) {
 		t.Errorf("body = %q, want it to contain %q", rec.Body.String(), `"status":"down"`)
+	}
+}
+
+func TestHealthHandler_DoesNotLeakDBErrorToCaller(t *testing.T) {
+	// Unauthenticated callers must never see raw DB error text; the real
+	// error is logged server-side instead (fix #7 from the PR1 gate review).
+	r := newHealthRouter(fakePinger{err: errors.New("connection refused: dial tcp 10.0.0.5:3306")})
+
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if strings.Contains(rec.Body.String(), "connection refused") {
+		t.Errorf("body = %q, must not leak the underlying DB error to unauthenticated callers", rec.Body.String())
+	}
+	if strings.Contains(rec.Body.String(), "10.0.0.5") {
+		t.Errorf("body = %q, must not leak internal host details", rec.Body.String())
 	}
 }

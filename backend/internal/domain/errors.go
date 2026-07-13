@@ -1,6 +1,7 @@
-// Package domain holds framework-free entities, repository interfaces, and
-// domain-level sentinel errors shared across the usecase, repository, and
-// handler layers.
+// Package domain holds domain-level sentinel errors shared across the
+// usecase, repository, and handler layers. Framework-free entities and
+// repository interfaces are added by later PRs (Phase 1+) as each resource
+// is ported.
 package domain
 
 import "errors"

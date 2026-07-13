@@ -1,9 +1,9 @@
-package http
+package rest
 
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/gianluca-v/filas-backend/internal/handler/http/middleware"
+	"github.com/gianluca-v/filas-backend/internal/handler/rest/middleware"
 )
 
 // RouterDeps holds the dependencies NewRouter needs to wire the Gin engine.
@@ -13,12 +13,13 @@ type RouterDeps struct {
 	HealthDB           dbPinger
 }
 
-// NewRouter builds the Gin engine with global middleware (recovery, CORS,
-// centralized error handling) and registers routes. Only /health is wired
-// in the skeleton; resource routes are added by later PRs.
+// NewRouter builds the Gin engine with global middleware (recovery, request
+// logging, CORS, centralized error handling) and registers routes. Only
+// /health is wired in the skeleton; resource routes are added by later PRs.
 func NewRouter(deps RouterDeps) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(middleware.RequestLogger())
 	r.Use(middleware.CORS(deps.CORSAllowedOrigins))
 	r.Use(middleware.ErrorHandler())
 

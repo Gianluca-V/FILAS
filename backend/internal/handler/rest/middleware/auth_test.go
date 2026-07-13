@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/gianluca-v/filas-backend/internal/auth"
-	"github.com/gianluca-v/filas-backend/internal/handler/http/middleware"
+	"github.com/gianluca-v/filas-backend/internal/handler/rest/middleware"
 )
 
 func newProtectedRouter(svc *auth.JWTService) *gin.Engine {

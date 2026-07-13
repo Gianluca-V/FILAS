@@ -3,11 +3,21 @@
 package mysql
 
 import (
-	"context"
 	"fmt"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql" // registers the "mysql" sql.DB driver
 	"github.com/jmoiron/sqlx"
+)
+
+// Modest local-dev connection pool limits (fix #10 from the PR1 gate
+// review). This is a single-instance local portfolio deployment, not a
+// production fleet — these values just prevent an unbounded pool and stale
+// idle connections outliving a MySQL-side wait_timeout.
+const (
+	maxOpenConns    = 10
+	maxIdleConns    = 5
+	connMaxLifetime = 5 * time.Minute
 )
 
 // MustOpen opens a MySQL connection pool via sqlx and pings it immediately,
@@ -21,11 +31,10 @@ func MustOpen(dsn string) *sqlx.DB {
 	if err := db.Ping(); err != nil {
 		panic(fmt.Sprintf("mysql: ping failed: %v", err))
 	}
-	return db
-}
 
-// Ping checks DB connectivity with the given context. Used by the health
-// handler to report liveness without crashing the process.
-func Ping(ctx context.Context, db *sqlx.DB) error {
-	return db.PingContext(ctx)
+	db.SetMaxOpenConns(maxOpenConns)
+	db.SetMaxIdleConns(maxIdleConns)
+	db.SetConnMaxLifetime(connMaxLifetime)
+
+	return db
 }

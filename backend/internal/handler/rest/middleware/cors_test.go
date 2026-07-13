@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/gianluca-v/filas-backend/internal/handler/http/middleware"
+	"github.com/gianluca-v/filas-backend/internal/handler/rest/middleware"
 )
 
 func newCORSRouter(allowedOrigins []string) *gin.Engine {
@@ -66,8 +66,25 @@ func TestCORS_OmitsHeaderForDisallowedOrigin(t *testing.T) {
 	}
 }
 
-func TestCORS_WildcardWhenNoOriginsConfigured(t *testing.T) {
+func TestCORS_FailsClosedWhenNoOriginsConfigured(t *testing.T) {
+	// fix #8 from the PR1 gate review: an unset CORS_ALLOWED_ORIGINS must
+	// fail CLOSED (no ACAO header at all), never fall back to a wildcard.
 	r := newCORSRouter(nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
+	req.Header.Set("Origin", "http://anything.example")
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if got := rec.Header().Get("Access-Control-Allow-Origin"); got != "" {
+		t.Errorf("Access-Control-Allow-Origin = %q, want empty when no origins are configured", got)
+	}
+}
+
+func TestCORS_WildcardOnlyWhenExplicitlyConfigured(t *testing.T) {
+	// Wildcard is opt-in: only when the operator explicitly sets
+	// CORS_ALLOWED_ORIGINS=* does any origin get echoed back.
+	r := newCORSRouter([]string{"*"})
 
 	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
 	req.Header.Set("Origin", "http://anything.example")
