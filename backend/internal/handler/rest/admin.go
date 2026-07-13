@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/handler/rest/dto"
+	"github.com/gianluca-v/filas-backend/internal/handler/rest/middleware"
 )
 
 // AdminService is the usecase-layer contract this handler depends on for
@@ -27,9 +27,15 @@ type AuthService interface {
 	Login(ctx context.Context, username, password string) (string, error)
 }
 
-// tokenParser is satisfied by *auth.JWTService; kept narrow for testability
-// (same shape as middleware.jwtParser, duplicated here because that one is
-// package-private — see AdminHandler.requireAuthInline).
+// tokenParser is satisfied by *auth.JWTService; kept narrow for
+// testability. This is deliberate point-of-use interface duplication (the
+// same shape as middleware.jwtParser/middleware.TokenParser) — a Go idiom
+// used throughout this codebase (see also usecase.jwtIssuer) — NOT the
+// duplication gate #36 flagged. That finding was about the bearer-auth
+// LOGIC being hand-copied; the logic itself now lives in one place
+// (middleware.AuthenticateRequest), which AdminHandler.requireAuthInline
+// calls directly (h.jwt, of this interface type, satisfies
+// middleware.TokenParser structurally).
 type tokenParser interface {
 	Parse(tokenString string) (int64, error)
 }
@@ -52,23 +58,18 @@ func NewAdminHandler(adminSvc AdminService, authSvc AuthService, jwt tokenParser
 	return &AdminHandler{adminSvc: adminSvc, authSvc: authSvc, jwt: jwt}
 }
 
-// requireAuthInline mirrors middleware.RequireAuth's check for the one
-// route (POST /api/admins, non-login branch) that cannot use route-group
-// middleware because the same path/method also serves the public login
-// call. Returns false (having already written the 401 response) if the
-// request is not authenticated.
+// requireAuthInline covers the one route (POST /api/admins, non-login
+// branch) that cannot use route-group middleware because the same
+// path/method also serves the public login call. It delegates to
+// middleware.AuthenticateRequest — the SAME implementation GET/PUT/DELETE
+// use via middleware.RequireAuth — so the header-parsing logic and the two
+// 401 message strings cannot drift between this inline check and the
+// route-group middleware (gate #36 readability finding; previously
+// hand-duplicated here). Returns false (having already written the 401
+// response) if the request is not authenticated.
 func (h *AdminHandler) requireAuthInline(c *gin.Context) bool {
-	header := c.GetHeader("Authorization")
-	if header == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "missing authorization token"})
-		return false
-	}
-	token := strings.TrimPrefix(header, "Bearer ")
-	if _, err := h.jwt.Parse(token); err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "invalid or expired token"})
-		return false
-	}
-	return true
+	_, ok := middleware.AuthenticateRequest(c, h.jwt)
+	return ok
 }
 
 type createAdminRequest struct {
