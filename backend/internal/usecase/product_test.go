@@ -17,6 +17,13 @@ type fakeProductRepo struct {
 	products []domain.Product
 	byID     map[int]domain.Product
 	err      error
+	// getErrByID simulates a Get() failure for ONE specific product ID,
+	// distinct from the global `err` field above. Needed by the order
+	// usecase tests (PR6 corrective), which call Get() for MULTIPLE
+	// different products per order/update and must be able to prove a
+	// failure surfaces for the RIGHT product without every other lookup
+	// also failing.
+	getErrByID map[int]error
 
 	createErr      error
 	createdProduct domain.Product
@@ -24,18 +31,8 @@ type fakeProductRepo struct {
 	updateCalled   bool
 	updateID       int
 	updateProduct  domain.Product
-	// updateCalls records every Update() invocation in order, in addition
-	// to the single-latest-call fields above. Needed by the order usecase
-	// tests (PR6), which decrement/restore stock across MULTIPLE products
-	// per order and must assert on each call, not just the last one.
-	updateCalls []fakeProductRepoUpdateCall
-	deleteErr   error
-	deleteID    int
-}
-
-type fakeProductRepoUpdateCall struct {
-	id      int
-	product domain.Product
+	deleteErr      error
+	deleteID       int
 }
 
 func (f *fakeProductRepo) List(ctx context.Context) ([]domain.Product, error) {
@@ -48,6 +45,9 @@ func (f *fakeProductRepo) List(ctx context.Context) ([]domain.Product, error) {
 func (f *fakeProductRepo) Get(ctx context.Context, id int) (domain.Product, error) {
 	if f.err != nil {
 		return domain.Product{}, f.err
+	}
+	if getErr, ok := f.getErrByID[id]; ok {
+		return domain.Product{}, getErr
 	}
 	p, ok := f.byID[id]
 	if !ok {
@@ -69,7 +69,6 @@ func (f *fakeProductRepo) Update(ctx context.Context, id int, p domain.Product) 
 	f.updateCalled = true
 	f.updateID = id
 	f.updateProduct = p
-	f.updateCalls = append(f.updateCalls, fakeProductRepoUpdateCall{id: id, product: p})
 	return f.updateErr
 }
 
