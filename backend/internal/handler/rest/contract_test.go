@@ -45,7 +45,7 @@ func TestContract_Products(t *testing.T) {
 	image18 := `assets\ajo.jpg`
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB: fakePinger{},
-		ProductService: fakeProductService{
+		ProductService: &fakeProductService{
 			products: []domain.Product{
 				{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: &image1, Description: &desc},
 				{ID: 18, Name: "Encurtido de ajo", Price: 700, Stock: 1, Image: &image18, Description: nil},
@@ -64,7 +64,7 @@ func TestContract_Products(t *testing.T) {
 func TestContract_Products_EmptyListIsOKNotNotFound(t *testing.T) {
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB:       fakePinger{},
-		ProductService: fakeProductService{products: []domain.Product{}},
+		ProductService: &fakeProductService{products: []domain.Product{}},
 	})
 	assertJSONMatchesFixture(t, r, http.MethodGet, "/api/products", http.StatusOK, "products_empty_list.json")
 }
@@ -102,7 +102,7 @@ func TestContract_News_EmptyListIsNotFound(t *testing.T) {
 func TestContract_Gallery(t *testing.T) {
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB: fakePinger{},
-		GalleryService: fakeGalleryService{
+		GalleryService: &fakeGalleryService{
 			images: []domain.GalleryImage{{ID: 1, Image: "assets/galeria-1.jpg"}, {ID: 2, Image: "assets/galeria-2.jpg"}},
 			byID:   map[int]domain.GalleryImage{1: {ID: 1, Image: "assets/galeria-1.jpg"}},
 		},
@@ -117,7 +117,7 @@ func TestContract_Family(t *testing.T) {
 	image := "https://example.com/3.jpg"
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB: fakePinger{},
-		FamilyService: fakeFamilyService{
+		FamilyService: &fakeFamilyService{
 			items: []domain.FamilyItem{
 				{ID: 3, Image: &image, Body: "aqui va la descripcion 3", Category: "Taller protegido"},
 				{ID: 6, Image: nil, Body: "Taller de musica", Category: "Centro de dia"},
@@ -135,7 +135,7 @@ func TestContract_Organizations(t *testing.T) {
 	desc1 := "Descripcion de prueba 1"
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB: fakePinger{},
-		OrganizationService: fakeOrganizationService{
+		OrganizationService: &fakeOrganizationService{
 			items: []domain.Organization{
 				{ID: 1, Title: "organizacions de prueba 1", Description: &desc1, Image: "https://example.com/1.jpg"},
 				{ID: 2, Title: "sin descripcion", Description: nil, Image: "https://example.com/2.jpg"},

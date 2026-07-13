@@ -99,11 +99,11 @@ func TestNewRouter_WiresPublicResourceReadRoutes(t *testing.T) {
 	// resource's own test file.
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB:            fakePinger{err: nil},
-		ProductService:      fakeProductService{products: []domain.Product{}},
+		ProductService:      &fakeProductService{products: []domain.Product{}},
 		NewsService:         fakeNewsService{items: []domain.NewsItem{{ID: 1, Title: "t"}}},
-		GalleryService:      fakeGalleryService{images: []domain.GalleryImage{{ID: 1, Image: "i"}}},
-		FamilyService:       fakeFamilyService{items: []domain.FamilyItem{{ID: 1, Body: "b", Category: "Centro de dia"}}},
-		OrganizationService: fakeOrganizationService{items: []domain.Organization{{ID: 1, Title: "t", Image: "i"}}},
+		GalleryService:      &fakeGalleryService{images: []domain.GalleryImage{{ID: 1, Image: "i"}}},
+		FamilyService:       &fakeFamilyService{items: []domain.FamilyItem{{ID: 1, Body: "b", Category: "Centro de dia"}}},
+		OrganizationService: &fakeOrganizationService{items: []domain.Organization{{ID: 1, Title: "t", Image: "i"}}},
 	})
 
 	cases := []struct {
@@ -160,6 +160,71 @@ func TestNewRouter_WiresAdminRoutes(t *testing.T) {
 		{"get with token", http.MethodGet, "/api/admins/1543", "", token, http.StatusOK},
 		{"update without token", http.MethodPut, "/api/admins/1543", `{"username":"x","password":"y"}`, "", http.StatusUnauthorized},
 		{"delete without token", http.MethodDelete, "/api/admins/1543", "", "", http.StatusUnauthorized},
+	}
+	for _, tc := range cases {
+		var body *strings.Reader
+		if tc.body != "" {
+			body = strings.NewReader(tc.body)
+		} else {
+			body = strings.NewReader("")
+		}
+		req := httptest.NewRequest(tc.method, tc.path, body)
+		req.Header.Set("Content-Type", "application/json")
+		if tc.token != "" {
+			req.Header.Set("Authorization", "Bearer "+tc.token)
+		}
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+		if rec.Code != tc.want {
+			t.Errorf("%s: %s %s -> status = %d, want %d, body=%s", tc.name, tc.method, tc.path, rec.Code, tc.want, rec.Body.String())
+		}
+	}
+}
+
+func TestNewRouter_WiresAuthGatedWriteRoutes(t *testing.T) {
+	// PR4 (task 3.1): POST/PUT/DELETE for products/gallery/family/organizations
+	// must be reachable through the real router wiring, gated behind
+	// middleware.RequireAuth exactly like the admin GET/PUT/DELETE routes
+	// (PR3). GETs stay public. News writes are wired separately in PR5.
+	jwtSvc := auth.NewJWTService("router-test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+
+	r := rest.NewRouter(rest.RouterDeps{
+		HealthDB:            fakePinger{err: nil},
+		ProductService:      &fakeProductService{byID: map[int]domain.Product{1: {ID: 1, Name: "p"}}},
+		GalleryService:      &fakeGalleryService{byID: map[int]domain.GalleryImage{1: {ID: 1, Image: "i"}}},
+		FamilyService:       &fakeFamilyService{byID: map[int]domain.FamilyItem{1: {ID: 1, Body: "b", Category: "Centro de dia"}}},
+		OrganizationService: &fakeOrganizationService{byID: map[int]domain.Organization{1: {ID: 1, Title: "t", Image: "i"}}},
+		JWTService:          jwtSvc,
+	})
+
+	cases := []struct {
+		name   string
+		method string
+		path   string
+		body   string
+		token  string
+		want   int
+	}{
+		{"products create without token", http.MethodPost, "/api/products", `{"Name":"n","Price":1,"Stock":1}`, "", http.StatusUnauthorized},
+		{"products create with token", http.MethodPost, "/api/products", `{"Name":"n","Price":1,"Stock":1}`, token, http.StatusOK},
+		{"products update without token", http.MethodPut, "/api/products/1", `{"Name":"n","Price":1,"Stock":1}`, "", http.StatusUnauthorized},
+		{"products delete without token", http.MethodDelete, "/api/products/1", "", "", http.StatusUnauthorized},
+		{"gallery create without token", http.MethodPost, "/api/gallery", `{"Image":"i"}`, "", http.StatusUnauthorized},
+		{"gallery create with token", http.MethodPost, "/api/gallery", `{"Image":"i"}`, token, http.StatusCreated},
+		{"gallery update without token", http.MethodPut, "/api/gallery/1", `{"Image":"i"}`, "", http.StatusUnauthorized},
+		{"gallery delete without token", http.MethodDelete, "/api/gallery/1", "", "", http.StatusUnauthorized},
+		{"family create without token", http.MethodPost, "/api/family", `{"Body":"b","Category":"Centro de dia"}`, "", http.StatusUnauthorized},
+		{"family create with token", http.MethodPost, "/api/family", `{"Body":"b","Category":"Centro de dia"}`, token, http.StatusCreated},
+		{"family update without token", http.MethodPut, "/api/family/1", `{"Body":"b","Category":"Centro de dia"}`, "", http.StatusUnauthorized},
+		{"family delete without token", http.MethodDelete, "/api/family/1", "", "", http.StatusUnauthorized},
+		{"organizations create without token", http.MethodPost, "/api/organizations", `{"Title":"t","Image":"i"}`, "", http.StatusUnauthorized},
+		{"organizations create with token", http.MethodPost, "/api/organizations", `{"Title":"t","Image":"i"}`, token, http.StatusCreated},
+		{"organizations update without token", http.MethodPut, "/api/organizations/1", `{"Title":"t","Image":"i"}`, "", http.StatusUnauthorized},
+		{"organizations delete without token", http.MethodDelete, "/api/organizations/1", "", "", http.StatusUnauthorized},
 	}
 	for _, tc := range cases {
 		var body *strings.Reader
