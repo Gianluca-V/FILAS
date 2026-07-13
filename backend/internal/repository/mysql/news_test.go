@@ -114,3 +114,138 @@ func TestNewsRepository_Get_PropagatesQueryError(t *testing.T) {
 		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }
+
+const newsInsertSQL = "INSERT INTO news (Title, Body, Image) VALUES (?, ?, ?)"
+const newsUpdateSQL = "UPDATE news SET Title = ?, Body = ?, Image = ? WHERE ID = ?"
+const newsDeleteSQL = "DELETE FROM news WHERE ID = ?"
+
+func TestNewsRepository_Create_AssignsAutoIncrementID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	body := "Lorem ipsum"
+	image := "https://example.com/1.jpg"
+	mock.ExpectExec(regexp.QuoteMeta(newsInsertSQL)).
+		WithArgs("Noticia nueva", &body, &image).
+		WillReturnResult(sqlmock.NewResult(9001, 1))
+
+	got, err := repo.Create(context.Background(), domain.NewsItem{Title: "Noticia nueva", Body: &body, Image: &image})
+	if err != nil {
+		t.Fatalf("Create() error = %v, want nil", err)
+	}
+	if got.ID != 9001 {
+		t.Errorf("Create() ID = %d, want 9001 (from LastInsertId)", got.ID)
+	}
+}
+
+func TestNewsRepository_Create_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	body := "Lorem ipsum"
+	image := "https://example.com/1.jpg"
+	dbErr := errors.New("duplicate entry")
+	mock.ExpectExec(regexp.QuoteMeta(newsInsertSQL)).
+		WithArgs("Noticia nueva", &body, &image).
+		WillReturnError(dbErr)
+
+	_, err := repo.Create(context.Background(), domain.NewsItem{Title: "Noticia nueva", Body: &body, Image: &image})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestNewsRepository_Update_ExecutesWithFields(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	body := "Cuerpo actualizado"
+	image := "https://example.com/2.jpg"
+	mock.ExpectExec(regexp.QuoteMeta(newsUpdateSQL)).
+		WithArgs("Renombrada", &body, &image, 5).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Update(context.Background(), 5, domain.NewsItem{Title: "Renombrada", Body: &body, Image: &image}); err != nil {
+		t.Fatalf("Update() error = %v, want nil", err)
+	}
+}
+
+func TestNewsRepository_Update_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	body := "Cuerpo"
+	image := "https://example.com/2.jpg"
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(newsUpdateSQL)).
+		WithArgs("Renombrada", &body, &image, 5).
+		WillReturnError(dbErr)
+
+	err := repo.Update(context.Background(), 5, domain.NewsItem{Title: "Renombrada", Body: &body, Image: &image})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Update() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+// TestNewsRepository_Update_SucceedsWithZeroRowsAffected locks the same
+// legacy mysqli parity as products/family (PR4 corrective, see
+// backend/docs/legacy-quirks.md §10): a zero-rows-affected UPDATE (missing
+// or non-numeric ID) is not an error.
+func TestNewsRepository_Update_SucceedsWithZeroRowsAffected(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	body := "Fantasma"
+	image := "https://example.com/x.jpg"
+	mock.ExpectExec(regexp.QuoteMeta(newsUpdateSQL)).
+		WithArgs("Fantasma", &body, &image, 999999).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	if err := repo.Update(context.Background(), 999999, domain.NewsItem{Title: "Fantasma", Body: &body, Image: &image}); err != nil {
+		t.Fatalf("Update() error = %v, want nil (zero rows affected is a success, matching legacy mysqli parity)", err)
+	}
+}
+
+func TestNewsRepository_Delete_ExecutesWithID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(newsDeleteSQL)).
+		WithArgs(7).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Delete(context.Background(), 7); err != nil {
+		t.Fatalf("Delete() error = %v, want nil", err)
+	}
+}
+
+func TestNewsRepository_Delete_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(newsDeleteSQL)).
+		WithArgs(7).
+		WillReturnError(dbErr)
+
+	err := repo.Delete(context.Background(), 7)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Delete() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+// TestNewsRepository_Delete_SucceedsWithZeroRowsAffected mirrors
+// TestNewsRepository_Update_SucceedsWithZeroRowsAffected for DELETE — see
+// backend/docs/legacy-quirks.md §10.
+func TestNewsRepository_Delete_SucceedsWithZeroRowsAffected(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(newsDeleteSQL)).
+		WithArgs(999999).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	if err := repo.Delete(context.Background(), 999999); err != nil {
+		t.Fatalf("Delete() error = %v, want nil (zero rows affected is a success, matching legacy mysqli parity)", err)
+	}
+}

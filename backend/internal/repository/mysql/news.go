@@ -67,3 +67,43 @@ func (r *NewsRepository) Get(ctx context.Context, id int) (domain.NewsItem, erro
 	}
 	return row.toDomain(), nil
 }
+
+const newsInsert = "INSERT INTO news (Title, Body, Image) VALUES (?, ?, ?)"
+const newsUpdate = "UPDATE news SET Title = ?, Body = ?, Image = ? WHERE ID = ?"
+const newsDelete = "DELETE FROM news WHERE ID = ?"
+
+// Create inserts a new news item WITHOUT supplying an ID — the seed
+// schema's AUTO_INCREMENT PRIMARY KEY assigns it. The assigned ID is read
+// back via LastInsertId() and populated on the returned domain.NewsItem.
+func (r *NewsRepository) Create(ctx context.Context, n domain.NewsItem) (domain.NewsItem, error) {
+	res, err := r.db.ExecContext(ctx, newsInsert, n.Title, n.Body, n.Image)
+	if err != nil {
+		return domain.NewsItem{}, fmt.Errorf("mysql: create news item: %w", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return domain.NewsItem{}, fmt.Errorf("mysql: read new news item id: %w", err)
+	}
+	n.ID = int(id)
+	return n, nil
+}
+
+// Update overwrites Title, Body, and Image for the given ID. Like legacy
+// (mysqli::query() returns TRUE even when zero rows match — see
+// backend/docs/legacy-quirks.md §10), it does not check row existence
+// first — a nonexistent ID is a no-op UPDATE that still reports success.
+func (r *NewsRepository) Update(ctx context.Context, id int, n domain.NewsItem) error {
+	if _, err := r.db.ExecContext(ctx, newsUpdate, n.Title, n.Body, n.Image, id); err != nil {
+		return fmt.Errorf("mysql: update news item %d: %w", id, err)
+	}
+	return nil
+}
+
+// Delete removes the news item with the given ID, same
+// no-existence-check quirk as Update.
+func (r *NewsRepository) Delete(ctx context.Context, id int) error {
+	if _, err := r.db.ExecContext(ctx, newsDelete, id); err != nil {
+		return fmt.Errorf("mysql: delete news item %d: %w", id, err)
+	}
+	return nil
+}
