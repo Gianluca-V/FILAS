@@ -27,6 +27,9 @@ import (
 type fakeProductRepoE2E struct {
 	createCalled bool
 	updateCalled bool
+	updateID     int
+	deleteCalled bool
+	deleteID     int
 }
 
 func (f *fakeProductRepoE2E) List(ctx context.Context) ([]domain.Product, error) {
@@ -44,10 +47,17 @@ func (f *fakeProductRepoE2E) Create(ctx context.Context, p domain.Product) (doma
 
 func (f *fakeProductRepoE2E) Update(ctx context.Context, id int, p domain.Product) error {
 	f.updateCalled = true
+	f.updateID = id
+	// Matches legacy mysqli parity (backend/docs/legacy-quirks.md §10): a
+	// zero-rows-affected UPDATE (e.g. a missing or non-numeric ID) is NOT
+	// an error, so this fake never returns one here regardless of id.
 	return nil
 }
 
 func (f *fakeProductRepoE2E) Delete(ctx context.Context, id int) error {
+	f.deleteCalled = true
+	f.deleteID = id
+	// Same zero-rows-affected-is-not-an-error parity as Update.
 	return nil
 }
 
@@ -455,6 +465,43 @@ func TestProductHandler_Update_ReturnsInternalServerErrorOnServiceFailure(t *tes
 	}
 }
 
+// TestProductHandler_Update_TreatsNonNumericIDAsNoOpSuccess is a PR4
+// corrective reliability lock: this is EXACT legacy parity, not a bug.
+// Legacy updateProduct only checks `$conn->query($sql) === TRUE`, and
+// mysqli::query() returns TRUE for a zero-rows UPDATE — live-confirmed by
+// curling a real, nonexistent product ID against the legacy PHP (see
+// backend/docs/legacy-quirks.md §10). `parseLegacyID("abc")` resolves to
+// 0 (see §9), an ID that never exists, so PUT /api/products/abc must
+// return 200 with the standard success message — NOT 404, unlike GET's
+// TestProductHandler_Get_TreatsNonNumericIDAsNotFound right above, which
+// explicitly checks domain.ErrNotFound. Update never does.
+func TestProductHandler_Update_TreatsNonNumericIDAsNoOpSuccess(t *testing.T) {
+	jwtSvc := auth.NewJWTService("test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+	repo := &fakeProductRepoE2E{}
+	realSvc := usecase.NewProductService(repo)
+	r := newAuthedProductTestRouter(realSvc, jwtSvc)
+
+	req := httptest.NewRequest(http.MethodPut, "/api/products/abc", strings.NewReader(`{"Name":"Fantasma","Price":1,"Stock":1}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"Product updated successfully"}` {
+		t.Errorf("body = %s, want %s", rec.Body.String(), `{"message":"Product updated successfully"}`)
+	}
+	if !repo.updateCalled || repo.updateID != 0 {
+		t.Errorf("repository.Update called=%v with id=%d, want called=true id=0 (parseLegacyID(\"abc\") == 0)", repo.updateCalled, repo.updateID)
+	}
+}
+
 // --- Delete (DELETE /api/products/:id) ---
 
 func TestProductHandler_Delete_RejectsMissingJWT(t *testing.T) {
@@ -508,5 +555,34 @@ func TestProductHandler_Delete_ReturnsInternalServerErrorOnServiceFailure(t *tes
 
 	if rec.Code != http.StatusInternalServerError {
 		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+}
+
+// TestProductHandler_Delete_TreatsNonNumericIDAsNoOpSuccess mirrors
+// TestProductHandler_Update_TreatsNonNumericIDAsNoOpSuccess for DELETE —
+// see that test's doc comment and backend/docs/legacy-quirks.md §10.
+func TestProductHandler_Delete_TreatsNonNumericIDAsNoOpSuccess(t *testing.T) {
+	jwtSvc := auth.NewJWTService("test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+	repo := &fakeProductRepoE2E{}
+	realSvc := usecase.NewProductService(repo)
+	r := newAuthedProductTestRouter(realSvc, jwtSvc)
+
+	req := httptest.NewRequest(http.MethodDelete, "/api/products/abc", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"Product deleted successfully"}` {
+		t.Errorf("body = %s, want %s", rec.Body.String(), `{"message":"Product deleted successfully"}`)
+	}
+	if !repo.deleteCalled || repo.deleteID != 0 {
+		t.Errorf("repository.Delete called=%v with id=%d, want called=true id=0 (parseLegacyID(\"abc\") == 0)", repo.deleteCalled, repo.deleteID)
 	}
 }

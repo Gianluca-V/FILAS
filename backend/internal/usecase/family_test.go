@@ -191,6 +191,27 @@ func TestFamilyService_Create_PropagatesRepositoryError(t *testing.T) {
 	}
 }
 
+// TestFamilyService_Create_RejectsAccentedCategoryVariant is a PR4
+// corrective reliability lock (cheap regression guard): domain.go's doc
+// comment on FamilyCategoryCentroDeDia specifically warns the valid legacy
+// value is the UNACCENTED "Centro de dia", matching family.php's inline
+// `===` string comparison exactly. "Centro de día" (with an accented í) —
+// the "correctly spelled" Spanish form an IDE autocorrect/autocomplete
+// could easily introduce — must still be REJECTED as an invalid category,
+// not silently normalized or accepted.
+func TestFamilyService_Create_RejectsAccentedCategoryVariant(t *testing.T) {
+	repo := &fakeFamilyRepo{}
+	svc := usecase.NewFamilyService(repo)
+
+	_, err := svc.Create(context.Background(), domain.FamilyItem{Body: "cuerpo", Category: "Centro de día"})
+	if !errors.Is(err, domain.ErrValidation) {
+		t.Errorf("Create() error = %v, want %v (accented variant must NOT match the unaccented legacy value)", err, domain.ErrValidation)
+	}
+	if repo.createdItem.Body != "" {
+		t.Errorf("Create() should not have called the repository, but persisted %+v", repo.createdItem)
+	}
+}
+
 func TestFamilyService_Update_PersistsFields(t *testing.T) {
 	repo := &fakeFamilyRepo{}
 	svc := usecase.NewFamilyService(repo)

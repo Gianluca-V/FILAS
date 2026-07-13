@@ -182,6 +182,25 @@ func TestFamilyRepository_Update_PropagatesExecError(t *testing.T) {
 	}
 }
 
+// TestFamilyRepository_Update_SucceedsWithZeroRowsAffected is a PR4
+// corrective reliability lock (products' sibling, "at least products +
+// one other" per the gate finding): legacy family.php's updateFamily has
+// the same `$conn->query($sql) === TRUE` check as products, so a missing
+// or non-numeric ID's zero-rows UPDATE must still succeed, not error — see
+// backend/docs/legacy-quirks.md §10.
+func TestFamilyRepository_Update_SucceedsWithZeroRowsAffected(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(familyUpdateSQL)).
+		WithArgs("cuerpo fantasma", "Centro de dia", (*string)(nil), 999999).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	if err := repo.Update(context.Background(), 999999, domain.FamilyItem{Body: "cuerpo fantasma", Category: "Centro de dia"}); err != nil {
+		t.Fatalf("Update() error = %v, want nil (zero rows affected is a success, matching legacy mysqli parity)", err)
+	}
+}
+
 func TestFamilyRepository_Delete_ExecutesWithID(t *testing.T) {
 	db, mock := newTestDB(t)
 	repo := mysql.NewFamilyRepository(db)

@@ -168,6 +168,28 @@ func TestProductService_Create_PropagatesRepositoryError(t *testing.T) {
 	}
 }
 
+// TestProductService_Create_AcceptsNegativePriceAndStock locks the
+// intentional decision (PR4 corrective, see ProductService.Create's doc
+// comment) that Price/Stock range validation is explicitly OUT of scope:
+// legacy never range-checked them either, and the seed already has
+// negative-Stock rows. This test exists so a future "fix" that silently
+// adds range validation breaks a test instead of shipping unreviewed.
+func TestProductService_Create_AcceptsNegativePriceAndStock(t *testing.T) {
+	repo := &fakeProductRepo{}
+	svc := usecase.NewProductService(repo)
+
+	got, err := svc.Create(context.Background(), domain.Product{Name: "Producto con stock negativo", Price: -50, Stock: -3})
+	if err != nil {
+		t.Fatalf("Create() error = %v, want nil (negative Price/Stock are intentionally accepted)", err)
+	}
+	if got.Price != -50 || got.Stock != -3 {
+		t.Errorf("Create() = %+v, want Price=-50 Stock=-3 preserved", got)
+	}
+	if repo.createdProduct.Price != -50 || repo.createdProduct.Stock != -3 {
+		t.Errorf("Create() persisted Price=%v Stock=%v, want the negative values passed through unchanged", repo.createdProduct.Price, repo.createdProduct.Stock)
+	}
+}
+
 func TestProductService_Update_PersistsFields(t *testing.T) {
 	repo := &fakeProductRepo{}
 	svc := usecase.NewProductService(repo)

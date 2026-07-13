@@ -234,6 +234,27 @@ func TestProductRepository_Update_PropagatesExecError(t *testing.T) {
 	}
 }
 
+// TestProductRepository_Update_SucceedsWithZeroRowsAffected is a PR4
+// corrective reliability lock: legacy updateProduct only checks
+// `$conn->query($sql) === TRUE`, and mysqli::query() returns TRUE for ANY
+// successful DML — including an UPDATE that matches zero rows (a missing
+// or non-numeric ID). Go's database/sql has the exact same semantics: a
+// zero-rows-affected Exec is not an error. sqlmock.NewResult(0, 0) proves
+// Update does not treat "0 rows matched" as a failure — see
+// backend/docs/legacy-quirks.md §10.
+func TestProductRepository_Update_SucceedsWithZeroRowsAffected(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(productUpdateSQL)).
+		WithArgs("Fantasma", 1.0, 1, (*string)(nil), 999999).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	if err := repo.Update(context.Background(), 999999, domain.Product{Name: "Fantasma", Price: 1.0, Stock: 1}); err != nil {
+		t.Fatalf("Update() error = %v, want nil (zero rows affected is a success, matching legacy mysqli parity)", err)
+	}
+}
+
 func TestProductRepository_Delete_ExecutesWithID(t *testing.T) {
 	db, mock := newTestDB(t)
 	repo := mysql.NewProductRepository(db)
@@ -259,5 +280,21 @@ func TestProductRepository_Delete_PropagatesExecError(t *testing.T) {
 	err := repo.Delete(context.Background(), 7)
 	if !errors.Is(err, dbErr) {
 		t.Errorf("Delete() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+// TestProductRepository_Delete_SucceedsWithZeroRowsAffected mirrors
+// TestProductRepository_Update_SucceedsWithZeroRowsAffected for DELETE —
+// see backend/docs/legacy-quirks.md §10.
+func TestProductRepository_Delete_SucceedsWithZeroRowsAffected(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(productDeleteSQL)).
+		WithArgs(999999).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	if err := repo.Delete(context.Background(), 999999); err != nil {
+		t.Fatalf("Delete() error = %v, want nil (zero rows affected is a success, matching legacy mysqli parity)", err)
 	}
 }
