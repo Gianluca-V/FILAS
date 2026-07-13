@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/gianluca-v/filas-backend/internal/auth"
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
 )
@@ -145,6 +147,55 @@ func TestContract_Organizations(t *testing.T) {
 	assertJSONMatchesFixture(t, r, http.MethodGet, "/api/organizations", http.StatusOK, "organizations_list.json")
 	assertJSONMatchesFixture(t, r, http.MethodGet, "/api/organizations/1", http.StatusOK, "organizations_get.json")
 	assertJSONMatchesFixture(t, r, http.MethodGet, "/api/organizations/999999", http.StatusNotFound, "organizations_not_found.json")
+}
+
+// TestContract_Admins locks the admins list/get/not-found shapes against
+// fixtures captured LIVE from FilasServer/admins.php against the seeded
+// synthetic admin (see sdd/migrate-go-vue/apply-progress for the exact
+// characterization procedure). Unlike the fixtures above, these are NOT
+// byte-for-byte copies of the legacy output: legacy leaked password/salt
+// via SELECT * on both routes (confirmed live), which the Go DTO
+// deliberately excludes (see dto.AdminResponse doc comment) — the fixture
+// files record the FIXED shape. Login/create/update/delete are message-only
+// (or carry a dynamically-signed token) and are exact-string-asserted in
+// admin_test.go instead of fixture files, since a signed JWT is not a
+// stable byte-for-byte fixture value.
+func TestContract_Admins(t *testing.T) {
+	jwtSvc := auth.NewJWTService("contract-test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+	r := rest.NewRouter(rest.RouterDeps{
+		HealthDB: fakePinger{},
+		AdminService: &fakeAdminService{
+			admins: []domain.Admin{{ID: 1543, Username: "FilasAdmin", Password: "leaked-in-legacy", Salt: "leaked-in-legacy"}},
+			byID:   map[int]domain.Admin{1543: {ID: 1543, Username: "FilasAdmin", Password: "leaked-in-legacy", Salt: "leaked-in-legacy"}},
+		},
+		AuthService: &fakeAuthService{},
+		JWTService:  jwtSvc,
+	})
+
+	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/admins", token, http.StatusOK, "admins_list.json")
+	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/admins/1543", token, http.StatusOK, "admins_get.json")
+	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/admins/999999", token, http.StatusNotFound, "admins_not_found.json")
+}
+
+func assertAuthedJSONMatchesFixture(t *testing.T, r http.Handler, method, path, token string, wantStatus int, fixture string) {
+	t.Helper()
+	req := httptest.NewRequest(method, path, nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != wantStatus {
+		t.Errorf("%s %s -> status = %d, want %d, body=%s", method, path, rec.Code, wantStatus, rec.Body.String())
+	}
+	want := loadFixture(t, fixture)
+	got := strings.TrimRight(rec.Body.String(), "\n")
+	if got != want {
+		t.Errorf("%s %s -> body = %s, want (from %s) %s", method, path, got, fixture, want)
+	}
 }
 
 func assertJSONMatchesFixture(t *testing.T, r http.Handler, method, path string, wantStatus int, fixture string) {
