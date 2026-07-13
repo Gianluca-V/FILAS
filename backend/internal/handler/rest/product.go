@@ -15,6 +15,9 @@ import (
 type ProductService interface {
 	List(ctx context.Context) ([]domain.Product, error)
 	Get(ctx context.Context, id int) (domain.Product, error)
+	Create(ctx context.Context, p domain.Product) (domain.Product, error)
+	Update(ctx context.Context, id int, p domain.Product) error
+	Delete(ctx context.Context, id int) error
 }
 
 // ProductHandler serves GET /api/products[/:id], reproducing
@@ -56,4 +59,60 @@ func (h *ProductHandler) Get(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, dto.NewProductResponse(product))
+}
+
+// productRequest is the shared inbound shape for POST/PUT — legacy's
+// createProduct and updateProduct both read the same 5 fields off the
+// decoded body (PascalCase, matching $data->Name etc. in products.php).
+type productRequest struct {
+	Name        string  `json:"Name"`
+	Price       float64 `json:"Price"`
+	Stock       int     `json:"Stock"`
+	Image       *string `json:"Image"`
+	Description *string `json:"Description"`
+}
+
+// Create handles POST /api/products (auth-gated via router.go). Legacy
+// createProduct has NO field validation; usecase.ProductService.Create adds
+// a deliberate Name-required check (see its doc comment). A
+// malformed/absent body binds to a zero-value request (mirrors the
+// null-safe fall-through pattern established in AdminHandler.Create),
+// which naturally fails that validation as a 400.
+func (h *ProductHandler) Create(c *gin.Context) {
+	var req productRequest
+	_ = c.ShouldBindJSON(&req)
+
+	p := domain.Product{Name: req.Name, Price: req.Price, Stock: req.Stock, Image: req.Image, Description: req.Description}
+	if _, err := h.svc.Create(c.Request.Context(), p); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Product created successfully"})
+}
+
+// Update handles PUT /api/products/:id (auth-gated via router.go). Like
+// legacy updateProduct, Description is never persisted here (see
+// domain.ProductRepository.Update).
+func (h *ProductHandler) Update(c *gin.Context) {
+	id := parseLegacyID(c.Param("id"))
+	var req productRequest
+	_ = c.ShouldBindJSON(&req)
+
+	p := domain.Product{Name: req.Name, Price: req.Price, Stock: req.Stock, Image: req.Image, Description: req.Description}
+	if err := h.svc.Update(c.Request.Context(), id, p); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully"})
+}
+
+// Delete handles DELETE /api/products/:id (auth-gated via router.go). Same
+// no-existence-check quirk as legacy deleteProduct.
+func (h *ProductHandler) Delete(c *gin.Context) {
+	id := parseLegacyID(c.Param("id"))
+	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
 }

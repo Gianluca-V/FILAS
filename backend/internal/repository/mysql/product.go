@@ -69,3 +69,48 @@ func (r *ProductRepository) Get(ctx context.Context, id int) (domain.Product, er
 	}
 	return row.toDomain(), nil
 }
+
+const productInsert = "INSERT INTO products (Name, Price, Stock, Image, Description) VALUES (?, ?, ?, ?, ?)"
+
+// productUpdate deliberately excludes Description — see
+// domain.ProductRepository.Update's doc comment for why this mirrors
+// legacy's updateProduct SQL exactly.
+const productUpdate = "UPDATE products SET Name = ?, Price = ?, Stock = ?, Image = ? WHERE ID = ?"
+
+const productDelete = "DELETE FROM products WHERE ID = ?"
+
+// Create inserts a new product WITHOUT supplying an ID — the seed schema's
+// AUTO_INCREMENT PRIMARY KEY assigns it. The assigned ID is read back via
+// LastInsertId() and populated on the returned domain.Product.
+func (r *ProductRepository) Create(ctx context.Context, p domain.Product) (domain.Product, error) {
+	res, err := r.db.ExecContext(ctx, productInsert, p.Name, p.Price, p.Stock, p.Image, p.Description)
+	if err != nil {
+		return domain.Product{}, fmt.Errorf("mysql: create product: %w", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return domain.Product{}, fmt.Errorf("mysql: read new product id: %w", err)
+	}
+	p.ID = int(id)
+	return p, nil
+}
+
+// Update overwrites Name, Price, Stock, and Image for the given ID.
+// Description is NOT touched (see productUpdate). Like legacy, it does not
+// check row existence first — a nonexistent ID is a no-op UPDATE that
+// still reports success.
+func (r *ProductRepository) Update(ctx context.Context, id int, p domain.Product) error {
+	if _, err := r.db.ExecContext(ctx, productUpdate, p.Name, p.Price, p.Stock, p.Image, id); err != nil {
+		return fmt.Errorf("mysql: update product %d: %w", id, err)
+	}
+	return nil
+}
+
+// Delete removes the product with the given ID, same no-existence-check
+// quirk as Update.
+func (r *ProductRepository) Delete(ctx context.Context, id int) error {
+	if _, err := r.db.ExecContext(ctx, productDelete, id); err != nil {
+		return fmt.Errorf("mysql: delete product %d: %w", id, err)
+	}
+	return nil
+}

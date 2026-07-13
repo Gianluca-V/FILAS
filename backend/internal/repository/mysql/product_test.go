@@ -165,3 +165,99 @@ func TestProductRepository_Get_PropagatesQueryError(t *testing.T) {
 		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }
+
+const productInsertSQL = "INSERT INTO products (Name, Price, Stock, Image, Description) VALUES (?, ?, ?, ?, ?)"
+const productUpdateSQL = "UPDATE products SET Name = ?, Price = ?, Stock = ?, Image = ? WHERE ID = ?"
+const productDeleteSQL = "DELETE FROM products WHERE ID = ?"
+
+func TestProductRepository_Create_AssignsAutoIncrementID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	image := "assets/nuevo.png"
+	mock.ExpectExec(regexp.QuoteMeta(productInsertSQL)).
+		WithArgs("Nuevo producto", 150.0, 20, &image, (*string)(nil)).
+		WillReturnResult(sqlmock.NewResult(9001, 1))
+
+	got, err := repo.Create(context.Background(), domain.Product{Name: "Nuevo producto", Price: 150.0, Stock: 20, Image: &image})
+	if err != nil {
+		t.Fatalf("Create() error = %v, want nil", err)
+	}
+	if got.ID != 9001 {
+		t.Errorf("Create() ID = %d, want 9001 (from LastInsertId)", got.ID)
+	}
+}
+
+func TestProductRepository_Create_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	dbErr := errors.New("duplicate entry")
+	mock.ExpectExec(regexp.QuoteMeta(productInsertSQL)).
+		WithArgs("Nuevo producto", 150.0, 20, (*string)(nil), (*string)(nil)).
+		WillReturnError(dbErr)
+
+	_, err := repo.Create(context.Background(), domain.Product{Name: "Nuevo producto", Price: 150.0, Stock: 20})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestProductRepository_Update_ExcludesDescription(t *testing.T) {
+	// Locks the deliberate legacy quirk documented on
+	// domain.ProductRepository.Update: Description is never part of the
+	// UPDATE statement.
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(productUpdateSQL)).
+		WithArgs("Renombrado", 200.0, 10, (*string)(nil), 5).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Update(context.Background(), 5, domain.Product{Name: "Renombrado", Price: 200.0, Stock: 10}); err != nil {
+		t.Fatalf("Update() error = %v, want nil", err)
+	}
+}
+
+func TestProductRepository_Update_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(productUpdateSQL)).
+		WithArgs("Renombrado", 200.0, 10, (*string)(nil), 5).
+		WillReturnError(dbErr)
+
+	err := repo.Update(context.Background(), 5, domain.Product{Name: "Renombrado", Price: 200.0, Stock: 10})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Update() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestProductRepository_Delete_ExecutesWithID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(productDeleteSQL)).
+		WithArgs(7).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Delete(context.Background(), 7); err != nil {
+		t.Fatalf("Delete() error = %v, want nil", err)
+	}
+}
+
+func TestProductRepository_Delete_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(productDeleteSQL)).
+		WithArgs(7).
+		WillReturnError(dbErr)
+
+	err := repo.Delete(context.Background(), 7)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Delete() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
