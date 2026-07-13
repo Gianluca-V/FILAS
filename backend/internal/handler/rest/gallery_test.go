@@ -2,6 +2,7 @@ package rest_test
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
+	"github.com/gianluca-v/filas-backend/internal/handler/rest/middleware"
 )
 
 type fakeGalleryService struct {
@@ -39,6 +41,7 @@ func (f fakeGalleryService) Get(ctx context.Context, id int) (domain.GalleryImag
 func newGalleryTestRouter(svc rest.GalleryService) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
+	r.Use(middleware.ErrorHandler())
 	h := rest.NewGalleryHandler(svc)
 	r.GET("/api/gallery", h.List)
 	r.GET("/api/gallery/:id", h.Get)
@@ -128,5 +131,35 @@ func TestGalleryHandler_Get_TreatsNonNumericIDAsNotFound(t *testing.T) {
 
 	if rec.Code != http.StatusNotFound {
 		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusNotFound, rec.Body.String())
+	}
+}
+
+func TestGalleryHandler_List_ReturnsInternalServerErrorOnServiceFailure(t *testing.T) {
+	r := newGalleryTestRouter(fakeGalleryService{err: errors.New("db down")})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/gallery", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"internal server error"}` {
+		t.Errorf("body = %s, want the generic ErrorHandler body, not a leaked error", rec.Body.String())
+	}
+}
+
+func TestGalleryHandler_Get_ReturnsInternalServerErrorOnServiceFailure(t *testing.T) {
+	r := newGalleryTestRouter(fakeGalleryService{err: errors.New("db down")})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/gallery/1", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"internal server error"}` {
+		t.Errorf("body = %s, want the generic ErrorHandler body, not a leaked error", rec.Body.String())
 	}
 }

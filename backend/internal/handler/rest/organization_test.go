@@ -2,6 +2,7 @@ package rest_test
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
+	"github.com/gianluca-v/filas-backend/internal/handler/rest/middleware"
 )
 
 type fakeOrganizationService struct {
@@ -39,6 +41,7 @@ func (f fakeOrganizationService) Get(ctx context.Context, id int) (domain.Organi
 func newOrganizationTestRouter(svc rest.OrganizationService) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
+	r.Use(middleware.ErrorHandler())
 	h := rest.NewOrganizationHandler(svc)
 	r.GET("/api/organizations", h.List)
 	r.GET("/api/organizations/:id", h.Get)
@@ -109,5 +112,48 @@ func TestOrganizationHandler_Get_ReturnsNotFoundForMissingID(t *testing.T) {
 	}
 	if rec.Body.String() != `{"message":"No organizations found"}` {
 		t.Errorf("body = %s, want %s", rec.Body.String(), `{"message":"No organizations found"}`)
+	}
+}
+
+func TestOrganizationHandler_Get_TreatsNonNumericIDAsNotFound(t *testing.T) {
+	// Mirrors legacy PHP intval("abc") == 0 -> lookup of ID 0 -> not found.
+	r := newOrganizationTestRouter(fakeOrganizationService{byID: map[int]domain.Organization{}})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/organizations/abc", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusNotFound, rec.Body.String())
+	}
+}
+
+func TestOrganizationHandler_List_ReturnsInternalServerErrorOnServiceFailure(t *testing.T) {
+	r := newOrganizationTestRouter(fakeOrganizationService{err: errors.New("db down")})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/organizations", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"internal server error"}` {
+		t.Errorf("body = %s, want the generic ErrorHandler body, not a leaked error", rec.Body.String())
+	}
+}
+
+func TestOrganizationHandler_Get_ReturnsInternalServerErrorOnServiceFailure(t *testing.T) {
+	r := newOrganizationTestRouter(fakeOrganizationService{err: errors.New("db down")})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/organizations/1", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"internal server error"}` {
+		t.Errorf("body = %s, want the generic ErrorHandler body, not a leaked error", rec.Body.String())
 	}
 }
