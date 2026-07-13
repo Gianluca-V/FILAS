@@ -49,7 +49,23 @@ func (s *AdminService) Create(ctx context.Context, username, rawPassword string)
 // Update bcrypt-hashes the new password before persisting (fixes the
 // legacy floatval($password) bug that stored a mangled number instead of a
 // usable credential).
+//
+// SECURITY (blocker fix, gate #36): requires BOTH username and rawPassword
+// to be non-empty, mirroring Create's guard. This is a deliberate design
+// decision, not an oversight: legacy updateUser has NO isset() check
+// whatsoever — it unconditionally overwrites both columns on every PUT, so
+// legacy never actually supported a "username-only" partial update (an
+// omitted password there just meant floatval(null) == 0). There is
+// therefore no legacy semantic to preserve for a password-optional update,
+// and making it optional here would have reopened the exact vulnerability
+// this fix closes: an omitted/empty password previously reached
+// auth.HashPassword(""), which produces a VALID, persistable bcrypt hash of
+// the empty string — letting any admin with a JWT blank another admin's
+// password and log in as them with password "".
 func (s *AdminService) Update(ctx context.Context, id int, username, rawPassword string) error {
+	if username == "" || rawPassword == "" {
+		return fmt.Errorf("username and password are required: %w", domain.ErrValidation)
+	}
 	hash, err := auth.HashPassword(rawPassword)
 	if err != nil {
 		return fmt.Errorf("usecase: hash password for admin update: %w", err)

@@ -16,6 +16,7 @@ type fakeAdminRepo struct {
 	err          error
 	createdAdmin domain.Admin
 	createErr    error
+	updateCalled bool
 	updateID     int
 	updateUser   string
 	updateHash   string
@@ -56,6 +57,7 @@ func (f *fakeAdminRepo) Create(ctx context.Context, a domain.Admin) (domain.Admi
 }
 
 func (f *fakeAdminRepo) Update(ctx context.Context, id int, username, passwordHash string) error {
+	f.updateCalled = true
 	f.updateID = id
 	f.updateUser = username
 	f.updateHash = passwordHash
@@ -67,7 +69,7 @@ func (f *fakeAdminRepo) Delete(ctx context.Context, id int) error {
 	return f.deleteErr
 }
 
-func (f *fakeAdminRepo) UpdatePassword(ctx context.Context, id int, passwordHash string) error {
+func (f *fakeAdminRepo) UpdatePassword(ctx context.Context, id int, oldHash, newHash string) error {
 	return nil
 }
 
@@ -159,6 +161,59 @@ func TestAdminService_Update_HashesPasswordWithBcryptBeforePersisting(t *testing
 	}
 	if !auth.VerifyBcrypt(repo.updateHash, "new-raw-password") {
 		t.Errorf("the persisted hash does not verify against the raw password")
+	}
+}
+
+// TestAdminService_Update_RejectsMissingUsernameOrPassword is the blocker
+// fix from the PR3 gate review (obs #36): PUT /api/admins/:id had NO
+// validation, so an omitted/empty password field produced
+// auth.HashPassword("") -> a VALID bcrypt hash of the empty string,
+// persisted unconditionally. Any admin holding a JWT could blank another
+// admin's password and log in as them with password "". Deliberate design
+// decision (documented on AdminService.Update): legacy's updateUser has NO
+// isset() guard at all — it always overwrites BOTH columns unconditionally
+// (mangling password via floatval when non-numeric) — so legacy never
+// supported a real "username-only" partial update. Update therefore
+// REQUIRES both username and password, mirroring Create's guard exactly,
+// rather than making password optional.
+func TestAdminService_Update_RejectsMissingUsernameOrPassword(t *testing.T) {
+	tests := []struct {
+		name     string
+		username string
+		password string
+	}{
+		{"missing password", "renamed", ""},
+		{"missing username", "", "new-raw-password"},
+		{"missing both", "", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &fakeAdminRepo{}
+			svc := usecase.NewAdminService(repo)
+
+			err := svc.Update(context.Background(), 5, tt.username, tt.password)
+			if !errors.Is(err, domain.ErrValidation) {
+				t.Errorf("Update() error = %v, want %v", err, domain.ErrValidation)
+			}
+			if repo.updateCalled {
+				t.Errorf("Update() called the repository with (%q, %q) — no persistence should happen on validation failure", tt.username, tt.password)
+			}
+		})
+	}
+}
+
+// TestAdminService_Update_NeverPersistsABcryptHashOfEmptyString locks the
+// exact attack this blocker closes: even if a caller sneaks an empty
+// password through some other path, the persisted hash must never verify
+// against "" (which is what auth.HashPassword("") would otherwise produce).
+func TestAdminService_Update_NeverPersistsABcryptHashOfEmptyString(t *testing.T) {
+	repo := &fakeAdminRepo{}
+	svc := usecase.NewAdminService(repo)
+
+	_ = svc.Update(context.Background(), 5, "renamed", "")
+
+	if repo.updateCalled {
+		t.Fatalf("Update() persisted a hash for an empty password: hash=%q", repo.updateHash)
 	}
 }
 
