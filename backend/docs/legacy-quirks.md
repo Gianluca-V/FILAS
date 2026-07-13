@@ -299,3 +299,72 @@ unlike products/gallery/family's informally-worded Go validation messages
 (see §10/§11), because reproducing that particular string was a stated
 parity requirement for this endpoint while the AUTH behavior around it was
 explicitly NOT.
+
+## 14. Orders — 5 legacy triggers ported to `usecase/order.go` (PR6, tasks 5.1/5.4)
+
+Order business logic in legacy was split across two places that had to be
+read together to understand actual behavior: five MySQL triggers on
+`orderproduct`/`orders` (`01-schema.sql`), and three PHP entry points in
+`FilasServer/orders.php` (`createOrder`, `updateOrder`, `patchOrder`).
+`usecase.OrderService` (domain: `internal/domain/order.go`) ports both into
+one place, per design decision #2 (ADR-3). The triggers themselves stay in
+the seed, unexecuted-by-Go, until PR7's gate drops them once the order
+repository/handler land and characterization tests are green.
+
+**Trigger -> usecase mapping:**
+
+| Legacy trigger | Ported to |
+|---|---|
+| `before_orderProduct_insert` / `before_orderProduct_update` (`orderPrice = products.price * NEW.productQuantity`) | `OrderService.Create`/`Update`: `price := product.Price * float64(item.Quantity)` |
+| `after_orderProduct_insert` / `after_orderProduct_update` (`orders.total = SUM(orderPrice) WHERE orderID = ...`) | `OrderService.Create`/`Update`: `total` accumulated as each line's price is computed |
+| `before_update_orders` (`IF NEW.state='finished' AND OLD.state!='finished' THEN NEW.finishDate = CURRENT_TIMESTAMP`) | `OrderService.PatchState`: stamps `finishDate = time.Now()` only when `target == OrderStateFinished`, left `nil` otherwise |
+
+**PHP entry point -> usecase mapping**, and the three DELIBERATE
+divergences (confirmed against the design doc's §2.7/§9 and the spec's
+"Public Checkout with Tightened Validation" / "Stock Non-Negative
+Invariant" requirements before implementing):
+
+1. **`createOrder` (orders.php:168) -> `OrderService.Create`.** Requires
+   `orderProducts`/`name`/`phone` (else `ErrValidation`, mirrors the 400
+   "Parameters missing" message). Per line: inserts and decrements product
+   stock — ported from the inline `$newStock = $currentStock - $quantity`
+   (orders.php:211), but now guarded:
+   - **Quantity > 0, not just >= 0.** Legacy only rejected `quantity < 0`
+     (orders.php:192), so `quantity == 0` silently passed despite the
+     error message reading "Quantity can not be less than 1" — a bug
+     against its own stated intent. The Go usecase rejects `quantity <= 0`.
+   - **`ErrInsufficientStock`.** Legacy applied the stock subtraction
+     unconditionally, with no floor check — directly responsible for the
+     seed's `orderproduct` row 63 (`productQuantity=-100000`,
+     `orderPrice=-85000000`) and `orders` row 31 (`total=-85000000`,
+     `01-schema.sql`). The Go usecase rejects a line if
+     `product.Stock < item.Quantity` before persisting anything.
+2. **`updateOrder` (orders.php:232) -> `OrderService.Update`.** Recomputes
+   orderPrice/total for the replacement line items (same computation as
+   Create) and replaces them via `OrderRepository.ReplaceProducts`.
+   Quantity <= 0 is rejected for consistency with Create's invariant (not
+   a legacy behavior — legacy's `updateOrder` had zero quantity
+   validation). Deliberately does **NOT** touch product stock: legacy
+   never adjusted stock on PUT either (a pre-existing gap the design doc
+   §2.7 calls "the PUT stock-drift bug"), and properly reconciling it
+   would require reading the order's OLD line items atomically with the
+   new write — that needs the transactional repository landing in PR7,
+   not the usecase alone operating on non-transactional reads. Locked by
+   `TestOrderService_Update_DoesNotTouchStock` so a future change to this
+   scope is a deliberate, reviewed decision, not a silent behavior shift.
+3. **`patchOrder` (orders.php:261) -> `OrderService.PatchState`.**
+   Preserved as-is (not a divergence): target state must be `finished` or
+   `canceled` (else `ErrValidation`, 400 "invalid state"); the order must
+   currently be `pending` (else `ErrConflict`, 409 "order not pending").
+   On `pending -> canceled`, restores each line's quantity back to product
+   stock — ported from the inline restore loop (orders.php:293-325),
+   symmetric with Create's guarded decrement.
+
+**Not yet built (PR7 scope, explicitly out of bounds for this port):**
+`repository/mysql/order.go` (the transactional repo implementing
+`domain.OrderRepository`), `handler/rest/order.go` + DTOs (including the
+`GROUP_CONCAT` JSON shape from §12), router wiring, and dropping the 5
+triggers from `01-schema.sql`. `usecase.OrderService` and
+`domain.OrderRepository` are verified with table-driven unit tests against
+fake repositories only — there is no live/Docker verification for this
+PR, since there is no DB-backed order path yet to verify against.
