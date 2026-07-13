@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gianluca-v/filas-backend/internal/auth"
 	"github.com/gianluca-v/filas-backend/internal/config"
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
 	"github.com/gianluca-v/filas-backend/internal/repository/mysql"
@@ -49,6 +50,11 @@ func run() error {
 	familySvc := usecase.NewFamilyService(mysql.NewFamilyRepository(db))
 	organizationSvc := usecase.NewOrganizationService(mysql.NewOrganizationRepository(db))
 
+	adminRepo := mysql.NewAdminRepository(db)
+	jwtSvc := auth.NewJWTService(cfg.JWTSecret, time.Duration(cfg.JWTExpiryHours)*time.Hour)
+	adminSvc := usecase.NewAdminService(adminRepo)
+	authSvc := usecase.NewAuthService(adminRepo, jwtSvc)
+
 	router := rest.NewRouter(rest.RouterDeps{
 		CORSAllowedOrigins:  cfg.CORSAllowedOrigins,
 		HealthDB:            db,
@@ -57,6 +63,9 @@ func run() error {
 		GalleryService:      gallerySvc,
 		FamilyService:       familySvc,
 		OrganizationService: organizationSvc,
+		AdminService:        adminSvc,
+		AuthService:         authSvc,
+		JWTService:          jwtSvc,
 	})
 
 	srv := &http.Server{

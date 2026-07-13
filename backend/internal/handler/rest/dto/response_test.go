@@ -88,3 +88,27 @@ func TestNewProductResponse_PreservesNullImageAsJSONNull(t *testing.T) {
 		t.Errorf("body = %s, want it to contain %q", got, `"Image":null`)
 	}
 }
+
+// TestNewAdminResponse_ExcludesPasswordAndSalt is the DTO-layer half of the
+// admin password-leak fix: legacy getAdmins()/getUser() used `SELECT *`
+// and echoed the raw row, including the password hash and salt
+// (characterized live against FilasServer/admins.php — see
+// sdd/migrate-go-vue/apply-progress). AdminResponse only ever carries
+// ID/username, by construction (there is no Password/Salt field to
+// serialize), so this test also proves the struct shape itself.
+func TestNewAdminResponse_ExcludesPasswordAndSalt(t *testing.T) {
+	a := domain.Admin{ID: 1543, Username: "FilasAdmin", Password: "should-never-appear", Salt: "nope"}
+
+	resp := dto.NewAdminResponse(a)
+	body, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("json.Marshal() error = %v", err)
+	}
+
+	if got := string(body); got != `{"ID":"1543","username":"FilasAdmin"}` {
+		t.Errorf("body = %s, want %s", got, `{"ID":"1543","username":"FilasAdmin"}`)
+	}
+	if strings.Contains(string(body), "should-never-appear") || strings.Contains(string(body), "nope") {
+		t.Errorf("body leaked password/salt: %s", body)
+	}
+}

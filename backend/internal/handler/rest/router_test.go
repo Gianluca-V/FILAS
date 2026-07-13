@@ -8,9 +8,11 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/gianluca-v/filas-backend/internal/auth"
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
 )
@@ -122,6 +124,59 @@ func TestNewRouter_WiresPublicResourceReadRoutes(t *testing.T) {
 		r.ServeHTTP(rec, req)
 		if rec.Code != tc.want {
 			t.Errorf("%s %s -> status = %d, want %d, body=%s", tc.method, tc.path, rec.Code, tc.want, rec.Body.String())
+		}
+	}
+}
+
+func TestNewRouter_WiresAdminRoutes(t *testing.T) {
+	// PR3: login is public; list/get/create(non-login)/update/delete
+	// require a valid JWT through the real router wiring (the first real
+	// use of middleware.RequireAuth outside its own unit tests).
+	jwtSvc := auth.NewJWTService("router-test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+
+	r := rest.NewRouter(rest.RouterDeps{
+		HealthDB:     fakePinger{err: nil},
+		AdminService: &fakeAdminService{byID: map[int]domain.Admin{1543: {ID: 1543, Username: "FilasAdmin"}}},
+		AuthService:  &fakeAuthService{token: "signed-jwt"},
+		JWTService:   jwtSvc,
+	})
+
+	cases := []struct {
+		name   string
+		method string
+		path   string
+		body   string
+		token  string
+		want   int
+	}{
+		{"login is public", http.MethodPost, "/api/admins", `{"login":true,"username":"x","password":"y"}`, "", http.StatusOK},
+		{"list without token", http.MethodGet, "/api/admins", "", "", http.StatusUnauthorized},
+		{"list with token", http.MethodGet, "/api/admins", "", token, http.StatusOK},
+		{"get without token", http.MethodGet, "/api/admins/1543", "", "", http.StatusUnauthorized},
+		{"get with token", http.MethodGet, "/api/admins/1543", "", token, http.StatusOK},
+		{"update without token", http.MethodPut, "/api/admins/1543", `{"username":"x","password":"y"}`, "", http.StatusUnauthorized},
+		{"delete without token", http.MethodDelete, "/api/admins/1543", "", "", http.StatusUnauthorized},
+	}
+	for _, tc := range cases {
+		var body *strings.Reader
+		if tc.body != "" {
+			body = strings.NewReader(tc.body)
+		} else {
+			body = strings.NewReader("")
+		}
+		req := httptest.NewRequest(tc.method, tc.path, body)
+		req.Header.Set("Content-Type", "application/json")
+		if tc.token != "" {
+			req.Header.Set("Authorization", "Bearer "+tc.token)
+		}
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+		if rec.Code != tc.want {
+			t.Errorf("%s: %s %s -> status = %d, want %d, body=%s", tc.name, tc.method, tc.path, rec.Code, tc.want, rec.Body.String())
 		}
 	}
 }

@@ -97,3 +97,25 @@ type OrganizationResponse struct {
 func NewOrganizationResponse(o domain.Organization) OrganizationResponse {
 	return OrganizationResponse{ID: strconv.Itoa(o.ID), Title: o.Title, Description: o.Description, Image: o.Image}
 }
+
+// AdminResponse matches one element of GET /api/admins[/:id] from
+// admins.php, MINUS password and salt. Legacy used `SELECT *` and echoed
+// the raw row — including the password hash and salt — in the JSON body
+// (characterized live, see sdd/migrate-go-vue/apply-progress). This is a
+// deliberate security fix, not preserved: AdminResponse structurally has
+// no Password/Salt field to serialize. The JSON key is lowercase
+// "username" (not "Username"), matching the `username` column name legacy
+// echoed verbatim via fetch_assoc.
+type AdminResponse struct {
+	ID       string `json:"ID"`
+	Username string `json:"username"`
+}
+
+func NewAdminResponse(a domain.Admin) AdminResponse {
+	return AdminResponse{ID: strconv.Itoa(a.ID), Username: a.Username}
+}
+
+// LoginResponse matches POST /api/admins {login:true} on success.
+type LoginResponse struct {
+	Token string `json:"token"`
+}
