@@ -56,3 +56,41 @@ func (r *GalleryRepository) Get(ctx context.Context, id int) (domain.GalleryImag
 	}
 	return row.toDomain(), nil
 }
+
+const galleryInsert = "INSERT INTO gallery (Image) VALUES (?)"
+const galleryUpdate = "UPDATE gallery SET Image = ? WHERE ID = ?"
+const galleryDelete = "DELETE FROM gallery WHERE ID = ?"
+
+// Create inserts a new gallery image WITHOUT supplying an ID — the seed
+// schema's AUTO_INCREMENT PRIMARY KEY assigns it. The assigned ID is read
+// back via LastInsertId() and populated on the returned domain.GalleryImage.
+func (r *GalleryRepository) Create(ctx context.Context, g domain.GalleryImage) (domain.GalleryImage, error) {
+	res, err := r.db.ExecContext(ctx, galleryInsert, g.Image)
+	if err != nil {
+		return domain.GalleryImage{}, fmt.Errorf("mysql: create gallery image: %w", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return domain.GalleryImage{}, fmt.Errorf("mysql: read new gallery image id: %w", err)
+	}
+	g.ID = int(id)
+	return g, nil
+}
+
+// Update overwrites Image for the given ID. Like legacy, it does not check
+// row existence first.
+func (r *GalleryRepository) Update(ctx context.Context, id int, image string) error {
+	if _, err := r.db.ExecContext(ctx, galleryUpdate, image, id); err != nil {
+		return fmt.Errorf("mysql: update gallery image %d: %w", id, err)
+	}
+	return nil
+}
+
+// Delete removes the gallery image with the given ID, same
+// no-existence-check quirk as Update.
+func (r *GalleryRepository) Delete(ctx context.Context, id int) error {
+	if _, err := r.db.ExecContext(ctx, galleryDelete, id); err != nil {
+		return fmt.Errorf("mysql: delete gallery image %d: %w", id, err)
+	}
+	return nil
+}

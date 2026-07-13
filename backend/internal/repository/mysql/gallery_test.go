@@ -112,3 +112,95 @@ func TestGalleryRepository_Get_PropagatesQueryError(t *testing.T) {
 		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }
+
+const galleryInsertSQL = "INSERT INTO gallery (Image) VALUES (?)"
+const galleryUpdateSQL = "UPDATE gallery SET Image = ? WHERE ID = ?"
+const galleryDeleteSQL = "DELETE FROM gallery WHERE ID = ?"
+
+func TestGalleryRepository_Create_AssignsAutoIncrementID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewGalleryRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(galleryInsertSQL)).
+		WithArgs("assets/nueva.jpg").
+		WillReturnResult(sqlmock.NewResult(9001, 1))
+
+	got, err := repo.Create(context.Background(), domain.GalleryImage{Image: "assets/nueva.jpg"})
+	if err != nil {
+		t.Fatalf("Create() error = %v, want nil", err)
+	}
+	if got.ID != 9001 {
+		t.Errorf("Create() ID = %d, want 9001 (from LastInsertId)", got.ID)
+	}
+}
+
+func TestGalleryRepository_Create_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewGalleryRepository(db)
+
+	dbErr := errors.New("duplicate entry")
+	mock.ExpectExec(regexp.QuoteMeta(galleryInsertSQL)).
+		WithArgs("assets/nueva.jpg").
+		WillReturnError(dbErr)
+
+	_, err := repo.Create(context.Background(), domain.GalleryImage{Image: "assets/nueva.jpg"})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestGalleryRepository_Update_ExecutesWithImage(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewGalleryRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(galleryUpdateSQL)).
+		WithArgs("assets/actualizada.jpg", 5).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Update(context.Background(), 5, "assets/actualizada.jpg"); err != nil {
+		t.Fatalf("Update() error = %v, want nil", err)
+	}
+}
+
+func TestGalleryRepository_Update_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewGalleryRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(galleryUpdateSQL)).
+		WithArgs("assets/actualizada.jpg", 5).
+		WillReturnError(dbErr)
+
+	err := repo.Update(context.Background(), 5, "assets/actualizada.jpg")
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Update() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestGalleryRepository_Delete_ExecutesWithID(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewGalleryRepository(db)
+
+	mock.ExpectExec(regexp.QuoteMeta(galleryDeleteSQL)).
+		WithArgs(7).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repo.Delete(context.Background(), 7); err != nil {
+		t.Fatalf("Delete() error = %v, want nil", err)
+	}
+}
+
+func TestGalleryRepository_Delete_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewGalleryRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta(galleryDeleteSQL)).
+		WithArgs(7).
+		WillReturnError(dbErr)
+
+	err := repo.Delete(context.Background(), 7)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Delete() error = %v, want it to wrap %v", err, dbErr)
+	}
+}

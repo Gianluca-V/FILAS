@@ -15,6 +15,9 @@ import (
 type GalleryService interface {
 	List(ctx context.Context) ([]domain.GalleryImage, error)
 	Get(ctx context.Context, id int) (domain.GalleryImage, error)
+	Create(ctx context.Context, g domain.GalleryImage) (domain.GalleryImage, error)
+	Update(ctx context.Context, id int, image string) error
+	Delete(ctx context.Context, id int) error
 }
 
 // GalleryHandler serves GET /api/gallery[/:id], reproducing gallery.php's
@@ -57,4 +60,49 @@ func (h *GalleryHandler) Get(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, []dto.GalleryResponse{dto.NewGalleryResponse(img)})
+}
+
+// galleryRequest is the shared inbound shape for POST/PUT, matching
+// legacy's $data->Image field.
+type galleryRequest struct {
+	Image string `json:"Image"`
+}
+
+// Create handles POST /api/gallery (auth-gated via router.go), returning
+// legacy's 201 status. usecase.GalleryService.Create rejects an
+// empty/missing Image (see its doc comment for the isset()-vs-empty-string
+// generalization).
+func (h *GalleryHandler) Create(c *gin.Context) {
+	var req galleryRequest
+	_ = c.ShouldBindJSON(&req)
+
+	if _, err := h.svc.Create(c.Request.Context(), domain.GalleryImage{Image: req.Image}); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Image added successfully"})
+}
+
+// Update handles PUT /api/gallery/:id (auth-gated via router.go).
+func (h *GalleryHandler) Update(c *gin.Context) {
+	id := parseLegacyID(c.Param("id"))
+	var req galleryRequest
+	_ = c.ShouldBindJSON(&req)
+
+	if err := h.svc.Update(c.Request.Context(), id, req.Image); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Image updated successfully"})
+}
+
+// Delete handles DELETE /api/gallery/:id (auth-gated via router.go). Same
+// no-existence-check quirk as legacy.
+func (h *GalleryHandler) Delete(c *gin.Context) {
+	id := parseLegacyID(c.Param("id"))
+	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Image deleted successfully"})
 }
