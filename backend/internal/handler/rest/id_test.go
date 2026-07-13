@@ -19,8 +19,9 @@ func TestParseLegacyID(t *testing.T) {
 			// of a mixed string). parseLegacyID does NOT replicate that —
 			// it treats any non-fully-numeric string as a parse failure and
 			// returns 0. This is a deliberate, documented simplification
-			// (see the parseLegacyID doc comment and sdd/migrate-go-vue
-			// apply-progress): no real client sends mixed numeric/alpha IDs.
+			// (see the parseLegacyID doc comment and
+			// backend/docs/legacy-quirks.md §9): no real client sends mixed
+			// numeric/alpha IDs.
 			raw:  "5abc",
 			want: 0,
 		},

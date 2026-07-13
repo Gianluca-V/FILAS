@@ -59,6 +59,12 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	r.GET("/api/organizations", organizations.List)
 	r.GET("/api/organizations/:id", organizations.Get)
 
+	// Legacy admins.php has a routing bug where GET /api/admins (no
+	// trailing slash, no ID) misroutes into getUser(0) -> 404 instead of
+	// the list, an artifact of its manual explode('/') URL parsing. Gin's
+	// :id path-param routing below has no equivalent failure mode, so
+	// there is nothing to deliberately NOT reproduce — the bug class does
+	// not exist here. See backend/docs/legacy-quirks.md §6.
 	admins := NewAdminHandler(deps.AdminService, deps.AuthService, deps.JWTService)
 	r.POST("/api/admins", admins.Create) // login (public) vs create (auth-gated inline)
 	r.GET("/api/admins", middleware.RequireAuth(deps.JWTService), admins.List)

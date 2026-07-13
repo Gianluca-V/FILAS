@@ -1,9 +1,9 @@
 // Package dto holds outbound response shapes matching the legacy PHP JSON
-// contract exactly, including its quirks (see per-type doc comments):
-// numeric columns are encoded as JSON strings because that is what the
-// legacy mysqli-backed PHP API actually emits (characterized live against
-// FilasServer/*.php + the seeded DB — see sdd/migrate-go-vue/apply-progress
-// obs #31). This is deliberate contract fidelity, not a modeling mistake.
+// contract exactly, including its quirks (see per-type doc comments and
+// backend/docs/legacy-quirks.md): numeric columns are encoded as JSON
+// strings because that is what the legacy mysqli-backed PHP API actually
+// emits (characterized live against FilasServer/*.php + the seeded DB).
+// This is deliberate contract fidelity, not a modeling mistake.
 package dto
 
 import (
@@ -101,7 +101,7 @@ func NewOrganizationResponse(o domain.Organization) OrganizationResponse {
 // AdminResponse matches one element of GET /api/admins[/:id] from
 // admins.php, MINUS password and salt. Legacy used `SELECT *` and echoed
 // the raw row — including the password hash and salt — in the JSON body
-// (characterized live, see sdd/migrate-go-vue/apply-progress). This is a
+// (characterized live, see backend/docs/legacy-quirks.md §1). This is a
 // deliberate security fix, not preserved: AdminResponse structurally has
 // no Password/Salt field to serialize. The JSON key is lowercase
 // "username" (not "Username"), matching the `username` column name legacy

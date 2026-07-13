@@ -17,8 +17,8 @@ import (
 // Contract/characterization tests: lock the Go handlers' JSON output against
 // golden fixtures captured LIVE from the legacy PHP (FilasServer/*.php)
 // running against a fresh copy of the seeded Docker DB (see
-// sdd/migrate-go-vue/apply-progress obs #31 for the exact capture
-// procedure and raw curl output). Fixtures live in backend/testdata/contract.
+// backend/docs/legacy-quirks.md for the capture methodology). Fixtures
+// live in backend/testdata/contract.
 //
 // One deliberate, documented divergence: fixture text uses correctly
 // decoded UTF-8 (e.g. plain URLs, no mojibake), whereas the raw legacy
@@ -151,7 +151,7 @@ func TestContract_Organizations(t *testing.T) {
 
 // TestContract_Admins locks the admins list/get/not-found shapes against
 // fixtures captured LIVE from FilasServer/admins.php against the seeded
-// synthetic admin (see sdd/migrate-go-vue/apply-progress for the exact
+// synthetic admin (see backend/docs/legacy-quirks.md §1 for the exact
 // characterization procedure). Unlike the fixtures above, these are NOT
 // byte-for-byte copies of the legacy output: legacy leaked password/salt
 // via SELECT * on both routes (confirmed live), which the Go DTO

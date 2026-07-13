@@ -53,7 +53,7 @@ func TestVerifyBcrypt_RejectsWrongPassword(t *testing.T) {
 func TestVerifyLegacySHA256_AcceptsMatchingHash(t *testing.T) {
 	// Reproduces PHP: hash('sha256', $salt . $rawPassword) — characterized
 	// live against the seeded synthetic admin (see
-	// sdd/migrate-go-vue/apply-progress obs #31 methodology, admins.php).
+	// backend/docs/legacy-quirks.md, methodology section, admins.php).
 	salt := "16308d7827b79fa10077d9a137027f97"
 	raw := "filas-local-dev-2026"
 	stored := "9a0d462f4985ce28e354f318e2346a3d61881336330e55cca8d9697cad9f1686"

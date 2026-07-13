@@ -36,7 +36,7 @@ func VerifyBcrypt(hash, raw string) bool {
 
 // VerifyLegacySHA256 reproduces the legacy PHP scheme
 // (hash('sha256', $salt . $rawPassword), characterized live against
-// FilasServer/admins.php — see sdd/migrate-go-vue/apply-progress) so a
+// FilasServer/admins.php — see backend/docs/legacy-quirks.md §3) so a
 // not-yet-migrated admin row can still log in. The comparison is
 // constant-time to avoid leaking hash-match timing.
 func VerifyLegacySHA256(salt, raw, storedHex string) bool {

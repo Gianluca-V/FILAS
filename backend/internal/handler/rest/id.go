@@ -8,7 +8,7 @@ import "strconv"
 // found" rather than a distinct 400. Unlike intval, this does not parse a
 // numeric prefix out of a mixed string (e.g. "5abc"); that edge case is not
 // exercised by any real client and is documented as a deliberate
-// simplification in sdd/migrate-go-vue/apply-progress.
+// simplification in backend/docs/legacy-quirks.md §9.
 func parseLegacyID(raw string) int {
 	id, err := strconv.Atoi(raw)
 	if err != nil {

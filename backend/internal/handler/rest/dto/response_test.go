@@ -93,7 +93,7 @@ func TestNewProductResponse_PreservesNullImageAsJSONNull(t *testing.T) {
 // admin password-leak fix: legacy getAdmins()/getUser() used `SELECT *`
 // and echoed the raw row, including the password hash and salt
 // (characterized live against FilasServer/admins.php — see
-// sdd/migrate-go-vue/apply-progress). AdminResponse only ever carries
+// backend/docs/legacy-quirks.md §1). AdminResponse only ever carries
 // ID/username, by construction (there is no Password/Salt field to
 // serialize), so this test also proves the struct shape itself.
 func TestNewAdminResponse_ExcludesPasswordAndSalt(t *testing.T) {
