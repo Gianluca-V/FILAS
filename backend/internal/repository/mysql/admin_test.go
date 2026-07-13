@@ -118,6 +118,55 @@ func TestAdminRepository_GetByUsername_ReturnsDomainNotFoundWhenNoRows(t *testin
 	}
 }
 
+// TestAdminRepository_List_PropagatesQueryError and its GetByUsername/Get
+// siblings restore the PR2-sibling WillReturnError convention (gate #36
+// reliability finding): every resource's repository tests cover the
+// query-error path for List/Get, and admins additionally needs
+// GetByUsername (used by the login flow) and UpdatePassword (used by
+// migrate-on-login).
+func TestAdminRepository_List_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewAdminRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(adminSelectCols)).WillReturnError(dbErr)
+
+	_, err := repo.List(context.Background())
+	if !errors.Is(err, dbErr) {
+		t.Errorf("List() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestAdminRepository_Get_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewAdminRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(adminSelectCols + " WHERE ID = ?")).
+		WithArgs(1543).
+		WillReturnError(dbErr)
+
+	_, err := repo.Get(context.Background(), 1543)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestAdminRepository_GetByUsername_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewAdminRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(adminSelectCols + " WHERE username = ?")).
+		WithArgs("FilasAdmin").
+		WillReturnError(dbErr)
+
+	_, err := repo.GetByUsername(context.Background(), "FilasAdmin")
+	if !errors.Is(err, dbErr) {
+		t.Errorf("GetByUsername() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
 func TestAdminRepository_Create_AssignsAutoIncrementID(t *testing.T) {
 	// Task 2.1: the seed schema patches admins with PRIMARY KEY +
 	// AUTO_INCREMENT — the INSERT does not supply an ID, and Create reads
@@ -212,15 +261,41 @@ func TestAdminRepository_Delete_PropagatesExecError(t *testing.T) {
 	}
 }
 
-func TestAdminRepository_UpdatePassword_ExecutesWithoutTouchingUsername(t *testing.T) {
+// TestAdminRepository_UpdatePassword_ExecutesConditionalOnOldHash is the
+// TOCTOU fix (gate #36 risk finding): the migrate-on-login rehash UPDATE is
+// now conditional on the password column still holding the exact legacy
+// hash that was read and verified, via "AND password = ?". This prevents a
+// concurrent password rotation from being silently reverted by a
+// last-write-wins UPDATE — if the row changed between read and write, the
+// WHERE clause simply matches 0 rows instead of overwriting the newer
+// value.
+func TestAdminRepository_UpdatePassword_ExecutesConditionalOnOldHash(t *testing.T) {
 	db, mock := newTestDB(t)
 	repo := mysql.NewAdminRepository(db)
 
-	mock.ExpectExec(regexp.QuoteMeta("UPDATE admins SET password = ? WHERE ID = ?")).
-		WithArgs("migrated-bcrypt-hash", 1543).
+	mock.ExpectExec(regexp.QuoteMeta("UPDATE admins SET password = ? WHERE ID = ? AND password = ?")).
+		WithArgs("migrated-bcrypt-hash", 1543, "legacy-sha256-hex").
 		WillReturnResult(sqlmock.NewResult(0, 1))
 
-	if err := repo.UpdatePassword(context.Background(), 1543, "migrated-bcrypt-hash"); err != nil {
+	if err := repo.UpdatePassword(context.Background(), 1543, "legacy-sha256-hex", "migrated-bcrypt-hash"); err != nil {
 		t.Fatalf("UpdatePassword() error = %v, want nil", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("unmet sqlmock expectations: %v", err)
+	}
+}
+
+func TestAdminRepository_UpdatePassword_PropagatesExecError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewAdminRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectExec(regexp.QuoteMeta("UPDATE admins SET password = ? WHERE ID = ? AND password = ?")).
+		WithArgs("migrated-bcrypt-hash", 1543, "legacy-sha256-hex").
+		WillReturnError(dbErr)
+
+	err := repo.UpdatePassword(context.Background(), 1543, "legacy-sha256-hex", "migrated-bcrypt-hash")
+	if !errors.Is(err, dbErr) {
+		t.Errorf("UpdatePassword() error = %v, want it to wrap %v", err, dbErr)
 	}
 }

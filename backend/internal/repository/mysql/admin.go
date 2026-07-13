@@ -96,7 +96,7 @@ func (r *AdminRepository) Create(ctx context.Context, a domain.Admin) (domain.Ad
 // Update overwrites username and password (already a bcrypt hash) for the
 // given ID. Like legacy updateUser, it does not check row existence first
 // — a nonexistent ID is a no-op UPDATE that still reports success. This
-// quirk was live-characterized (see sdd/migrate-go-vue/apply-progress) and
+// quirk was live-characterized (see backend/docs/legacy-quirks.md) and
 // preserved deliberately rather than invented as new behavior.
 func (r *AdminRepository) Update(ctx context.Context, id int, username, passwordHash string) error {
 	if _, err := r.db.ExecContext(ctx, "UPDATE admins SET username = ?, password = ? WHERE ID = ?", username, passwordHash, id); err != nil {
@@ -116,9 +116,15 @@ func (r *AdminRepository) Delete(ctx context.Context, id int) error {
 
 // UpdatePassword persists only the password column, used by the
 // migrate-on-login flow (usecase.AuthService.Login) to upgrade a legacy
-// sha256 row to bcrypt without touching username.
-func (r *AdminRepository) UpdatePassword(ctx context.Context, id int, passwordHash string) error {
-	if _, err := r.db.ExecContext(ctx, "UPDATE admins SET password = ? WHERE ID = ?", passwordHash, id); err != nil {
+// sha256 row to bcrypt without touching username. The UPDATE is
+// conditional on "AND password = ?" (oldHash): this closes a TOCTOU window
+// where an admin rotates their password concurrently with a migrate-on-login
+// rehash — without the condition, the rehash would unconditionally
+// last-write-wins overwrite the newer password with a bcrypt hash of the
+// OLD one. If oldHash no longer matches, the statement affects 0 rows and
+// is a silent no-op by design (the row already has a newer, correct value).
+func (r *AdminRepository) UpdatePassword(ctx context.Context, id int, oldHash, newHash string) error {
+	if _, err := r.db.ExecContext(ctx, "UPDATE admins SET password = ? WHERE ID = ? AND password = ?", newHash, id, oldHash); err != nil {
 		return fmt.Errorf("mysql: update admin %d password: %w", id, err)
 	}
 	return nil
