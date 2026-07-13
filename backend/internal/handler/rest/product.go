@@ -87,6 +87,10 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		c.Error(err)
 		return
 	}
+	// 200, not 201 like family/gallery/organizations' Create: legacy
+	// createProduct() never calls http_response_code() on success, so it
+	// falls through to PHP's default 200 — not a copy-paste miss vs. the
+	// 201 siblings, which DO call http_response_code(201) explicitly.
 	c.JSON(http.StatusOK, gin.H{"message": "Product created successfully"})
 }
 

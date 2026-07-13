@@ -34,7 +34,15 @@ func (s *ProductService) Get(ctx context.Context, id int) (domain.Product, error
 // fix), generalized here as new, deliberate hardening — not a legacy
 // contract requirement. Price and Stock are NOT required to be non-zero:
 // both are legitimate values (a free promotional item, an out-of-stock
-// listing), unlike Name which is the product's identity.
+// listing), unlike Name which is the product's identity. Price/Stock are
+// ALSO not required to be non-negative: legacy createProduct/updateProduct
+// never range-check them either (floatval/intval happily persist a
+// negative number), the existing seed already has negative-Stock rows
+// (see design doc §9 "integrity garbage"), and range validation was never
+// part of this PR's scope. This is an intentional decision, not an
+// oversight — a future change adding Price/Stock range validation should
+// treat it as a deliberate, separately-reviewed behavior change, not a
+// silent bugfix.
 func (s *ProductService) Create(ctx context.Context, p domain.Product) (domain.Product, error) {
 	if p.Name == "" {
 		return domain.Product{}, fmt.Errorf("name is required: %w", domain.ErrValidation)

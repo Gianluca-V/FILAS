@@ -26,11 +26,14 @@ type ProductRepository interface {
 	// Update overwrites Name, Price, Stock, and Image for the given ID.
 	// Description is DELIBERATELY excluded: legacy updateProduct's SQL
 	// never included the Description column (characterized live, see
-	// backend/docs/legacy-quirks.md) — a PUT can never change a product's
-	// Description, only its value from Create persists. Preserved here for
-	// contract fidelity, not an oversight.
+	// backend/docs/legacy-quirks.md §11) — a PUT can never change a
+	// product's Description, only its value from Create persists.
+	// Preserved here for contract fidelity, not an oversight.
 	Update(ctx context.Context, id int, p Product) error
 	// Delete removes the product with the given ID. Mirrors legacy
-	// deleteProduct: does not check row existence first.
+	// deleteProduct: does not check row existence first. Like legacy
+	// (mysqli::query() returns TRUE even for zero affected rows), Update
+	// and Delete both succeed as a no-op on a missing ID rather than
+	// erroring or 404ing — see backend/docs/legacy-quirks.md §10.
 	Delete(ctx context.Context, id int) error
 }

@@ -160,17 +160,79 @@ NULL-image row and confirming a 500, then confirming 200 after the fix).
 consistency even though a real admin row never actually has a NULL
 username/password/salt.
 
-## 9. `intval()` mixed-string ID parsing (PR2, all resources)
+## 9. `intval()` mixed-string ID parsing — READS only (PR2, all resources)
+
+Scope: this entry covers **GET** requests only. See §10 below for the
+distinct, separately-characterized behavior of non-numeric IDs on
+**write** (PUT/DELETE) requests, which does NOT resolve to "not found".
 
 PHP's `intval("5abc")` parses a leading numeric prefix out of a mixed
 string and returns `5`. `parseLegacyID` (`internal/handler/rest/id.go`)
 does not replicate that: any path segment that isn't fully numeric returns
-`0` (an ID that never exists, resolving to the same "not found" outcome
-intval's stricter cases produce). Deliberate, documented simplification —
-no real client (the vanilla-JS frontend) ever sends a mixed numeric/alpha
-ID segment.
+`0` (an ID that never exists for GET, resolving to the same "not found"
+outcome intval's stricter cases produce, since `Get(ctx, 0)` legitimately
+finds no row and the handler maps `domain.ErrNotFound` -> 404). Deliberate,
+documented simplification — no real client (the vanilla-JS frontend) ever
+sends a mixed numeric/alpha ID segment.
 
-## 10. Orders' `GROUP_CONCAT` JSON shape (not yet ported)
+## 10. Write ops (PUT/DELETE) on a missing or non-numeric ID return 200, NOT 404 (PR4 corrective)
+
+This is EXACT legacy parity, not a bug to fix — it was previously
+undocumented and untested (gate finding, PR4 corrective batch).
+
+Legacy `updateProduct`/`deleteProduct` (`FilasServer/products.php:120-140`
+and `:142-154`) check only `if ($conn->query($sql) === TRUE)`. PHP's
+`mysqli::query()` returns `TRUE` for ANY successful DML statement,
+including an `UPDATE`/`DELETE` that matches **zero rows** — mysqli only
+returns `FALSE` on a genuine SQL/connection error, never on "no rows
+matched". Consequently `PUT`/`DELETE /api/products/{missing-or-non-numeric-id}`
+returns `200 {"message":"Product updated/deleted successfully"}` with no
+actual mutation, exactly like a real ID would.
+
+Live-characterized (PR4 corrective, scratch PHP against the seeded
+Docker `db`, methodology as above): `PUT /api/products/999999` and
+`DELETE /api/products/999999` (a guaranteed-nonexistent ID) both returned
+`200` with the standard success message — confirmed live, not just by
+code inspection.
+
+Go reproduces this exactly: `ProductRepository.Update`/`.Delete` (and the
+equivalent methods on every other resource's repository) execute an
+`UPDATE`/`DELETE ... WHERE ID = ?` and only return an error on a genuine
+`database/sql` exec error — a zero-rows-affected result is not an error
+in Go's `database/sql` any more than it is in mysqli, so no special-casing
+was needed to match. `parseLegacyID` returning `0` for a non-numeric path
+segment (see §9) therefore also resolves to a 200 no-op on write routes,
+not a 404 — the two write handlers (`ProductHandler.Update`/`.Delete`,
+and their siblings) never check `domain.ErrNotFound` at all, unlike
+`Get`, which explicitly does. Locked by
+`TestProductHandler_Update_TreatsNonNumericIDAsNoOpSuccess` /
+`_Delete_...` (handler layer) and
+`TestProductRepository_Update_SucceedsWithZeroRowsAffected` /
+`TestFamilyRepository_Update_SucceedsWithZeroRowsAffected` (repository
+layer, `sqlmock.NewResult(0, 0)`).
+
+## 11. Description excluded from `updateProduct`'s SQL (products)
+
+Live-characterized (PR4 corrective; also visible directly in
+`FilasServer/products.php:120-140`): `updateProduct()`'s `UPDATE` statement
+(lines 129-131) is `UPDATE products SET Name = '$name', Price = $price,
+Stock = $stock, Image = '$image' WHERE ID = $id` — it never references the
+`Description` column at all, unlike `createProduct()`'s `INSERT`, which
+does. A `PUT /api/products/:id` can therefore never change a product's
+Description, regardless of what the request body contains; only the value
+set at `POST` time (`createProduct`) persists.
+
+Confirmed live: created a product with `Description:"original-description"`,
+then `PUT` the same product with a different `Description` in the body —
+the raw DB row afterward still held `"original-description"` untouched,
+while Name/Price/Stock/Image all reflected the PUT.
+
+Go reproduces this: `domain.ProductRepository.Update` and
+`mysql.ProductRepository.Update`/`productUpdate` (the SQL constant)
+deliberately omit `Description` from the `UPDATE` statement — see their
+doc comments, which now cite this entry.
+
+## 12. Orders' `GROUP_CONCAT` JSON shape (not yet ported)
 
 Not yet characterized in code — flagged in the design doc (§9) as a risk
 for the orders PR: the legacy response is built with `GROUP_CONCAT` plus

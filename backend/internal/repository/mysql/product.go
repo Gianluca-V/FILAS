@@ -73,8 +73,9 @@ func (r *ProductRepository) Get(ctx context.Context, id int) (domain.Product, er
 const productInsert = "INSERT INTO products (Name, Price, Stock, Image, Description) VALUES (?, ?, ?, ?, ?)"
 
 // productUpdate deliberately excludes Description — see
-// domain.ProductRepository.Update's doc comment for why this mirrors
-// legacy's updateProduct SQL exactly.
+// domain.ProductRepository.Update's doc comment and
+// backend/docs/legacy-quirks.md §11 for why this mirrors legacy's
+// updateProduct SQL exactly.
 const productUpdate = "UPDATE products SET Name = ?, Price = ?, Stock = ?, Image = ? WHERE ID = ?"
 
 const productDelete = "DELETE FROM products WHERE ID = ?"
@@ -96,9 +97,13 @@ func (r *ProductRepository) Create(ctx context.Context, p domain.Product) (domai
 }
 
 // Update overwrites Name, Price, Stock, and Image for the given ID.
-// Description is NOT touched (see productUpdate). Like legacy, it does not
-// check row existence first — a nonexistent ID is a no-op UPDATE that
-// still reports success.
+// Description is NOT touched (see productUpdate). Like legacy
+// (mysqli::query() returns TRUE even when zero rows match — see
+// backend/docs/legacy-quirks.md §10), it does not check row existence
+// first — a nonexistent ID is a no-op UPDATE that still reports success,
+// not a 404. This is NOT reported as a database/sql error either: a
+// zero-rows-affected Exec result is not an error in Go any more than it
+// is in mysqli, so no special-casing was needed to match the parity.
 func (r *ProductRepository) Update(ctx context.Context, id int, p domain.Product) error {
 	if _, err := r.db.ExecContext(ctx, productUpdate, p.Name, p.Price, p.Stock, p.Image, id); err != nil {
 		return fmt.Errorf("mysql: update product %d: %w", id, err)
@@ -107,7 +112,7 @@ func (r *ProductRepository) Update(ctx context.Context, id int, p domain.Product
 }
 
 // Delete removes the product with the given ID, same no-existence-check
-// quirk as Update.
+// quirk as Update (backend/docs/legacy-quirks.md §10).
 func (r *ProductRepository) Delete(ctx context.Context, id int) error {
 	if _, err := r.db.ExecContext(ctx, productDelete, id); err != nil {
 		return fmt.Errorf("mysql: delete product %d: %w", id, err)
