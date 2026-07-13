@@ -17,6 +17,7 @@ import (
 	"github.com/gianluca-v/filas-backend/internal/config"
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
 	"github.com/gianluca-v/filas-backend/internal/repository/mysql"
+	"github.com/gianluca-v/filas-backend/internal/usecase"
 )
 
 // shutdownTimeout bounds how long in-flight requests get to finish once a
@@ -42,9 +43,20 @@ func run() error {
 	db := mysql.MustOpen(cfg.DSN())
 	defer db.Close()
 
+	productSvc := usecase.NewProductService(mysql.NewProductRepository(db))
+	newsSvc := usecase.NewNewsService(mysql.NewNewsRepository(db))
+	gallerySvc := usecase.NewGalleryService(mysql.NewGalleryRepository(db))
+	familySvc := usecase.NewFamilyService(mysql.NewFamilyRepository(db))
+	organizationSvc := usecase.NewOrganizationService(mysql.NewOrganizationRepository(db))
+
 	router := rest.NewRouter(rest.RouterDeps{
-		CORSAllowedOrigins: cfg.CORSAllowedOrigins,
-		HealthDB:           db,
+		CORSAllowedOrigins:  cfg.CORSAllowedOrigins,
+		HealthDB:            db,
+		ProductService:      productSvc,
+		NewsService:         newsSvc,
+		GalleryService:      gallerySvc,
+		FamilyService:       familySvc,
+		OrganizationService: organizationSvc,
 	})
 
 	srv := &http.Server{
