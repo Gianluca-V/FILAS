@@ -7,26 +7,15 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/repository/mysql"
 )
 
-func newFamilyTestDB(t *testing.T) (*sqlx.DB, sqlmock.Sqlmock) {
-	t.Helper()
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("sqlmock.New() error = %v", err)
-	}
-	t.Cleanup(func() { db.Close() })
-	return sqlx.NewDb(db, "sqlmock"), mock
-}
-
 const familySelectCols = "SELECT ID, Image, Body, Category FROM family"
 
 func TestFamilyRepository_List_MapsRowsToDomain(t *testing.T) {
-	db, mock := newFamilyTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewFamilyRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Image", "Body", "Category"}).
@@ -53,7 +42,7 @@ func TestFamilyRepository_List_MapsRowsToDomain(t *testing.T) {
 }
 
 func TestFamilyRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
-	db, mock := newFamilyTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewFamilyRepository(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta(familySelectCols)).
@@ -69,7 +58,7 @@ func TestFamilyRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
 }
 
 func TestFamilyRepository_Get_ReturnsMatchingItem(t *testing.T) {
-	db, mock := newFamilyTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewFamilyRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Image", "Body", "Category"}).
@@ -88,7 +77,7 @@ func TestFamilyRepository_Get_ReturnsMatchingItem(t *testing.T) {
 }
 
 func TestFamilyRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T) {
-	db, mock := newFamilyTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewFamilyRepository(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta(familySelectCols + " WHERE ID = ?")).
@@ -98,5 +87,33 @@ func TestFamilyRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T) {
 	_, err := repo.Get(context.Background(), 999999)
 	if !errors.Is(err, domain.ErrNotFound) {
 		t.Errorf("Get() error = %v, want %v", err, domain.ErrNotFound)
+	}
+}
+
+func TestFamilyRepository_List_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(familySelectCols)).WillReturnError(dbErr)
+
+	_, err := repo.List(context.Background())
+	if !errors.Is(err, dbErr) {
+		t.Errorf("List() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestFamilyRepository_Get_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewFamilyRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(familySelectCols + " WHERE ID = ?")).
+		WithArgs(3).
+		WillReturnError(dbErr)
+
+	_, err := repo.Get(context.Background(), 3)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }

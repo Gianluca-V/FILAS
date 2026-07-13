@@ -7,21 +7,10 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/repository/mysql"
 )
-
-func newProductTestDB(t *testing.T) (*sqlx.DB, sqlmock.Sqlmock) {
-	t.Helper()
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("sqlmock.New() error = %v", err)
-	}
-	t.Cleanup(func() { db.Close() })
-	return sqlx.NewDb(db, "sqlmock"), mock
-}
 
 const productSelectCols = "SELECT ID, Name, Price, Stock, Image, Description FROM products"
 
@@ -29,7 +18,7 @@ func TestProductRepository_List_MapsNullAndNonNullDescription(t *testing.T) {
 	// Triangulation: legacy seed data has BOTH empty-string and NULL
 	// Description rows (see obs #31/#29 characterization). Both must be
 	// preserved as distinct values through the domain layer.
-	db, mock := newProductTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewProductRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Name", "Price", "Stock", "Image", "Description"}).
@@ -62,7 +51,7 @@ func TestProductRepository_List_MapsNullImage(t *testing.T) {
 	// 500. Legacy PHP emits "Image":null for a NULL column, so the domain
 	// layer must preserve NULL vs "" exactly as it already does for
 	// Description.
-	db, mock := newProductTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewProductRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Name", "Price", "Stock", "Image", "Description"}).
@@ -82,7 +71,7 @@ func TestProductRepository_List_MapsNullImage(t *testing.T) {
 }
 
 func TestProductRepository_Get_MapsNullImage(t *testing.T) {
-	db, mock := newProductTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewProductRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Name", "Price", "Stock", "Image", "Description"}).
@@ -101,7 +90,7 @@ func TestProductRepository_Get_MapsNullImage(t *testing.T) {
 }
 
 func TestProductRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
-	db, mock := newProductTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewProductRepository(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta(productSelectCols)).
@@ -117,7 +106,7 @@ func TestProductRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
 }
 
 func TestProductRepository_Get_ReturnsMatchingProduct(t *testing.T) {
-	db, mock := newProductTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewProductRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Name", "Price", "Stock", "Image", "Description"}).
@@ -136,7 +125,7 @@ func TestProductRepository_Get_ReturnsMatchingProduct(t *testing.T) {
 }
 
 func TestProductRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T) {
-	db, mock := newProductTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewProductRepository(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta(productSelectCols + " WHERE ID = ?")).
@@ -146,5 +135,33 @@ func TestProductRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T) {
 	_, err := repo.Get(context.Background(), 999999)
 	if !errors.Is(err, domain.ErrNotFound) {
 		t.Errorf("Get() error = %v, want %v", err, domain.ErrNotFound)
+	}
+}
+
+func TestProductRepository_List_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(productSelectCols)).WillReturnError(dbErr)
+
+	_, err := repo.List(context.Background())
+	if !errors.Is(err, dbErr) {
+		t.Errorf("List() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestProductRepository_Get_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(productSelectCols + " WHERE ID = ?")).
+		WithArgs(1).
+		WillReturnError(dbErr)
+
+	_, err := repo.Get(context.Background(), 1)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }

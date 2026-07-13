@@ -7,30 +7,21 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/repository/mysql"
 )
 
-func newGalleryTestDB(t *testing.T) (*sqlx.DB, sqlmock.Sqlmock) {
-	t.Helper()
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("sqlmock.New() error = %v", err)
-	}
-	t.Cleanup(func() { db.Close() })
-	return sqlx.NewDb(db, "sqlmock"), mock
-}
+const gallerySelectCols = "SELECT ID, Image FROM gallery"
 
 func TestGalleryRepository_List_MapsRowsToDomain(t *testing.T) {
-	db, mock := newGalleryTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewGalleryRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Image"}).
 		AddRow(1, "assets/galeria-1.jpg").
 		AddRow(2, "assets/galeria-2.jpg")
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT ID, Image FROM gallery")).WillReturnRows(rows)
+	mock.ExpectQuery(regexp.QuoteMeta(gallerySelectCols)).WillReturnRows(rows)
 
 	got, err := repo.List(context.Background())
 	if err != nil {
@@ -46,11 +37,11 @@ func TestGalleryRepository_List_MapsRowsToDomain(t *testing.T) {
 }
 
 func TestGalleryRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
-	db, mock := newGalleryTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewGalleryRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Image"})
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT ID, Image FROM gallery")).WillReturnRows(rows)
+	mock.ExpectQuery(regexp.QuoteMeta(gallerySelectCols)).WillReturnRows(rows)
 
 	got, err := repo.List(context.Background())
 	if err != nil {
@@ -62,11 +53,11 @@ func TestGalleryRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
 }
 
 func TestGalleryRepository_Get_ReturnsMatchingImage(t *testing.T) {
-	db, mock := newGalleryTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewGalleryRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Image"}).AddRow(5, "assets/galeria-5.jpg")
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT ID, Image FROM gallery WHERE ID = ?")).
+	mock.ExpectQuery(regexp.QuoteMeta(gallerySelectCols + " WHERE ID = ?")).
 		WithArgs(5).
 		WillReturnRows(rows)
 
@@ -81,15 +72,43 @@ func TestGalleryRepository_Get_ReturnsMatchingImage(t *testing.T) {
 }
 
 func TestGalleryRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T) {
-	db, mock := newGalleryTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewGalleryRepository(db)
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT ID, Image FROM gallery WHERE ID = ?")).
+	mock.ExpectQuery(regexp.QuoteMeta(gallerySelectCols + " WHERE ID = ?")).
 		WithArgs(999999).
 		WillReturnRows(sqlmock.NewRows([]string{"ID", "Image"}))
 
 	_, err := repo.Get(context.Background(), 999999)
 	if !errors.Is(err, domain.ErrNotFound) {
 		t.Errorf("Get() error = %v, want %v", err, domain.ErrNotFound)
+	}
+}
+
+func TestGalleryRepository_List_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewGalleryRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(gallerySelectCols)).WillReturnError(dbErr)
+
+	_, err := repo.List(context.Background())
+	if !errors.Is(err, dbErr) {
+		t.Errorf("List() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestGalleryRepository_Get_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewGalleryRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(gallerySelectCols + " WHERE ID = ?")).
+		WithArgs(5).
+		WillReturnError(dbErr)
+
+	_, err := repo.Get(context.Background(), 5)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }

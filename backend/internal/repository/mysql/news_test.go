@@ -7,26 +7,15 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/repository/mysql"
 )
 
-func newNewsTestDB(t *testing.T) (*sqlx.DB, sqlmock.Sqlmock) {
-	t.Helper()
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("sqlmock.New() error = %v", err)
-	}
-	t.Cleanup(func() { db.Close() })
-	return sqlx.NewDb(db, "sqlmock"), mock
-}
-
 const newsSelectCols = "SELECT ID, Title, Body, Image FROM news"
 
 func TestNewsRepository_List_MapsRowsToDomain(t *testing.T) {
-	db, mock := newNewsTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewNewsRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Title", "Body", "Image"}).
@@ -50,7 +39,7 @@ func TestNewsRepository_List_MapsRowsToDomain(t *testing.T) {
 }
 
 func TestNewsRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
-	db, mock := newNewsTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewNewsRepository(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta(newsSelectCols)).
@@ -66,7 +55,7 @@ func TestNewsRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
 }
 
 func TestNewsRepository_Get_ReturnsMatchingItem(t *testing.T) {
-	db, mock := newNewsTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewNewsRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Title", "Body", "Image"}).
@@ -85,7 +74,7 @@ func TestNewsRepository_Get_ReturnsMatchingItem(t *testing.T) {
 }
 
 func TestNewsRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T) {
-	db, mock := newNewsTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewNewsRepository(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta(newsSelectCols + " WHERE ID = ?")).
@@ -95,5 +84,33 @@ func TestNewsRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T) {
 	_, err := repo.Get(context.Background(), 999999)
 	if !errors.Is(err, domain.ErrNotFound) {
 		t.Errorf("Get() error = %v, want %v", err, domain.ErrNotFound)
+	}
+}
+
+func TestNewsRepository_List_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(newsSelectCols)).WillReturnError(dbErr)
+
+	_, err := repo.List(context.Background())
+	if !errors.Is(err, dbErr) {
+		t.Errorf("List() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestNewsRepository_Get_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewNewsRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(newsSelectCols + " WHERE ID = ?")).
+		WithArgs(1).
+		WillReturnError(dbErr)
+
+	_, err := repo.Get(context.Background(), 1)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }

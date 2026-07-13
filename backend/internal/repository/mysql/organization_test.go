@@ -7,26 +7,15 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/repository/mysql"
 )
 
-func newOrganizationTestDB(t *testing.T) (*sqlx.DB, sqlmock.Sqlmock) {
-	t.Helper()
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("sqlmock.New() error = %v", err)
-	}
-	t.Cleanup(func() { db.Close() })
-	return sqlx.NewDb(db, "sqlmock"), mock
-}
-
 const organizationSelectCols = "SELECT ID, Title, Description, Image FROM organizations"
 
 func TestOrganizationRepository_List_MapsRowsToDomain(t *testing.T) {
-	db, mock := newOrganizationTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewOrganizationRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Title", "Description", "Image"}).
@@ -50,7 +39,7 @@ func TestOrganizationRepository_List_MapsRowsToDomain(t *testing.T) {
 }
 
 func TestOrganizationRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
-	db, mock := newOrganizationTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewOrganizationRepository(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta(organizationSelectCols)).
@@ -66,7 +55,7 @@ func TestOrganizationRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
 }
 
 func TestOrganizationRepository_Get_ReturnsMatchingItem(t *testing.T) {
-	db, mock := newOrganizationTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewOrganizationRepository(db)
 
 	rows := sqlmock.NewRows([]string{"ID", "Title", "Description", "Image"}).
@@ -85,7 +74,7 @@ func TestOrganizationRepository_Get_ReturnsMatchingItem(t *testing.T) {
 }
 
 func TestOrganizationRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T) {
-	db, mock := newOrganizationTestDB(t)
+	db, mock := newTestDB(t)
 	repo := mysql.NewOrganizationRepository(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta(organizationSelectCols + " WHERE ID = ?")).
@@ -95,5 +84,33 @@ func TestOrganizationRepository_Get_ReturnsDomainNotFoundWhenNoRows(t *testing.T
 	_, err := repo.Get(context.Background(), 999999)
 	if !errors.Is(err, domain.ErrNotFound) {
 		t.Errorf("Get() error = %v, want %v", err, domain.ErrNotFound)
+	}
+}
+
+func TestOrganizationRepository_List_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrganizationRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(organizationSelectCols)).WillReturnError(dbErr)
+
+	_, err := repo.List(context.Background())
+	if !errors.Is(err, dbErr) {
+		t.Errorf("List() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+func TestOrganizationRepository_Get_PropagatesQueryError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrganizationRepository(db)
+
+	dbErr := errors.New("connection refused")
+	mock.ExpectQuery(regexp.QuoteMeta(organizationSelectCols + " WHERE ID = ?")).
+		WithArgs(1).
+		WillReturnError(dbErr)
+
+	_, err := repo.Get(context.Background(), 1)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Get() error = %v, want it to wrap %v", err, dbErr)
 	}
 }

@@ -31,9 +31,11 @@ func (r galleryRow) toDomain() domain.GalleryImage {
 	return domain.GalleryImage{ID: r.ID, Image: r.Image}
 }
 
+const gallerySelect = "SELECT ID, Image FROM gallery"
+
 func (r *GalleryRepository) List(ctx context.Context) ([]domain.GalleryImage, error) {
 	var rows []galleryRow
-	if err := r.db.SelectContext(ctx, &rows, "SELECT ID, Image FROM gallery"); err != nil {
+	if err := r.db.SelectContext(ctx, &rows, gallerySelect); err != nil {
 		return nil, fmt.Errorf("mysql: list gallery: %w", err)
 	}
 	images := make([]domain.GalleryImage, 0, len(rows))
@@ -45,7 +47,7 @@ func (r *GalleryRepository) List(ctx context.Context) ([]domain.GalleryImage, er
 
 func (r *GalleryRepository) Get(ctx context.Context, id int) (domain.GalleryImage, error) {
 	var row galleryRow
-	err := r.db.GetContext(ctx, &row, "SELECT ID, Image FROM gallery WHERE ID = ?", id)
+	err := r.db.GetContext(ctx, &row, gallerySelect+" WHERE ID = ?", id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.GalleryImage{}, domain.ErrNotFound
 	}
