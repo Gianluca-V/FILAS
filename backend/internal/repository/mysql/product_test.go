@@ -55,6 +55,51 @@ func TestProductRepository_List_MapsNullAndNonNullDescription(t *testing.T) {
 	}
 }
 
+func TestProductRepository_List_MapsNullImage(t *testing.T) {
+	// BLOCKER (gate #34): products.Image is `text DEFAULT NULL` in the
+	// schema, but productRow.Image was a plain Go string, so a single NULL
+	// Image row made sqlx's row scan fail and turned the ENTIRE list into a
+	// 500. Legacy PHP emits "Image":null for a NULL column, so the domain
+	// layer must preserve NULL vs "" exactly as it already does for
+	// Description.
+	db, mock := newProductTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	rows := sqlmock.NewRows([]string{"ID", "Name", "Price", "Stock", "Image", "Description"}).
+		AddRow(18, "Encurtido de ajo", 700.0, 1, nil, nil)
+	mock.ExpectQuery(regexp.QuoteMeta(productSelectCols)).WillReturnRows(rows)
+
+	got, err := repo.List(context.Background())
+	if err != nil {
+		t.Fatalf("List() error = %v, want nil (NULL Image must not fail the scan)", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("List() returned %d products, want 1", len(got))
+	}
+	if got[0].Image != nil {
+		t.Errorf("got[0].Image = %v, want nil (NULL in DB)", *got[0].Image)
+	}
+}
+
+func TestProductRepository_Get_MapsNullImage(t *testing.T) {
+	db, mock := newProductTestDB(t)
+	repo := mysql.NewProductRepository(db)
+
+	rows := sqlmock.NewRows([]string{"ID", "Name", "Price", "Stock", "Image", "Description"}).
+		AddRow(18, "Encurtido de ajo", 700.0, 1, nil, nil)
+	mock.ExpectQuery(regexp.QuoteMeta(productSelectCols + " WHERE ID = ?")).
+		WithArgs(18).
+		WillReturnRows(rows)
+
+	got, err := repo.Get(context.Background(), 18)
+	if err != nil {
+		t.Fatalf("Get() error = %v, want nil (NULL Image must not fail the scan)", err)
+	}
+	if got.Image != nil {
+		t.Errorf("got.Image = %v, want nil (NULL in DB)", *got.Image)
+	}
+}
+
 func TestProductRepository_List_ReturnsEmptySliceWhenNoRows(t *testing.T) {
 	db, mock := newProductTestDB(t)
 	repo := mysql.NewProductRepository(db)

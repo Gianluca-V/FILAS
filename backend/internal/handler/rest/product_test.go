@@ -2,6 +2,7 @@ package rest_test
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
+	"github.com/gianluca-v/filas-backend/internal/handler/rest/middleware"
 )
 
 type fakeProductService struct {
@@ -39,6 +41,7 @@ func (f fakeProductService) Get(ctx context.Context, id int) (domain.Product, er
 func newProductTestRouter(svc rest.ProductService) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
+	r.Use(middleware.ErrorHandler())
 	h := rest.NewProductHandler(svc)
 	r.GET("/api/products", h.List)
 	r.GET("/api/products/:id", h.Get)
@@ -46,8 +49,9 @@ func newProductTestRouter(svc rest.ProductService) *gin.Engine {
 }
 
 func TestProductHandler_List_ReturnsArray(t *testing.T) {
+	image := "assets/default-img.png"
 	svc := fakeProductService{products: []domain.Product{
-		{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: "assets/default-img.png"},
+		{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: &image},
 	}}
 	r := newProductTestRouter(svc)
 
@@ -86,7 +90,8 @@ func TestProductHandler_List_ReturnsEmptyArrayWhenNoProducts(t *testing.T) {
 func TestProductHandler_Get_ReturnsBareObjectNotArray(t *testing.T) {
 	// Legacy quirk: unlike news/gallery/family/organizations, a found
 	// product is a bare JSON object, not wrapped in an array.
-	svc := fakeProductService{byID: map[int]domain.Product{1: {ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: "assets/default-img.png"}}}
+	image := "assets/default-img.png"
+	svc := fakeProductService{byID: map[int]domain.Product{1: {ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: &image}}}
 	r := newProductTestRouter(svc)
 
 	req := httptest.NewRequest(http.MethodGet, "/api/products/1", nil)
@@ -126,5 +131,35 @@ func TestProductHandler_Get_TreatsNonNumericIDAsNotFound(t *testing.T) {
 
 	if rec.Code != http.StatusNotFound {
 		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusNotFound, rec.Body.String())
+	}
+}
+
+func TestProductHandler_List_ReturnsInternalServerErrorOnServiceFailure(t *testing.T) {
+	r := newProductTestRouter(fakeProductService{err: errors.New("db down")})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/products", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"internal server error"}` {
+		t.Errorf("body = %s, want the generic ErrorHandler body, not a leaked error", rec.Body.String())
+	}
+}
+
+func TestProductHandler_Get_ReturnsInternalServerErrorOnServiceFailure(t *testing.T) {
+	r := newProductTestRouter(fakeProductService{err: errors.New("db down")})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/products/1", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"internal server error"}` {
+		t.Errorf("body = %s, want the generic ErrorHandler body, not a leaked error", rec.Body.String())
 	}
 }

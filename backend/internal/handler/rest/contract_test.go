@@ -39,15 +39,17 @@ func loadFixture(t *testing.T, name string) string {
 
 func TestContract_Products(t *testing.T) {
 	desc := ""
+	image1 := "assets/default-img.png"
+	image18 := `assets\ajo.jpg`
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB: fakePinger{},
 		ProductService: fakeProductService{
 			products: []domain.Product{
-				{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: "assets/default-img.png", Description: &desc},
-				{ID: 18, Name: "Encurtido de ajo", Price: 700, Stock: 1, Image: `assets\ajo.jpg`, Description: nil},
+				{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: &image1, Description: &desc},
+				{ID: 18, Name: "Encurtido de ajo", Price: 700, Stock: 1, Image: &image18, Description: nil},
 			},
 			byID: map[int]domain.Product{
-				1: {ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: "assets/default-img.png", Description: &desc},
+				1: {ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: &image1, Description: &desc},
 			},
 		},
 	})

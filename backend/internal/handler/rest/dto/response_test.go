@@ -2,6 +2,7 @@ package dto_test
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
@@ -16,7 +17,8 @@ import (
 // live against FilasServer/products.php + the seeded DB (obs #29/#31).
 func TestNewProductResponse_EncodesNumericFieldsAsJSONStrings(t *testing.T) {
 	desc := ""
-	p := domain.Product{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: "assets/default-img.png", Description: &desc}
+	image := "assets/default-img.png"
+	p := domain.Product{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: &image, Description: &desc}
 
 	resp := dto.NewProductResponse(p)
 	body, err := json.Marshal(resp)
@@ -48,7 +50,7 @@ func TestNewProductResponse_FormatsFractionalPriceWithoutTrailingZeros(t *testin
 	// MySQL's double->text formatting drops unnecessary trailing zeros
 	// (e.g. 199.5, not 199.50 or 199.5000000001). strconv.FormatFloat with
 	// precision -1 (shortest round-trip) mirrors that.
-	p := domain.Product{ID: 2, Name: "Fractional", Price: 199.5, Stock: 1, Image: ""}
+	p := domain.Product{ID: 2, Name: "Fractional", Price: 199.5, Stock: 1}
 
 	resp := dto.NewProductResponse(p)
 	if resp.Price != "199.5" {
@@ -57,25 +59,32 @@ func TestNewProductResponse_FormatsFractionalPriceWithoutTrailingZeros(t *testin
 }
 
 func TestNewProductResponse_PreservesNullDescriptionAsJSONNull(t *testing.T) {
-	p := domain.Product{ID: 18, Name: "Encurtido de ajo", Price: 700, Stock: 1, Image: "assets/ajo.jpg", Description: nil}
+	image := "assets/ajo.jpg"
+	p := domain.Product{ID: 18, Name: "Encurtido de ajo", Price: 700, Stock: 1, Image: &image, Description: nil}
 
 	resp := dto.NewProductResponse(p)
 	body, err := json.Marshal(resp)
 	if err != nil {
 		t.Fatalf("json.Marshal() error = %v", err)
 	}
-	if got := string(body); !jsonContains(got, `"Description":null`) {
+	if got := string(body); !strings.Contains(got, `"Description":null`) {
 		t.Errorf("body = %s, want it to contain %q", got, `"Description":null`)
 	}
 }
 
-func jsonContains(body, substr string) bool {
-	return len(body) >= len(substr) && (func() bool {
-		for i := 0; i+len(substr) <= len(body); i++ {
-			if body[i:i+len(substr)] == substr {
-				return true
-			}
-		}
-		return false
-	})()
+// TestNewProductResponse_PreservesNullImageAsJSONNull is the DTO-layer half
+// of the gate #34 blocker fix: a NULL Image column must survive as JSON
+// null (matching legacy PHP's json_encode(NULL) behavior), not "" and not a
+// 500. Mirrors the Description nullability test above exactly.
+func TestNewProductResponse_PreservesNullImageAsJSONNull(t *testing.T) {
+	p := domain.Product{ID: 18, Name: "Encurtido de ajo", Price: 700, Stock: 1, Image: nil}
+
+	resp := dto.NewProductResponse(p)
+	body, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("json.Marshal() error = %v", err)
+	}
+	if got := string(body); !strings.Contains(got, `"Image":null`) {
+		t.Errorf("body = %s, want it to contain %q", got, `"Image":null`)
+	}
 }

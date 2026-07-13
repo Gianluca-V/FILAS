@@ -27,12 +27,16 @@ type productRow struct {
 	Name        string         `db:"Name"`
 	Price       float64        `db:"Price"`
 	Stock       int            `db:"Stock"`
-	Image       string         `db:"Image"`
+	Image       sql.NullString `db:"Image"`
 	Description sql.NullString `db:"Description"`
 }
 
 func (r productRow) toDomain() domain.Product {
-	p := domain.Product{ID: r.ID, Name: r.Name, Price: r.Price, Stock: r.Stock, Image: r.Image}
+	p := domain.Product{ID: r.ID, Name: r.Name, Price: r.Price, Stock: r.Stock}
+	if r.Image.Valid {
+		image := r.Image.String
+		p.Image = &image
+	}
 	if r.Description.Valid {
 		desc := r.Description.String
 		p.Description = &desc

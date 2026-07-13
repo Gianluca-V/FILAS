@@ -15,14 +15,15 @@ import (
 // ProductResponse matches GET /api/products[/:id] from products.php, which
 // returns a single JSON OBJECT for a by-ID lookup (unlike the other four
 // resources below, which wrap a by-ID result in a single-element array —
-// see NewsResponse etc.). Numeric fields are JSON strings; Description is
-// nullable and preserved as null vs "" exactly as stored.
+// see NewsResponse etc.). Numeric fields are JSON strings; Description and
+// Image are both nullable and preserved as null vs "" exactly as stored
+// (see gate #34: a NULL Image column used to 500 the whole endpoint).
 type ProductResponse struct {
 	ID          string  `json:"ID"`
 	Name        string  `json:"Name"`
 	Price       string  `json:"Price"`
 	Stock       string  `json:"Stock"`
-	Image       string  `json:"Image"`
+	Image       *string `json:"Image"`
 	Description *string `json:"Description"`
 }
 

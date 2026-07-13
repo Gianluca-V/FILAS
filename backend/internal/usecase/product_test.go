@@ -35,7 +35,8 @@ func (f fakeProductRepo) Get(ctx context.Context, id int) (domain.Product, error
 }
 
 func TestProductService_List_ReturnsRepositoryProducts(t *testing.T) {
-	want := []domain.Product{{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: "assets/default-img.png"}}
+	image := "assets/default-img.png"
+	want := []domain.Product{{ID: 1, Name: "Mermelada de pera", Price: 600, Stock: 112, Image: &image}}
 	svc := usecase.NewProductService(fakeProductRepo{products: want})
 
 	got, err := svc.List(context.Background())
@@ -76,5 +77,15 @@ func TestProductService_Get_ReturnsNotFoundForMissingID(t *testing.T) {
 	_, err := svc.Get(context.Background(), 999999)
 	if !errors.Is(err, domain.ErrNotFound) {
 		t.Errorf("Get() error = %v, want %v", err, domain.ErrNotFound)
+	}
+}
+
+func TestProductService_Get_PropagatesRepositoryError(t *testing.T) {
+	repoErr := errors.New("db down")
+	svc := usecase.NewProductService(fakeProductRepo{err: repoErr})
+
+	_, err := svc.Get(context.Background(), 1)
+	if !errors.Is(err, repoErr) {
+		t.Errorf("Get() error = %v, want it to wrap %v", err, repoErr)
 	}
 }
