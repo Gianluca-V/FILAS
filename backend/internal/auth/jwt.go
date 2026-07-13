@@ -1,6 +1,6 @@
-// Package auth provides token issuance/verification (JWT) and password
-// hashing/verification (bcrypt + legacy sha256 migration) primitives used
-// by the usecase and handler layers.
+// Package auth provides token issuance/verification (JWT) primitives used
+// by the usecase and handler layers. Password hashing/verification
+// (bcrypt + legacy sha256 migration) is added by later PRs (Phase 2).
 package auth
 
 import (
@@ -45,7 +45,10 @@ func (s *JWTService) Generate(adminID int64) (string, error) {
 }
 
 // Parse validates the token's signature and expiry, returning the admin
-// ID embedded in its claims.
+// ID embedded in its claims. It requires an "exp" claim (WithExpirationRequired)
+// and a positive "data" claim: every legacy and Go-issued token carries
+// both, so their absence indicates a malformed or forged token, not a
+// legitimate degraded case.
 func (s *JWTService) Parse(tokenString string) (int64, error) {
 	var c claims
 	token, err := jwt.ParseWithClaims(tokenString, &c, func(t *jwt.Token) (interface{}, error) {
@@ -53,12 +56,15 @@ func (s *JWTService) Parse(tokenString string) (int64, error) {
 			return nil, errors.New("unexpected signing method")
 		}
 		return s.secret, nil
-	})
+	}, jwt.WithExpirationRequired())
 	if err != nil {
 		return 0, err
 	}
 	if !token.Valid {
 		return 0, errors.New("invalid token")
+	}
+	if c.Data <= 0 {
+		return 0, errors.New("invalid or missing data claim")
 	}
 	return c.Data, nil
 }
