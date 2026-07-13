@@ -1,0 +1,21 @@
+package domain
+
+import "context"
+
+// Product is a sellable item. Description is nullable in the schema (some
+// legacy rows store NULL, others an empty string — both are preserved as
+// distinct values through the stack, see dto.ProductResponse).
+type Product struct {
+	ID          int
+	Name        string
+	Price       float64
+	Stock       int
+	Image       string
+	Description *string
+}
+
+// ProductRepository is implemented by internal/repository/mysql.
+type ProductRepository interface {
+	List(ctx context.Context) ([]Product, error)
+	Get(ctx context.Context, id int) (Product, error)
+}
