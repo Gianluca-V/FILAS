@@ -24,8 +24,18 @@ type fakeProductRepo struct {
 	updateCalled   bool
 	updateID       int
 	updateProduct  domain.Product
-	deleteErr      error
-	deleteID       int
+	// updateCalls records every Update() invocation in order, in addition
+	// to the single-latest-call fields above. Needed by the order usecase
+	// tests (PR6), which decrement/restore stock across MULTIPLE products
+	// per order and must assert on each call, not just the last one.
+	updateCalls []fakeProductRepoUpdateCall
+	deleteErr   error
+	deleteID    int
+}
+
+type fakeProductRepoUpdateCall struct {
+	id      int
+	product domain.Product
 }
 
 func (f *fakeProductRepo) List(ctx context.Context) ([]domain.Product, error) {
@@ -59,6 +69,7 @@ func (f *fakeProductRepo) Update(ctx context.Context, id int, p domain.Product) 
 	f.updateCalled = true
 	f.updateID = id
 	f.updateProduct = p
+	f.updateCalls = append(f.updateCalls, fakeProductRepoUpdateCall{id: id, product: p})
 	return f.updateErr
 }
 
