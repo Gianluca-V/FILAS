@@ -81,8 +81,10 @@ func (f *fakeNewsService) Delete(ctx context.Context, id int) error {
 // Title/Body/Image — not the handler.
 type fakeNewsRepoE2E struct {
 	createCalled bool
+	createErr    error
 	updateCalled bool
 	updateID     int
+	updateErr    error
 	deleteCalled bool
 	deleteID     int
 }
@@ -97,15 +99,24 @@ func (f *fakeNewsRepoE2E) Get(ctx context.Context, id int) (domain.NewsItem, err
 
 func (f *fakeNewsRepoE2E) Create(ctx context.Context, n domain.NewsItem) (domain.NewsItem, error) {
 	f.createCalled = true
+	if f.createErr != nil {
+		return domain.NewsItem{}, f.createErr
+	}
 	return n, nil
 }
 
 func (f *fakeNewsRepoE2E) Update(ctx context.Context, id int, n domain.NewsItem) error {
 	f.updateCalled = true
 	f.updateID = id
+	if f.updateErr != nil {
+		return f.updateErr
+	}
 	// Matches legacy mysqli parity (backend/docs/legacy-quirks.md §10): a
 	// zero-rows-affected UPDATE (e.g. a missing or non-numeric ID) is NOT
-	// an error, so this fake never returns one here regardless of id.
+	// an error, so this fake never returns one here regardless of id
+	// (unless updateErr is explicitly set, e.g. to simulate a genuine
+	// repository failure — see
+	// TestNewsHandler_Update_RealUsecaseRepoErrorIsNotMisclassifiedAsValidation).
 	return nil
 }
 
@@ -407,6 +418,45 @@ func TestNewsHandler_Create_ReturnsInternalServerErrorOnServiceFailure(t *testin
 	}
 }
 
+// TestNewsHandler_Create_RealUsecaseRepoErrorIsNotMisclassifiedAsValidation
+// is a PR5 corrective reliability lock (gate WARNING #1). The other 500
+// test above (TestNewsHandler_Create_ReturnsInternalServerErrorOnServiceFailure)
+// uses fakeNewsService, which returns a raw error and never exercises
+// usecase.NewsService.Create's `fmt.Errorf("usecase: create news item: %w",
+// err)` wrapping — so nothing proved that a genuine repository failure,
+// once wrapped by the REAL usecase, doesn't accidentally satisfy
+// errors.Is(err, domain.ErrValidation) and get mis-rendered as the news
+// verbatim 400 body (NewsHandler.Create's ErrValidation special-case,
+// see newsMissingFieldMessage) instead of a 500. This wires the REAL
+// usecase.NewsService with a fakeNewsRepoE2E whose Create returns a
+// non-validation error, through the full HTTP stack with a valid JWT and
+// a fully-valid body (so validation passes and the repo is actually
+// reached), and asserts 500 with the generic body — proving the wrapped
+// repo error is NOT misclassified as validation.
+func TestNewsHandler_Create_RealUsecaseRepoErrorIsNotMisclassifiedAsValidation(t *testing.T) {
+	jwtSvc := auth.NewJWTService("test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+	repo := &fakeNewsRepoE2E{createErr: errors.New("db exploded")}
+	realSvc := usecase.NewNewsService(repo)
+	r := newAuthedNewsTestRouter(realSvc, jwtSvc)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/news", strings.NewReader(`{"Title":"Nueva","Body":"Cuerpo","Image":"i.jpg"}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"internal server error"}` {
+		t.Errorf("body = %s, want the generic ErrorHandler body %q — a wrapped repository failure must never be misclassified as the news validation message", rec.Body.String(), `{"message":"internal server error"}`)
+	}
+}
+
 // --- Update (PUT /api/news/:id) ---
 
 func TestNewsHandler_Update_RejectsMissingJWT(t *testing.T) {
@@ -520,6 +570,36 @@ func TestNewsHandler_Update_ReturnsInternalServerErrorOnServiceFailure(t *testin
 
 	if rec.Code != http.StatusInternalServerError {
 		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+}
+
+// TestNewsHandler_Update_RealUsecaseRepoErrorIsNotMisclassifiedAsValidation
+// is the Update sibling of
+// TestNewsHandler_Create_RealUsecaseRepoErrorIsNotMisclassifiedAsValidation
+// (PR5 corrective, gate WARNING #1) — same rationale, exercising
+// usecase.NewsService.Update's `fmt.Errorf("usecase: update news item %d:
+// %w", id, err)` wrapping through the real HTTP stack.
+func TestNewsHandler_Update_RealUsecaseRepoErrorIsNotMisclassifiedAsValidation(t *testing.T) {
+	jwtSvc := auth.NewJWTService("test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+	repo := &fakeNewsRepoE2E{updateErr: errors.New("db exploded")}
+	realSvc := usecase.NewNewsService(repo)
+	r := newAuthedNewsTestRouter(realSvc, jwtSvc)
+
+	req := httptest.NewRequest(http.MethodPut, "/api/news/1", strings.NewReader(`{"Title":"Renombrada","Body":"Cuerpo","Image":"i.jpg"}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("status = %d, want %d, body=%s", rec.Code, http.StatusInternalServerError, rec.Body.String())
+	}
+	if rec.Body.String() != `{"message":"internal server error"}` {
+		t.Errorf("body = %s, want the generic ErrorHandler body %q — a wrapped repository failure must never be misclassified as the news validation message", rec.Body.String(), `{"message":"internal server error"}`)
 	}
 }
 
