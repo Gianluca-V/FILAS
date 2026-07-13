@@ -77,7 +77,7 @@ func TestContract_News(t *testing.T) {
 	image := "https://example.com/1.jpg"
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB: fakePinger{},
-		NewsService: fakeNewsService{
+		NewsService: &fakeNewsService{
 			items: []domain.NewsItem{
 				{ID: 1, Title: "Noticia de prueba 1", Body: &body, Image: &image},
 				{ID: 2, Title: "Noticia de prueba 2", Body: nil, Image: nil},
@@ -94,7 +94,7 @@ func TestContract_News(t *testing.T) {
 func TestContract_News_EmptyListIsNotFound(t *testing.T) {
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB:    fakePinger{},
-		NewsService: fakeNewsService{items: []domain.NewsItem{}},
+		NewsService: &fakeNewsService{items: []domain.NewsItem{}},
 	})
 	assertJSONMatchesFixture(t, r, http.MethodGet, "/api/news", http.StatusNotFound, "news_not_found.json")
 }

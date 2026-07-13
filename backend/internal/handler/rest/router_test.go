@@ -100,7 +100,7 @@ func TestNewRouter_WiresPublicResourceReadRoutes(t *testing.T) {
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB:            fakePinger{err: nil},
 		ProductService:      &fakeProductService{products: []domain.Product{}},
-		NewsService:         fakeNewsService{items: []domain.NewsItem{{ID: 1, Title: "t"}}},
+		NewsService:         &fakeNewsService{items: []domain.NewsItem{{ID: 1, Title: "t"}}},
 		GalleryService:      &fakeGalleryService{images: []domain.GalleryImage{{ID: 1, Image: "i"}}},
 		FamilyService:       &fakeFamilyService{items: []domain.FamilyItem{{ID: 1, Body: "b", Category: "Centro de dia"}}},
 		OrganizationService: &fakeOrganizationService{items: []domain.Organization{{ID: 1, Title: "t", Image: "i"}}},
@@ -185,7 +185,9 @@ func TestNewRouter_WiresAuthGatedWriteRoutes(t *testing.T) {
 	// PR4 (task 3.1): POST/PUT/DELETE for products/gallery/family/organizations
 	// must be reachable through the real router wiring, gated behind
 	// middleware.RequireAuth exactly like the admin GET/PUT/DELETE routes
-	// (PR3). GETs stay public. News writes are wired separately in PR5.
+	// (PR3). GETs stay public. PR5 (task 4.1) extends this same assertion to
+	// news writes with the FIXED auth behavior (see router.go's doc comment
+	// on the news route registration).
 	jwtSvc := auth.NewJWTService("router-test-secret", time.Hour)
 	token, err := jwtSvc.Generate(1543)
 	if err != nil {
@@ -195,6 +197,7 @@ func TestNewRouter_WiresAuthGatedWriteRoutes(t *testing.T) {
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB:            fakePinger{err: nil},
 		ProductService:      &fakeProductService{byID: map[int]domain.Product{1: {ID: 1, Name: "p"}}},
+		NewsService:         &fakeNewsService{byID: map[int]domain.NewsItem{1: {ID: 1, Title: "t"}}},
 		GalleryService:      &fakeGalleryService{byID: map[int]domain.GalleryImage{1: {ID: 1, Image: "i"}}},
 		FamilyService:       &fakeFamilyService{byID: map[int]domain.FamilyItem{1: {ID: 1, Body: "b", Category: "Centro de dia"}}},
 		OrganizationService: &fakeOrganizationService{byID: map[int]domain.Organization{1: {ID: 1, Title: "t", Image: "i"}}},
@@ -225,6 +228,14 @@ func TestNewRouter_WiresAuthGatedWriteRoutes(t *testing.T) {
 		{"organizations create with token", http.MethodPost, "/api/organizations", `{"Title":"t","Image":"i"}`, token, http.StatusCreated},
 		{"organizations update without token", http.MethodPut, "/api/organizations/1", `{"Title":"t","Image":"i"}`, "", http.StatusUnauthorized},
 		{"organizations delete without token", http.MethodDelete, "/api/organizations/1", "", "", http.StatusUnauthorized},
+		// News writes (PR5, task 4.1): THE headline fix — legacy news.php
+		// only validated the JWT when the Authorization header was present
+		// at all, so a request with no header wrote unauthenticated. Go
+		// enforces middleware.RequireAuth unconditionally here too.
+		{"news create without token", http.MethodPost, "/api/news", `{"Title":"t","Body":"b","Image":"i"}`, "", http.StatusUnauthorized},
+		{"news create with token", http.MethodPost, "/api/news", `{"Title":"t","Body":"b","Image":"i"}`, token, http.StatusCreated},
+		{"news update without token", http.MethodPut, "/api/news/1", `{"Title":"t","Body":"b","Image":"i"}`, "", http.StatusUnauthorized},
+		{"news delete without token", http.MethodDelete, "/api/news/1", "", "", http.StatusUnauthorized},
 	}
 	for _, tc := range cases {
 		var body *strings.Reader

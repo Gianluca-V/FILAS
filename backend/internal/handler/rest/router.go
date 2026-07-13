@@ -32,8 +32,11 @@ type RouterDeps struct {
 // products/gallery/family/organizations added in PR4 (task 3.1): GETs stay
 // public, POST/PUT/DELETE require a valid JWT via middleware.RequireAuth,
 // same pattern as the admins GET/PUT/DELETE routes. News writes are wired
-// with the FIXED auth behavior in PR5 (task 4.1), not here. The orders
-// resource is wired in a later PR.
+// with the FIXED auth behavior in PR5 (task 4.1): unlike PR4's resources,
+// which reproduce legacy behavior byte-for-byte, news's JWT enforcement is
+// a deliberate, user-approved fix for a legacy auth bug — see the doc
+// comment on the news route registration below. The orders resource is
+// wired in a later PR.
 func NewRouter(deps RouterDeps) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -53,6 +56,18 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	news := NewNewsHandler(deps.NewsService)
 	r.GET("/api/news", news.List)
 	r.GET("/api/news/:id", news.Get)
+	// FIXED auth (PR5, task 4.1): legacy news.php only validated the JWT
+	// when the Authorization header happened to be present at all
+	// (`if(isset($headers['Authorization'])){ ...TokenValidationResponse... }`,
+	// news.php lines 30-33/61-64/94-97) — a request with NO header skipped
+	// validation entirely and the write proceeded UNAUTHENTICATED. Go
+	// enforces middleware.RequireAuth unconditionally on every news write,
+	// same as every other gated resource: missing OR invalid token -> 401,
+	// no mutation. This is the one deliberate, user-approved contract
+	// divergence for this resource (see backend/docs/legacy-quirks.md §13).
+	r.POST("/api/news", middleware.RequireAuth(deps.JWTService), news.Create)
+	r.PUT("/api/news/:id", middleware.RequireAuth(deps.JWTService), news.Update)
+	r.DELETE("/api/news/:id", middleware.RequireAuth(deps.JWTService), news.Delete)
 
 	gallery := NewGalleryHandler(deps.GalleryService)
 	r.GET("/api/gallery", gallery.List)
