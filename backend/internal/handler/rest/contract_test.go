@@ -68,13 +68,19 @@ func TestContract_Products_EmptyListIsOKNotNotFound(t *testing.T) {
 }
 
 func TestContract_News(t *testing.T) {
+	// Triangulation (fix #6 from the gate review): seed 2 items so list vs
+	// get-by-id actually diverge, matching the family/organizations
+	// convention below instead of list and get being byte-identical.
 	body := "Lorem ipsum dolor sit amet"
 	image := "https://example.com/1.jpg"
 	r := rest.NewRouter(rest.RouterDeps{
 		HealthDB: fakePinger{},
 		NewsService: fakeNewsService{
-			items: []domain.NewsItem{{ID: 1, Title: "Noticia de prueba 1", Body: &body, Image: &image}},
-			byID:  map[int]domain.NewsItem{1: {ID: 1, Title: "Noticia de prueba 1", Body: &body, Image: &image}},
+			items: []domain.NewsItem{
+				{ID: 1, Title: "Noticia de prueba 1", Body: &body, Image: &image},
+				{ID: 2, Title: "Noticia de prueba 2", Body: nil, Image: nil},
+			},
+			byID: map[int]domain.NewsItem{1: {ID: 1, Title: "Noticia de prueba 1", Body: &body, Image: &image}},
 		},
 	})
 
