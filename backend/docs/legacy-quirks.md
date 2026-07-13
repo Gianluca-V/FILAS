@@ -239,3 +239,63 @@ for the orders PR: the legacy response is built with `GROUP_CONCAT` plus
 manual JSON string concatenation, which is fragile with quotes/commas in
 product names. The Go DTO must reproduce the SHAPE, not the bug's
 fragility. Tracked for the orders work unit, not covered by this document.
+
+## 13. News write auth bug — FIXED, not reproduced (PR5, task 4.1)
+
+Live-characterized (also visible directly in `FilasServer/news.php:30-33`,
+repeated identically at `:61-64` for PUT and `:94-97` for DELETE). The
+auth gate on every news write is:
+
+```php
+$headers = getallheaders();
+if(isset($headers['Authorization'])) {
+    $token = trim(str_replace('Bearer ', '', $headers['Authorization']));
+    TokenValidationResponse($token);
+}
+```
+
+Two independent bugs compound here, both live-confirmed against a scratch
+copy of `FilasServer/` pointed at the local Docker `db` (per this
+document's Methodology note) with a 3-hour-old fixed news seed as the
+baseline:
+
+1. **No header -> no check at all.** The `isset($headers['Authorization'])`
+   guard means a request with NO `Authorization` header never calls
+   `TokenValidationResponse` — the write proceeds unconditionally. Confirmed
+   live: `POST /api/news` with no `Authorization` header at all returned
+   `201 {"message":"News added successfully"}`, and the row was verified
+   present in the database (`SELECT * FROM news` showed the new row with
+   the test `Title`).
+2. **Even when a header IS present, the validation result is discarded.**
+   `TokenValidationResponse($token)`'s return value is never checked, and
+   the function itself does not `exit`/`die` on failure — it only `echo`s
+   `{"message":"Token is invalid"}` and returns `false`, which the caller
+   ignores. Confirmed live: `POST /api/news` with
+   `Authorization: Bearer not-a-real-token` (garbage, unparseable) returned
+   HTTP 201 with a body of **two concatenated JSON objects**,
+   `{"message":"Token is invalid"}{"message":"News added successfully"}`
+   — direct evidence the code kept executing and the row was persisted
+   (verified in the database) despite the token being invalid.
+
+Both characterization rows were deleted after confirmation; the scratch
+`FilasServer/` copy and its patched `index.php`/`news.php` were never
+committed and were deleted after this session (`docker compose down` was
+NOT required, since the scratch PHP connected to the already-running `db`
+service standalone; only the scratch directory and the temporary `php -S`
+process were torn down).
+
+**Per user decision (obs #25) and spec requirement ("News Write
+Authentication (MODIFIED, CHANGE)"), this is NOT reproduced.** The Go
+backend applies `middleware.RequireAuth` unconditionally to all three news
+write routes (`router.go`), exactly like every other gated resource: a
+missing OR invalid/expired token always returns 401 before the usecase or
+repository is ever invoked — no mutation, no double-JSON body, no silent
+fall-through. `NewsHandler.Create`/`Update` also depart from the generic
+`middleware.ErrorHandler` validation-message convention (see
+`usecase.validateNewsItem` and `NewsHandler`'s `newsMissingFieldMessage`
+doc comments): the 400 body for a missing `Title`/`Body`/`Image` is the
+exact legacy string `"Missing Title, Body, or Image parameter"`, verbatim,
+unlike products/gallery/family's informally-worded Go validation messages
+(see §10/§11), because reproducing that particular string was a stated
+parity requirement for this endpoint while the AUTH behavior around it was
+explicitly NOT.
