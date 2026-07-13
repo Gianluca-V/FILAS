@@ -78,3 +78,13 @@ func TestNewsService_Get_ReturnsNotFoundForMissingID(t *testing.T) {
 		t.Errorf("Get() error = %v, want %v", err, domain.ErrNotFound)
 	}
 }
+
+func TestNewsService_Get_PropagatesRepositoryError(t *testing.T) {
+	repoErr := errors.New("db down")
+	svc := usecase.NewNewsService(fakeNewsRepo{err: repoErr})
+
+	_, err := svc.Get(context.Background(), 1)
+	if !errors.Is(err, repoErr) {
+		t.Errorf("Get() error = %v, want it to wrap %v", err, repoErr)
+	}
+}
