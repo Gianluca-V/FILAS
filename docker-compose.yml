@@ -8,7 +8,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
-      - "${DB_PORT}:3306"
+      - "127.0.0.1:${DB_PORT}:3306"
     volumes:
       - filas_db_data:/var/lib/mysql
       - ./backend/db/init:/docker-entrypoint-initdb.d:ro
@@ -17,6 +17,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 60s
 
   api:
     build:
@@ -37,6 +38,12 @@ services:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     ports:
       - "${API_PORT}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
 volumes:
   filas_db_data:
