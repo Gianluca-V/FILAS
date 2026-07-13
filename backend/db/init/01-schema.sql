@@ -3,23 +3,37 @@
 -- following are intentionally changed:
 --
 --  1. Trigger status: all 5 legacy MySQL triggers from filas.sql are
---     OMITTED here. Their logic (orderPrice, orders.total, finishDate
---     stamping) is ported to the Go `usecase/order.go` layer per ADR-3
---     (sdd/migrate-go-vue/design). Per the gate review (obs #28), there
---     are FIVE triggers in the original dump, not four:
+--     RESTORED here, verbatim. Their logic (orderPrice, orders.total,
+--     finishDate stamping) is ALSO being ported to the Go
+--     `usecase/order.go` layer per ADR-3 (sdd/migrate-go-vue/design), but
+--     until that usecase exists and its order-parity characterization
+--     tests are green (Phase 6/PR7 gate), the dockerized DB is the
+--     characterization reference and MUST behave exactly like the legacy
+--     PHP+trigger stack. Dropping the triggers before that gate would
+--     silently lose the only working implementation of this logic — do
+--     NOT strip them early. They are dropped from this seed ONLY in PR7,
+--     immediately after order-parity tests pass. There are FIVE triggers
+--     in the original dump (confirmed by gate review obs #28):
 --       - after_orderProduct_insert   (orderproduct)
 --       - after_orderProduct_update   (orderproduct)
 --       - before_orderProduct_insert  (orderproduct)
 --       - before_orderProduct_update  (orderproduct)
 --       - before_update_orders        (orders)
---     They are dropped from this seed ONLY after the ported usecase logic
---     has green parity tests (Phase 6 gate); until then the triggers live
---     only in a scratch DB used for Phase 5/6 characterization testing.
 --
 --  2. `admins` table: the source dump has NO primary key at all (ID is a
 --     nullable int with zero constraints). Patched here with an explicit
 --     PRIMARY KEY + AUTO_INCREMENT (task 2.1 will confirm this choice
 --     against the Go AdminRepository).
+--
+--  3. `admins` seed row: the real legacy admin credential (username,
+--     password hash, salt) from filas.sql is NOT reproduced here. This is
+--     a synthetic, LOCAL-DEV-ONLY admin account using the same legacy
+--     sha256(salt+password) scheme the login usecase will verify against
+--     (see ADR-4, sdd/migrate-go-vue/design). Local dev credentials:
+--       username: FilasAdmin
+--       password: filas-local-dev-2026
+--     (salt/hash below were generated fresh for this password; they do
+--     NOT correspond to any real account.)
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -28,7 +42,8 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table `admins` (PRIMARY KEY + AUTO_INCREMENT patched in, see note 2 above)
+-- Table `admins` (PRIMARY KEY + AUTO_INCREMENT patched in, see note 2
+-- above; synthetic local-dev credential, see note 3 above)
 --
 
 CREATE TABLE `admins` (
@@ -40,7 +55,7 @@ CREATE TABLE `admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `admins` (`ID`, `username`, `password`, `salt`) VALUES
-(1543, 'FilasAdmin', '8b4abda03a7fb4eee79d8fb7c07f88497f28b0728779c84fab84a07b3f824cef', 'bcf76de2e59270b37b7e76d22b53917b');
+(1543, 'FilasAdmin', '9a0d462f4985ce28e354f318e2346a3d61881336330e55cca8d9697cad9f1686', '16308d7827b79fa10077d9a137027f97');
 
 ALTER TABLE `admins` AUTO_INCREMENT = 1544;
 
@@ -124,8 +139,8 @@ ALTER TABLE `news` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7
 -- --------------------------------------------------------
 
 --
--- Table `orderproduct` (5 legacy triggers intentionally omitted -- see
--- header note 1)
+-- Table `orderproduct` (4 of the 5 legacy triggers live here -- see
+-- header note 1; they stay until PR7 drops them post order-parity gate)
 --
 
 CREATE TABLE `orderproduct` (
@@ -170,10 +185,64 @@ INSERT INTO `orderproduct` (`ID`, `orderID`, `productID`, `productQuantity`, `or
 (63, 31, 23, -100000, -85000000),
 (64, 32, 22, 3, 2550);
 
+--
+-- Triggers `orderproduct` (ported to Go usecase/order.go; kept here until
+-- the PR7 gate -- see header note 1)
+--
+DELIMITER $$
+CREATE TRIGGER `after_orderProduct_insert` AFTER INSERT ON `orderproduct` FOR EACH ROW BEGIN
+    UPDATE orders
+    SET total = (
+        SELECT SUM(orderPrice)
+        FROM orderProduct
+        WHERE orderID = NEW.orderID
+    )
+    WHERE ID = NEW.orderID;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_orderProduct_update` AFTER UPDATE ON `orderproduct` FOR EACH ROW BEGIN
+    UPDATE orders
+    SET total = (
+        SELECT SUM(orderPrice)
+        FROM orderProduct
+        WHERE orderID = NEW.orderID
+    )
+    WHERE ID = NEW.orderID;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_orderProduct_insert` BEFORE INSERT ON `orderproduct` FOR EACH ROW BEGIN
+    DECLARE productPrice DOUBLE;
+
+    SELECT price * NEW.productQuantity INTO productPrice
+    FROM products
+    WHERE ID = NEW.productID;
+
+    SET NEW.orderPrice = productPrice;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_orderProduct_update` BEFORE UPDATE ON `orderproduct` FOR EACH ROW BEGIN
+    DECLARE productPrice DOUBLE;
+
+    SELECT price * NEW.productQuantity INTO productPrice
+    FROM products
+    WHERE ID = NEW.productID;
+
+    SET NEW.OrderPrice = productPrice;
+END
+$$
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
--- Table `orders` (1 legacy trigger intentionally omitted -- see header note 1)
+-- Table `orders` (1 of the 5 legacy triggers lives here -- see header
+-- note 1; it stays until PR7 drops it post order-parity gate)
 --
 
 CREATE TABLE `orders` (
@@ -200,6 +269,19 @@ INSERT INTO `orders` (`ID`, `total`, `startDate`, `finishDate`, `state`, `name`,
 (30, 120000, '2023-11-20 22:21:06', NULL, 'canceled', 'gianluca', 'd323213'),
 (31, -85000000, '2023-11-20 22:24:24', NULL, 'pending', 'gianluca', '352435234234'),
 (32, 2550, '2023-11-20 22:28:45', NULL, 'pending', 'HoneyCorp', '1432546753');
+
+--
+-- Trigger `orders` (ported to Go usecase/order.go; kept here until the
+-- PR7 gate -- see header note 1)
+--
+DELIMITER $$
+CREATE TRIGGER `before_update_orders` BEFORE UPDATE ON `orders` FOR EACH ROW BEGIN
+    IF NEW.state = 'finished' AND OLD.state != 'finished' THEN
+        SET NEW.finishDate = CURRENT_TIMESTAMP;
+    END IF;
+END
+$$
+DELIMITER ;
 
 ALTER TABLE `orders` ADD PRIMARY KEY (`ID`);
 ALTER TABLE `orders` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
