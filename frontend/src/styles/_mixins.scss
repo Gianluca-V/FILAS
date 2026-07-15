@@ -1,4 +1,5 @@
 // Shared mixins, auto-imported into every SFC via vite.config.js.
+@use './_variables' as *;
 
 @mixin flex-row($justify: flex-start, $align: center, $gap: 0) {
   display: flex;
