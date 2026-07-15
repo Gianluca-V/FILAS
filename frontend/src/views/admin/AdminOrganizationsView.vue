@@ -3,12 +3,11 @@
 // create, edit, delete allied organizations. GET /api/organizations is
 // 404-on-empty (see backend/internal/handler/rest/organization.go), like
 // the public OrganizationsView (notFoundIsEmpty: true).
-import { ref } from 'vue';
-
 import { createOrganization, deleteOrganization, getOrganizations, updateOrganization } from '../../api/resources.js';
 import ConfirmDialog from '../../components/ConfirmDialog.vue';
 import ResourceForm from '../../components/ResourceForm.vue';
 import { useAsyncResource } from '../../composables/useAsyncResource.js';
+import { useResourceCrud } from '../../composables/useResourceCrud.js';
 
 const { data: organizations, status, refresh } = useAsyncResource(getOrganizations, { notFoundIsEmpty: true });
 
@@ -18,68 +17,33 @@ const fields = [
   { key: 'Image', label: 'Imagen', type: 'text', required: true },
 ];
 
-const isFormOpen = ref(false);
-const formMode = ref('create');
-const formValues = ref({});
-const editingId = ref(null);
-const formError = ref('');
-
-function openCreateForm() {
-  formMode.value = 'create';
-  formValues.value = { Title: '', Description: '', Image: '' };
-  editingId.value = null;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function openEditForm(organization) {
-  formMode.value = 'edit';
-  formValues.value = {
+const {
+  isFormOpen,
+  formMode,
+  formValues,
+  formError,
+  openCreateForm,
+  openEditForm,
+  closeForm,
+  handleSubmit,
+  confirmingId,
+  requestDelete,
+  cancelDelete,
+  confirmDelete,
+} = useResourceCrud({
+  createFn: createOrganization,
+  updateFn: updateOrganization,
+  deleteFn: deleteOrganization,
+  refresh,
+  emptyValues: { Title: '', Description: '', Image: '' },
+  toFormValues: (organization) => ({
     Title: organization.Title,
     Description: organization.Description ?? '',
     Image: organization.Image,
-  };
-  editingId.value = organization.ID;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function closeForm() {
-  isFormOpen.value = false;
-}
-
-async function handleSubmit(values) {
-  const payload = { Title: values.Title, Description: values.Description || null, Image: values.Image };
-
-  try {
-    if (formMode.value === 'create') {
-      await createOrganization(payload);
-    } else {
-      await updateOrganization(editingId.value, payload);
-    }
-    isFormOpen.value = false;
-    await refresh();
-  } catch (error) {
-    formError.value = error.body?.message || 'No se pudo guardar la organización.';
-  }
-}
-
-const confirmingId = ref(null);
-
-function requestDelete(id) {
-  confirmingId.value = id;
-}
-
-function cancelDelete() {
-  confirmingId.value = null;
-}
-
-async function confirmDelete() {
-  const id = confirmingId.value;
-  confirmingId.value = null;
-  await deleteOrganization(id);
-  await refresh();
-}
+  }),
+  toPayload: (values) => ({ Title: values.Title, Description: values.Description || null, Image: values.Image }),
+  errorMessage: 'No se pudo guardar la organización.',
+});
 </script>
 
 <template>

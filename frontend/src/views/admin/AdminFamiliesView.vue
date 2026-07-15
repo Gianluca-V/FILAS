@@ -5,12 +5,11 @@
 // like the public FamiliesView (notFoundIsEmpty: true). Category is a
 // fixed 2-value enum (domain.ValidFamilyCategory) — rendered as a select,
 // never free text.
-import { ref } from 'vue';
-
 import { createFamilyItem, deleteFamilyItem, getFamily, updateFamilyItem } from '../../api/resources.js';
 import ConfirmDialog from '../../components/ConfirmDialog.vue';
 import ResourceForm from '../../components/ResourceForm.vue';
 import { useAsyncResource } from '../../composables/useAsyncResource.js';
+import { useResourceCrud } from '../../composables/useResourceCrud.js';
 
 const { data: items, status, refresh } = useAsyncResource(getFamily, { notFoundIsEmpty: true });
 
@@ -22,64 +21,29 @@ const fields = [
   { key: 'Image', label: 'Imagen', type: 'text' },
 ];
 
-const isFormOpen = ref(false);
-const formMode = ref('create');
-const formValues = ref({});
-const editingId = ref(null);
-const formError = ref('');
-
-function openCreateForm() {
-  formMode.value = 'create';
-  formValues.value = { Body: '', Category: CATEGORY_OPTIONS[0], Image: '' };
-  editingId.value = null;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function openEditForm(item) {
-  formMode.value = 'edit';
-  formValues.value = { Body: item.Body, Category: item.Category, Image: item.Image ?? '' };
-  editingId.value = item.ID;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function closeForm() {
-  isFormOpen.value = false;
-}
-
-async function handleSubmit(values) {
-  const payload = { Body: values.Body, Category: values.Category, Image: values.Image || null };
-
-  try {
-    if (formMode.value === 'create') {
-      await createFamilyItem(payload);
-    } else {
-      await updateFamilyItem(editingId.value, payload);
-    }
-    isFormOpen.value = false;
-    await refresh();
-  } catch (error) {
-    formError.value = error.body?.message || 'No se pudo guardar el taller.';
-  }
-}
-
-const confirmingId = ref(null);
-
-function requestDelete(id) {
-  confirmingId.value = id;
-}
-
-function cancelDelete() {
-  confirmingId.value = null;
-}
-
-async function confirmDelete() {
-  const id = confirmingId.value;
-  confirmingId.value = null;
-  await deleteFamilyItem(id);
-  await refresh();
-}
+const {
+  isFormOpen,
+  formMode,
+  formValues,
+  formError,
+  openCreateForm,
+  openEditForm,
+  closeForm,
+  handleSubmit,
+  confirmingId,
+  requestDelete,
+  cancelDelete,
+  confirmDelete,
+} = useResourceCrud({
+  createFn: createFamilyItem,
+  updateFn: updateFamilyItem,
+  deleteFn: deleteFamilyItem,
+  refresh,
+  emptyValues: { Body: '', Category: CATEGORY_OPTIONS[0], Image: '' },
+  toFormValues: (item) => ({ Body: item.Body, Category: item.Category, Image: item.Image ?? '' }),
+  toPayload: (values) => ({ Body: values.Body, Category: values.Category, Image: values.Image || null }),
+  errorMessage: 'No se pudo guardar el taller.',
+});
 </script>
 
 <template>

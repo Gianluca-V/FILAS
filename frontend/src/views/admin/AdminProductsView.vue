@@ -2,12 +2,11 @@
 // Ports js/admin/productosController.mjs + its .html partial: list, create,
 // edit, delete products. GET /api/products is never 404-on-empty (see
 // backend/internal/handler/rest/product.go), so no notFoundIsEmpty flag.
-import { ref } from 'vue';
-
 import { createProduct, deleteProduct, getProducts, updateProduct } from '../../api/resources.js';
 import ConfirmDialog from '../../components/ConfirmDialog.vue';
 import ResourceForm from '../../components/ResourceForm.vue';
 import { useAsyncResource } from '../../composables/useAsyncResource.js';
+import { useResourceCrud } from '../../composables/useResourceCrud.js';
 
 const { data: products, status, refresh } = useAsyncResource(getProducts);
 
@@ -18,69 +17,39 @@ const fields = [
   { key: 'Stock', label: 'Stock', type: 'number', required: true },
 ];
 
-const isFormOpen = ref(false);
-const formMode = ref('create');
-const formValues = ref({});
-const editingId = ref(null);
-const formError = ref('');
-
-function openCreateForm() {
-  formMode.value = 'create';
-  formValues.value = { Name: '', Price: '', Image: '', Stock: '' };
-  editingId.value = null;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function openEditForm(product) {
-  formMode.value = 'edit';
-  formValues.value = { Name: product.Name, Price: product.Price, Image: product.Image ?? '', Stock: product.Stock };
-  editingId.value = product.ID;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function closeForm() {
-  isFormOpen.value = false;
-}
-
-async function handleSubmit(values) {
-  const payload = {
+const {
+  isFormOpen,
+  formMode,
+  formValues,
+  formError,
+  openCreateForm,
+  openEditForm,
+  closeForm,
+  handleSubmit,
+  confirmingId,
+  requestDelete,
+  cancelDelete,
+  confirmDelete,
+} = useResourceCrud({
+  createFn: createProduct,
+  updateFn: updateProduct,
+  deleteFn: deleteProduct,
+  refresh,
+  emptyValues: { Name: '', Price: '', Image: '', Stock: '' },
+  toFormValues: (product) => ({
+    Name: product.Name,
+    Price: product.Price,
+    Image: product.Image ?? '',
+    Stock: product.Stock,
+  }),
+  toPayload: (values) => ({
     Name: values.Name,
     Price: Number(values.Price),
     Image: values.Image || null,
     Stock: Number(values.Stock),
-  };
-
-  try {
-    if (formMode.value === 'create') {
-      await createProduct(payload);
-    } else {
-      await updateProduct(editingId.value, payload);
-    }
-    isFormOpen.value = false;
-    await refresh();
-  } catch (error) {
-    formError.value = error.body?.message || 'No se pudo guardar el producto.';
-  }
-}
-
-const confirmingId = ref(null);
-
-function requestDelete(id) {
-  confirmingId.value = id;
-}
-
-function cancelDelete() {
-  confirmingId.value = null;
-}
-
-async function confirmDelete() {
-  const id = confirmingId.value;
-  confirmingId.value = null;
-  await deleteProduct(id);
-  await refresh();
-}
+  }),
+  errorMessage: 'No se pudo guardar el producto.',
+});
 </script>
 
 <template>

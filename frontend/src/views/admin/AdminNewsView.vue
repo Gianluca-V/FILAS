@@ -7,12 +7,11 @@
 // legacy message "Missing Title, Body, or Image parameter" (see
 // backend/internal/handler/rest/news.go), surfaced here as-is via
 // error.body.message.
-import { ref } from 'vue';
-
 import { createNewsItem, deleteNewsItem, getNews, updateNewsItem } from '../../api/resources.js';
 import ConfirmDialog from '../../components/ConfirmDialog.vue';
 import ResourceForm from '../../components/ResourceForm.vue';
 import { useAsyncResource } from '../../composables/useAsyncResource.js';
+import { useResourceCrud } from '../../composables/useResourceCrud.js';
 
 const { data: news, status, refresh } = useAsyncResource(getNews, { notFoundIsEmpty: true });
 
@@ -22,64 +21,29 @@ const fields = [
   { key: 'Image', label: 'Imagen', type: 'text', required: true },
 ];
 
-const isFormOpen = ref(false);
-const formMode = ref('create');
-const formValues = ref({});
-const editingId = ref(null);
-const formError = ref('');
-
-function openCreateForm() {
-  formMode.value = 'create';
-  formValues.value = { Title: '', Body: '', Image: '' };
-  editingId.value = null;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function openEditForm(article) {
-  formMode.value = 'edit';
-  formValues.value = { Title: article.Title, Body: article.Body ?? '', Image: article.Image ?? '' };
-  editingId.value = article.ID;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function closeForm() {
-  isFormOpen.value = false;
-}
-
-async function handleSubmit(values) {
-  const payload = { Title: values.Title, Body: values.Body, Image: values.Image };
-
-  try {
-    if (formMode.value === 'create') {
-      await createNewsItem(payload);
-    } else {
-      await updateNewsItem(editingId.value, payload);
-    }
-    isFormOpen.value = false;
-    await refresh();
-  } catch (error) {
-    formError.value = error.body?.message || 'No se pudo guardar la noticia.';
-  }
-}
-
-const confirmingId = ref(null);
-
-function requestDelete(id) {
-  confirmingId.value = id;
-}
-
-function cancelDelete() {
-  confirmingId.value = null;
-}
-
-async function confirmDelete() {
-  const id = confirmingId.value;
-  confirmingId.value = null;
-  await deleteNewsItem(id);
-  await refresh();
-}
+const {
+  isFormOpen,
+  formMode,
+  formValues,
+  formError,
+  openCreateForm,
+  openEditForm,
+  closeForm,
+  handleSubmit,
+  confirmingId,
+  requestDelete,
+  cancelDelete,
+  confirmDelete,
+} = useResourceCrud({
+  createFn: createNewsItem,
+  updateFn: updateNewsItem,
+  deleteFn: deleteNewsItem,
+  refresh,
+  emptyValues: { Title: '', Body: '', Image: '' },
+  toFormValues: (article) => ({ Title: article.Title, Body: article.Body ?? '', Image: article.Image ?? '' }),
+  toPayload: (values) => ({ Title: values.Title, Body: values.Body, Image: values.Image }),
+  errorMessage: 'No se pudo guardar la noticia.',
+});
 </script>
 
 <template>

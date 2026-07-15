@@ -4,73 +4,39 @@
 // reused with prefilled values, kept here too). GET /api/gallery is
 // 404-on-empty (see backend/internal/handler/rest/gallery.go), like the
 // public GalleryView (notFoundIsEmpty: true).
-import { ref } from 'vue';
-
 import { createGalleryItem, deleteGalleryItem, getGallery, updateGalleryItem } from '../../api/resources.js';
 import ConfirmDialog from '../../components/ConfirmDialog.vue';
 import ResourceForm from '../../components/ResourceForm.vue';
 import { useAsyncResource } from '../../composables/useAsyncResource.js';
+import { useResourceCrud } from '../../composables/useResourceCrud.js';
 
 const { data: images, status, refresh } = useAsyncResource(getGallery, { notFoundIsEmpty: true });
 
 const fields = [{ key: 'Image', label: 'Imagen', type: 'text', required: true }];
 
-const isFormOpen = ref(false);
-const formMode = ref('create');
-const formValues = ref({});
-const editingId = ref(null);
-const formError = ref('');
-
-function openCreateForm() {
-  formMode.value = 'create';
-  formValues.value = { Image: '' };
-  editingId.value = null;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function openEditForm(image) {
-  formMode.value = 'edit';
-  formValues.value = { Image: image.Image };
-  editingId.value = image.ID;
-  formError.value = '';
-  isFormOpen.value = true;
-}
-
-function closeForm() {
-  isFormOpen.value = false;
-}
-
-async function handleSubmit(values) {
-  try {
-    if (formMode.value === 'create') {
-      await createGalleryItem({ Image: values.Image });
-    } else {
-      await updateGalleryItem(editingId.value, { Image: values.Image });
-    }
-    isFormOpen.value = false;
-    await refresh();
-  } catch (error) {
-    formError.value = error.body?.message || 'No se pudo guardar la imagen.';
-  }
-}
-
-const confirmingId = ref(null);
-
-function requestDelete(id) {
-  confirmingId.value = id;
-}
-
-function cancelDelete() {
-  confirmingId.value = null;
-}
-
-async function confirmDelete() {
-  const id = confirmingId.value;
-  confirmingId.value = null;
-  await deleteGalleryItem(id);
-  await refresh();
-}
+const {
+  isFormOpen,
+  formMode,
+  formValues,
+  formError,
+  openCreateForm,
+  openEditForm,
+  closeForm,
+  handleSubmit,
+  confirmingId,
+  requestDelete,
+  cancelDelete,
+  confirmDelete,
+} = useResourceCrud({
+  createFn: createGalleryItem,
+  updateFn: updateGalleryItem,
+  deleteFn: deleteGalleryItem,
+  refresh,
+  emptyValues: { Image: '' },
+  toFormValues: (image) => ({ Image: image.Image }),
+  toPayload: (values) => ({ Image: values.Image }),
+  errorMessage: 'No se pudo guardar la imagen.',
+});
 </script>
 
 <template>
