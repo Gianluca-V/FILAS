@@ -232,13 +232,14 @@ Go reproduces this: `domain.ProductRepository.Update` and
 deliberately omit `Description` from the `UPDATE` statement — see their
 doc comments, which now cite this entry.
 
-## 12. Orders' `GROUP_CONCAT` JSON shape (not yet ported)
+## 12. Orders' `GROUP_CONCAT` JSON shape — see §15
 
-Not yet characterized in code — flagged in the design doc (§9) as a risk
-for the orders PR: the legacy response is built with `GROUP_CONCAT` plus
-manual JSON string concatenation, which is fragile with quotes/commas in
-product names. The Go DTO must reproduce the SHAPE, not the bug's
-fragility. Tracked for the orders work unit, not covered by this document.
+Superseded: this entry originally flagged the orders `GROUP_CONCAT` shape
+as "not yet characterized" (design doc §9 risk, tracked for a future PR).
+It has since been live-characterized and fully documented in §15.2, along
+with the auth model (§15.1) and the trigger-case bug (§15.3). This section
+number is kept as a redirect stub because §14 cites "§12" by number; follow
+that reference to §15 for the actual content.
 
 ## 13. News write auth bug — FIXED, not reproduced (PR5, task 4.1)
 
@@ -596,3 +597,39 @@ matching sha256) — closing the loop create→persist→read across both stacks
 The four `orderproduct` triggers and `before_update_orders` were removed
 from `01-schema.sql` only after this evidence was green (see that file's
 header note 1 and the inline drop notes).
+
+### 15.5 Stock decrement is race-safe (floor-guarded CAS)
+
+`mysql.OrderRepository.Create` decrements stock with a FLOOR-GUARDED
+conditional UPDATE — `UPDATE products SET Stock = Stock + ? WHERE ID = ?
+AND Stock + ? >= 0` (`stockDecrement`) — and treats `RowsAffected == 0` as
+`domain.ErrInsufficientStock`, rolling the whole order back. This is the
+authoritative, race-safe availability check; the usecase's pre-transaction
+`Stock < demand` check is a fast/clear-failure optimization only (the two
+together are defense-in-depth). It mirrors `TransitionState`'s CAS idiom.
+Without this guard the usecase check is a TOCTOU: two concurrent
+`POST /api/orders` for the same product both read the same stale stock and
+both decrement, overselling into negative stock (this was the PR7 review
+gate's converged blocker — the same integrity family as PR6's
+duplicate-line lost update, but across concurrent distinct orders).
+
+Live-verified against the dockerized stack: with `products.Stock = 3` and
+12 concurrent `POST /api/orders` (qty 1 each), exactly **3** succeeded,
+final `Stock` landed at **0 (never negative)**, and the surplus requests
+were rejected — including at least one via the repository CAS (`RowsAffected
+== 0 → 409`) after its stale pre-check passed, proving the race is closed at
+the persistence boundary, not just the read.
+
+**Known limitation (tracked follow-up, not a blocker for this local-only
+project):** under that same high concurrent contention on a single product
+row, some transactions are chosen as InnoDB deadlock victims (Error 1213)
+and surface as `500`. This is a PRE-EXISTING lock pattern, not introduced by
+the CAS: the `orderproduct` insert takes a shared lock on the referenced
+`products` row (FK `orderproduct_ibfk_2`), and the subsequent stock UPDATE
+needs an exclusive lock on that same row — an S→X upgrade that deadlocks
+when several checkouts of the same product interleave. It is
+integrity-preserving (the victim rolls back atomically — no oversell, no
+partial write, confirmed by `Stock = 0` above) and retriable by design
+(Error 1213 explicitly says "try restarting transaction"). A production
+system would wrap `Create` in a bounded deadlock-retry; that is deliberately
+deferred here as out of scope for a single-operator local demo.

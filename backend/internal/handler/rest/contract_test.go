@@ -14,7 +14,7 @@ import (
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
 )
 
-// orderPtr is a small helper for building a *time.Time inline in test data.
+// orderTimePtr is a small helper for building a *time.Time inline in test data.
 func orderTimePtr(t time.Time) *time.Time { return &t }
 
 // Contract/characterization tests: lock the Go handlers' JSON output against
