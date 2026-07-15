@@ -6,8 +6,16 @@ backend/api
 backend/*.exe
 backend/bin/
 
-# Node (existing frontend)
+# Node (frontend manages its own; the legacy root node_modules was removed
+# at the PR9 cutover)
 node_modules/
+
+# Build output
+dist/
+
+# Tooling / index dirs (not part of the project)
+.codegraph/
+.atl/
 
 # OS
 .DS_Store
