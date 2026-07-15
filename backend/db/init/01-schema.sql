@@ -1,0 +1,346 @@
+-- FILAS schema, seeded from filas.sql for local Docker Compose development.
+-- Row/column data below is copied verbatim from the source dump; only the
+-- following are intentionally changed:
+--
+--  1. Trigger status: all 5 legacy MySQL triggers from filas.sql have been
+--     DROPPED in PR7 (task 6.1), after their logic (orderPrice, orders.total,
+--     finishDate stamping) was ported to the Go `usecase/order.go` +
+--     `repository/mysql/order.go` layers per ADR-3 (sdd/migrate-go-vue/design)
+--     AND the order-parity gate proved the Go path produces IDENTICAL
+--     persisted results with the triggers present vs. absent (before/after
+--     live evidence in backend/docs/legacy-quirks.md §15.4). The Go
+--     transactions now write orderPrice and total explicitly and stamp
+--     finishDate in the atomic TransitionState update, so the database no
+--     longer owns any of this logic. The five dropped triggers (were
+--     confirmed by gate review obs #28) and the point in this file where
+--     each was removed:
+--       - after_orderProduct_insert   (orderproduct)  -- see note below
+--       - after_orderProduct_update   (orderproduct)  -- see note below
+--       - before_orderProduct_insert  (orderproduct)  -- see note below
+--       - before_orderProduct_update  (orderproduct)  -- see note below
+--       - before_update_orders        (orders)        -- see note below
+--     A drop note is left inline at each former trigger location. Recreating
+--     any of them would double-apply orderPrice/total on top of the Go
+--     writes — they must stay dropped.
+--
+--  2. `admins` table: the source dump has NO primary key at all (ID is a
+--     nullable int with zero constraints). Patched here with an explicit
+--     PRIMARY KEY + AUTO_INCREMENT (task 2.1 will confirm this choice
+--     against the Go AdminRepository).
+--
+--  3. `admins` seed row: the real legacy admin credential (username,
+--     password hash, salt) from filas.sql is NOT reproduced here. This is
+--     a synthetic, LOCAL-DEV-ONLY admin account using the same legacy
+--     sha256(salt+password) scheme the login usecase will verify against
+--     (see ADR-4, sdd/migrate-go-vue/design). Local dev credentials:
+--       username: FilasAdmin
+--       password: filas-local-dev-2026
+--     (salt/hash below were generated fresh for this password; they do
+--     NOT correspond to any real account.)
+--
+--  4. Trigger case-sensitivity bug (PR7 discovery, now historical): the
+--     source dump's `after_orderProduct_insert`/`after_orderProduct_update`
+--     trigger bodies referenced `FROM orderProduct` (mixed case) while the
+--     actual table is `orderproduct` (lowercase, see note 1). This was a
+--     latent bug that MySQL 5.7/Windows (case-insensitive table lookups)
+--     silently tolerated; `mysql:8` on Linux (`lower_case_table_names=0`,
+--     case SENSITIVE) throws `Table 'filas.orderProduct' doesn't exist` on
+--     every INSERT into `orderproduct`, aborting the whole statement. That
+--     made the "triggers still present" half of the PR7 gate impossible to
+--     exercise, so the case was corrected FIRST (`orderProduct` ->
+--     `orderproduct`) purely to run the gate, then the triggers were
+--     dropped entirely (note 1). No trigger bodies remain in this file, so
+--     the fix is now moot for live behavior — recorded here only to explain
+--     why the gate's "before" half required a preliminary correction. See
+--     backend/docs/legacy-quirks.md §15.3 for the full write-up.
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+-- --------------------------------------------------------
+
+--
+-- Table `admins` (PRIMARY KEY + AUTO_INCREMENT patched in, see note 2
+-- above; synthetic local-dev credential, see note 3 above)
+--
+
+CREATE TABLE `admins` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `username` text DEFAULT NULL,
+  `password` text DEFAULT NULL,
+  `salt` text DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `admins` (`ID`, `username`, `password`, `salt`) VALUES
+(1543, 'FilasAdmin', '9a0d462f4985ce28e354f318e2346a3d61881336330e55cca8d9697cad9f1686', '16308d7827b79fa10077d9a137027f97');
+
+ALTER TABLE `admins` AUTO_INCREMENT = 1544;
+
+-- --------------------------------------------------------
+
+--
+-- Table `family`
+--
+
+CREATE TABLE `family` (
+  `ID` int(11) NOT NULL,
+  `Image` text DEFAULT NULL,
+  `Body` text NOT NULL,
+  `Category` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `family` (`ID`, `Image`, `Body`, `Category`) VALUES
+(3, 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=', 'aqui va la descripcion 3', 'Taller protegido'),
+(5, 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg', '', 'Taller protegido'),
+(6, '', 'Taller de música: Ritmo – canto- uso y confección de instrumentos', 'Centro de dia'),
+(7, '', 'Taller de educación física: Actividades y juegos con distintos materiales y elementos', 'Centro de dia'),
+(8, '', 'Taller de cocina: Lavado de manos, Planificación de receta, Compras, Uso de delantal, Reconocimiento de utensilios, Acciones, cortar, mezclar, amasar, batir; Reconocer y utilizar correctamente los dispositivos, usos y cuidados.', 'Centro de dia'),
+(9, '', 'Taller de estimulación cognitiva: Se pretende activar, estimular y entrenar determinadas capacidades cognitivas y los componentes que la integran, de forma adecuada y sistemática, para transformarlas en una habilidad, hábito o destreza. Todo ello parece desligarse de otras dimensiones tales como la emocional y/o la conductual, pero no es así dado que también se trabajan para poder ser transferidas al entorno cotidiano general.\nPropuestas lúdicas.', 'Centro de dia'),
+(10, '', 'Taller de manualidades: Diversas artesanías; Utilización de técnicas plásticas y grafo plásticas; Diversos materiales y texturas.', 'Centro de dia'),
+(11, '', 'Taller de expresión corporal: La expresión corporal es un medio de comunicación a través del cual las personas comunican ideas, sensaciones, emociones, sentimientos y pensamientos, esta es la unidad del lenguaje gestual. Las personas comunican sus representaciones mentales sobre el ambiente a través del cuerpo. En consecuencia, las diferentes formas de expresión corporal son aprovechadas para construir significados de acuerdo con los contextos donde se manifiestan.', 'Centro de dia'),
+(12, '', 'Expresión facial: Es el tipo de expresión corporal que se distingue por utilizar principalmente las diferentes partes del rostro para expresar sentimientos. Muchas veces ponemos en práctica esta forma de expresión si darnos cuenta, ya que es un elemento de uso común en el lenguaje humano.\nDiferentes propuestas para estimular la expresión corporal.', 'Centro de dia'),
+(13, '', 'Expresión teatral: Como mencionamos antes, en el teatro la expresión corporal es fundamental, porque aunque podamos hablar, en este arte los movimientos de nuestro cuerpo dicen más que las palabras. Quienes logran manejar esta forma de expresión corporal logran transmitir muchas emociones.\nPor lo general, comunicarse a través de la expresión teatral significa utilizar todo el cuerpo..', 'Centro de dia'),
+(14, '', 'Taller de relajación corporal: Las técnicas de relajación implican centrar la atención en algo que calme y aumente la conciencia del propio  cuerpo, favoreciendo la estimulación de las funciones ejecutivas. Ejercicios de relajación brindan  muchos beneficios, algunos son: Disminuir la frecuencia cardíaca; Disminuir la presión arterial; Disminuir la frecuencia respiratoria; Mejorar la digestión; Controlar los niveles de glucosa en la sangre; Reducir la actividad de las hormonas del estrés; Incrementar el flujo sanguíneo hacia los músculos más grandes; Reducir la tensión muscular y el dolor crónico; Mejorar la atención y el estado de ánimo; Mejorar la calidad del sueño; Disminuir la fatiga; Reducir la ira y la frustración; Desarrollar la confianza para resolver problemas;', 'Centro de dia');
+
+ALTER TABLE `family` ADD PRIMARY KEY (`ID`);
+ALTER TABLE `family` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+-- --------------------------------------------------------
+
+--
+-- Table `gallery`
+--
+
+CREATE TABLE `gallery` (
+  `ID` int(11) NOT NULL,
+  `Image` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `gallery` (`ID`, `Image`) VALUES
+(1, 'assets/galeria-1.jpg'),
+(2, 'assets/galeria-2.jpg'),
+(3, 'assets/galeria-3.jpg'),
+(4, 'assets/galeria-4.jpg'),
+(5, 'assets/galeria-5.jpg'),
+(6, 'assets/galeria-6.jpg'),
+(7, 'assets/galeria-7.jpg'),
+(8, 'assets/galeria-8.jpg'),
+(9, 'assets/galeria-9.jpg');
+
+ALTER TABLE `gallery` ADD PRIMARY KEY (`ID`);
+ALTER TABLE `gallery` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+-- --------------------------------------------------------
+
+--
+-- Table `news`
+--
+
+CREATE TABLE `news` (
+  `ID` int(11) NOT NULL,
+  `Title` varchar(99) NOT NULL,
+  `Body` text DEFAULT NULL,
+  `Image` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `news` (`ID`, `Title`, `Body`, `Image`) VALUES
+(1, 'Noticia de prueba 1', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at nisl sed justo cursus finibus. Vivamus quis suscipit turpis. Fusce eu urna magna. Nulla sit amet nunc eget ligula luctus tristique non ornare risus. Quisque nec nulla at massa imperdiet accumsan vitae nec augue. Nunc et nisl justo. Nam venenatis odio sed sapien laoreet, nec lobortis tellus volutpat.', 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg'),
+(2, 'Noticia de prueba 2', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at nisl sed justo cursus finibus. Vivamus quis suscipit turpis. Fusce eu urna magna. Nulla sit amet nunc eget ligula luctus tristique non ornare risus. Quisque nec nulla at massa imperdiet accumsan vitae nec augue. Nunc et nisl justo. Nam venenatis odio sed sapien laoreet, nec lobortis tellus volutpat.', 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg'),
+(3, 'Noticia de prueba 3', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at nisl sed justo cursus finibus. Vivamus quis suscipit turpis. Fusce eu urna magna. Nulla sit amet nunc eget ligula luctus tristique non ornare risus. Quisque nec nulla at massa imperdiet accumsan vitae nec augue. Nunc et nisl justo. Nam venenatis odio sed sapien laoreet, nec lobortis tellus volutpat.', 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg'),
+(4, 'Noticia de prueba 4', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at nisl sed justo cursus finibus. Vivamus quis suscipit turpis. Fusce eu urna magna. Nulla sit amet nunc eget ligula luctus tristique non ornare risus. Quisque nec nulla at massa imperdiet accumsan vitae nec augue. Nunc et nisl justo. Nam venenatis odio sed sapien laoreet, nec lobortis tellus volutpat.', 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg'),
+(5, 'Noticia de prueba 5', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at nisl sed justo cursus finibus. Vivamus quis suscipit turpis. Fusce eu urna magna. Nulla sit amet nunc eget ligula luctus tristique non ornare risus. Quisque nec nulla at massa imperdiet accumsan vitae nec augue. Nunc et nisl justo. Nam venenatis odio sed sapien laoreet, nec lobortis tellus volutpat.', 'https://www.refugeesrespond.org/dadaabwikimedia/images/archive/a/a9/20201124034818%21Example.jpg');
+
+ALTER TABLE `news` ADD PRIMARY KEY (`ID`);
+ALTER TABLE `news` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+-- --------------------------------------------------------
+
+--
+-- Table `orderproduct` (4 of the 5 legacy triggers live here -- see
+-- header note 1; they stay until PR7 drops them post order-parity gate)
+--
+
+CREATE TABLE `orderproduct` (
+  `ID` int(11) NOT NULL,
+  `orderID` int(11) NOT NULL,
+  `productID` int(11) NOT NULL,
+  `productQuantity` int(11) NOT NULL,
+  `orderPrice` double NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `orderproduct` (`ID`, `orderID`, `productID`, `productQuantity`, `orderPrice`) VALUES
+(16, 10, 1, 2, 600),
+(17, 10, 2, 1, 600),
+(18, 10, 3, 3, 600),
+(19, 11, 9, 2, 1400),
+(20, 11, 3, 3, 1800),
+(21, 11, 1, 3, 1800),
+(25, 14, 1, 2, 1200),
+(26, 14, 8, 1, 1000),
+(27, 14, 13, 3, 1050),
+(31, 21, 10, 2, 2000),
+(32, 22, 16, 2, 1700),
+(33, 22, 17, 2, 2400),
+(34, 22, 18, 1, 700),
+(35, 22, 23, 2, 1700),
+(36, 22, 22, 3, 2550),
+(37, 22, 20, 7, 5600),
+(38, 23, 21, 2, 1600),
+(50, 26, 23, 91, 77350),
+(51, 27, 23, 1, 850),
+(52, 27, 22, 1, 850),
+(53, 27, 21, 1, 800),
+(54, 27, 19, 1, 850),
+(55, 27, 20, 1, 800),
+(56, 27, 16, 1, 850),
+(57, 27, 15, 2, 1200),
+(58, 27, 17, 4, 4800),
+(59, 27, 18, 3, 2100),
+(60, 28, 1, 5, 3000),
+(61, 29, 1, 5, 3000),
+(62, 30, 1, 200, 120000),
+(63, 31, 23, -100000, -85000000),
+(64, 32, 22, 3, 2550);
+
+--
+-- Triggers `orderproduct` -- DROPPED in PR7 (task 6.1) after the order
+-- parity gate. The four legacy triggers that lived here
+-- (after_orderProduct_insert/update recomputing orders.total = SUM(orderPrice);
+-- before_orderProduct_insert/update setting orderPrice = product.price *
+-- productQuantity) are now enforced solely by Go's usecase/order.go +
+-- repository/mysql/order.go, which write orderPrice and total explicitly
+-- inside each transaction. Proven equivalent by the before/after live gate
+-- documented in backend/docs/legacy-quirks.md §15.4: an order created +
+-- transitioned through the Go API yields IDENTICAL persisted orderPrice,
+-- total, stock deltas, and finishDate stamping whether these triggers are
+-- present or absent. See header note 1.
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table `orders` (1 of the 5 legacy triggers lives here -- see header
+-- note 1; it stays until PR7 drops it post order-parity gate)
+--
+
+CREATE TABLE `orders` (
+  `ID` int(11) NOT NULL,
+  `total` double DEFAULT NULL,
+  `startDate` datetime NOT NULL DEFAULT current_timestamp(),
+  `finishDate` datetime DEFAULT NULL,
+  `state` enum('pending','finished','canceled') NOT NULL DEFAULT 'pending',
+  `name` varchar(50) NOT NULL,
+  `phone` varchar(30) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `orders` (`ID`, `total`, `startDate`, `finishDate`, `state`, `name`, `phone`) VALUES
+(10, 3600, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'canceled', '', ''),
+(11, 5000, '2023-11-18 20:09:58', '2023-11-18 20:41:43', 'pending', '', ''),
+(14, 3250, '2023-11-18 20:09:58', '2023-11-18 20:42:33', 'finished', '', ''),
+(21, 2000, '2023-11-20 00:22:57', NULL, 'pending', '', ''),
+(22, 14650, '2023-11-20 00:25:08', NULL, 'pending', '', ''),
+(23, 1600, '2023-11-20 00:27:01', '2023-11-20 00:41:45', 'canceled', '', ''),
+(26, 77350, '2023-11-20 18:28:39', NULL, 'canceled', 'Gianluca Vespe', '32133423342421'),
+(27, 13100, '2023-11-20 18:30:02', NULL, 'pending', 'Turco agustin', '32142432546'),
+(28, 3000, '2023-11-20 21:58:04', NULL, 'canceled', 'Gianluca Vespe', '352435234234'),
+(29, 3000, '2023-11-20 22:01:20', NULL, 'canceled', 'Gianluca Vespe', '352435234234'),
+(30, 120000, '2023-11-20 22:21:06', NULL, 'canceled', 'gianluca', 'd323213'),
+(31, -85000000, '2023-11-20 22:24:24', NULL, 'pending', 'gianluca', '352435234234'),
+(32, 2550, '2023-11-20 22:28:45', NULL, 'pending', 'HoneyCorp', '1432546753');
+
+--
+-- Trigger `orders` -- DROPPED in PR7 (task 6.1) after the order parity gate.
+-- The legacy before_update_orders trigger (stamping finishDate =
+-- CURRENT_TIMESTAMP on a pending->finished transition) is now enforced by
+-- Go's usecase/order.go, which sets finishDate explicitly in the atomic
+-- TransitionState CAS update. See header note 1 and legacy-quirks.md §15.4.
+--
+
+ALTER TABLE `orders` ADD PRIMARY KEY (`ID`);
+ALTER TABLE `orders` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+
+-- --------------------------------------------------------
+
+--
+-- Table `organizations`
+--
+
+CREATE TABLE `organizations` (
+  `ID` int(11) NOT NULL,
+  `Title` text NOT NULL,
+  `Description` text DEFAULT NULL,
+  `Image` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `organizations` (`ID`, `Title`, `Description`, `Image`) VALUES
+(1, 'organizacions de prueba 1', 'Descripcion de prueba 1', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
+(2, 'organizacions de prueba 2', 'Descripcion de prueba 2', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY='),
+(3, 'organizacions de prueba 3', 'Descripcion de prueba 3', 'https://media.istockphoto.com/id/600072788/es/foto/contactos-de-delegados-en-la-recepci%C3%B3n-de-bebidas-de-la-conferencia.jpg?s=612x612&w=0&k=20&c=fxN0g917vwO_oUq62yO1Ouw9QkiZT5By68sq3v1gvVY=');
+
+ALTER TABLE `organizations` ADD PRIMARY KEY (`ID`);
+ALTER TABLE `organizations` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+-- --------------------------------------------------------
+
+--
+-- Table `products`
+--
+
+CREATE TABLE `products` (
+  `ID` int(11) NOT NULL,
+  `Name` varchar(99) NOT NULL,
+  `Price` double NOT NULL,
+  `Stock` int(11) NOT NULL,
+  `Image` text DEFAULT NULL,
+  `Description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `products` (`ID`, `Name`, `Price`, `Stock`, `Image`, `Description`) VALUES
+(1, 'Mermelada de pera', 600, 112, 'assets/default-img.png', ''),
+(2, 'Mermelada de naranja inglesa', 600, 2, 'assets\\mermnaranja.jpg', ''),
+(3, 'Mermelada de tomate', 600, 4, '', ''),
+(4, 'Mermelada de zapallo', 600, 1, '', ''),
+(5, 'Mermelada de ciruela', 800, 1, '', ''),
+(6, 'Mermelada de higo', 800, 1, '', ''),
+(7, 'Encurtido de berenjena', 700, 1, 'assets\\berenjena.jpg', ''),
+(8, 'Encurtido de berenjena grande', 1000, 1, '', ''),
+(9, 'Encurtido de champiñón', 700, 1, '', ''),
+(10, 'Encurtido de champiñón grande', 1000, 1, '', ''),
+(11, 'Bandeja de alfajores (6 u.)', 850, 1, 'assets\\alfajores.jpeg', ''),
+(12, 'Pre pizza de tomate', 350, 1, '', ''),
+(13, 'Pre pizza de cebolla', 350, 1, '', ''),
+(14, 'Pasta frola', 900, 1, '', ''),
+(15, 'Pan de figasa (1kg)', 600, 1, '', ''),
+(16, 'Pan integral (800gr)', 850, 1, '', ''),
+(17, 'Tarta de coco y dulce de leche', 1200, 1, '', ''),
+(18, 'Encurtido de ajo', 700, 1, 'assets\\ajo.jpg', NULL),
+(19, 'Bandeja de alfajores de chocolate (6 u.)', 850, 1, 'assets\\alfajores-chocolate.jpeg', NULL),
+(20, 'Budin', 800, 1, 'assets\\budin.jpeg', NULL),
+(21, 'Pan dulce', 800, 0, 'assets\\pandulce.jpeg', NULL),
+(22, 'Fugazzeta', 850, -2, 'assets\\fugazzeta.jpg', NULL),
+(23, 'Galletas (6 u.)', 850, 100092, 'assets\\galletitas.jpeg', NULL);
+
+ALTER TABLE `products` ADD PRIMARY KEY (`ID`);
+ALTER TABLE `products` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+-- --------------------------------------------------------
+
+--
+-- Indexes and foreign keys for `orderproduct` (declared after all
+-- referenced tables exist)
+--
+
+ALTER TABLE `orderproduct`
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `orderID` (`orderID`),
+  ADD KEY `productID` (`productID`);
+
+ALTER TABLE `orderproduct` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+
+ALTER TABLE `orderproduct`
+  ADD CONSTRAINT `orderproduct_ibfk_1` FOREIGN KEY (`orderID`) REFERENCES `orders` (`ID`),
+  ADD CONSTRAINT `orderproduct_ibfk_2` FOREIGN KEY (`productID`) REFERENCES `products` (`ID`);
+
+COMMIT;
