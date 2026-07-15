@@ -9,7 +9,7 @@ vi.mock('../../../api/resources.js', () => ({
 }));
 
 import { ApiError } from '../../../api/client.js';
-import { getOrders, patchOrderState } from '../../../api/resources.js';
+import { getOrders, getProducts, patchOrderState, updateOrder } from '../../../api/resources.js';
 import AdminOrdersView from '../AdminOrdersView.vue';
 
 function flushPromises() {
@@ -69,5 +69,46 @@ describe('AdminOrdersView', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('ya esté finalizada/cancelada');
+  });
+
+  it('blocks saving and shows an error when a line item has no resolvable product in the current catalog', async () => {
+    getOrders.mockResolvedValue([
+      pendingOrder({ products: [{ productName: 'Producto discontinuado', productPrice: 50, productQuantity: 2 }] }),
+    ]);
+    // Catalog does NOT contain 'Producto discontinuado' (renamed/deleted
+    // product), so findProductIdByName resolves to '' and the row must be
+    // rejected before updateOrder is ever called.
+    getProducts.mockResolvedValue([{ ID: '9', Name: 'Otro producto' }]);
+
+    const wrapper = mount(AdminOrdersView);
+    await flushPromises();
+
+    await wrapper.find('[data-testid="edit-items-1"]').trigger('click');
+    await flushPromises();
+
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(updateOrder).not.toHaveBeenCalled();
+    expect(wrapper.text()).toContain('Seleccioná un producto válido');
+  });
+
+  it('calls updateOrder with a numeric productID and quantity when the product resolves from the catalog', async () => {
+    getOrders.mockResolvedValue([pendingOrder()]);
+    getProducts.mockResolvedValue([{ ID: '5', Name: 'Pan casero' }]);
+    updateOrder.mockResolvedValue({ message: 'Order updated successfully' });
+
+    const wrapper = mount(AdminOrdersView);
+    await flushPromises();
+
+    await wrapper.find('[data-testid="edit-items-1"]').trigger('click');
+    await flushPromises();
+
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(updateOrder).toHaveBeenCalledWith('1', {
+      orderProducts: [{ productID: 5, quantity: 1 }],
+    });
   });
 });

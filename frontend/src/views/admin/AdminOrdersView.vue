@@ -84,7 +84,33 @@ function removeItemRow(index) {
   editableItems.value.splice(index, 1);
 }
 
+// Defense in depth: the editor is a real <form> now (see template) so the
+// product <select>'s `required` participates in the browser's own
+// validation on submit, but we don't rely on that alone — a synthetic
+// form submission (e.g. in tests, or a browser that skips constraint
+// validation) would otherwise let a falsy/0/NaN productID reach the API.
+//
+// Residual limitation: dto.OrderProductResponse exposes no per-line
+// productID (see backend/internal/handler/rest/dto/response.go), so
+// findProductIdByName's name→id preselect is best-effort and an admin
+// must confirm each product before saving. This guard only prevents an
+// empty/0 id from being submitted — it cannot detect a duplicate product
+// NAME silently preselecting the wrong id, which would need a backend
+// productID to fully fix.
+function hasInvalidItemRow(item) {
+  const productId = Number(item.productID);
+  const quantity = Number(item.quantity);
+  return !item.productID || !productId || !Number.isInteger(quantity) || quantity <= 0;
+}
+
 async function submitItems() {
+  itemsError.value = '';
+
+  if (editableItems.value.length === 0 || editableItems.value.some(hasInvalidItemRow)) {
+    itemsError.value = 'Seleccioná un producto válido y una cantidad mayor a 0 en cada línea antes de guardar.';
+    return;
+  }
+
   try {
     await updateOrder(editingOrderId.value, {
       orderProducts: editableItems.value.map((item) => ({
@@ -139,10 +165,17 @@ async function submitItems() {
         <tr v-for="order in filteredOrders" :key="order.orderID">
           <td>{{ order.orderID }}</td>
           <td>
+            <!-- productPrice is the product's CURRENT catalog price (live JOIN,
+                 see the doc comment on OrderProductResponse in
+                 backend/internal/handler/rest/dto/response.go), NOT the
+                 price billed at order time. Do not multiply it by quantity
+                 and present it as a "subtotal" — it can disagree with the
+                 frozen order.orderTotal shown in the Total column. Label it
+                 explicitly as the current price instead. -->
             <ul class="admin-order__products">
               <li v-for="(product, index) in order.products" :key="index">
-                {{ product.productName }} x{{ product.productQuantity }} — Subtotal:
-                {{ product.productPrice * product.productQuantity }}
+                {{ product.productName }} x{{ product.productQuantity }}
+                (precio actual: $ {{ product.productPrice }} c/u)
               </li>
             </ul>
           </td>
@@ -158,7 +191,13 @@ async function submitItems() {
             <button type="button" :data-testid="`cancel-${order.orderID}`" @click="transitionState(order, 'canceled')">
               Cancelar
             </button>
-            <button type="button" @click="openItemsEditor(order)">Editar productos</button>
+            <button
+              type="button"
+              :data-testid="`edit-items-${order.orderID}`"
+              @click="openItemsEditor(order)"
+            >
+              Editar productos
+            </button>
             <p v-if="actionErrors[order.orderID]" class="admin-order__error">{{ actionErrors[order.orderID] }}</p>
           </td>
         </tr>
@@ -170,24 +209,30 @@ async function submitItems() {
         <h4>Editar productos de la orden #{{ editingOrderId }}</h4>
         <p v-if="itemsError" class="admin-order__error">{{ itemsError }}</p>
 
-        <div v-for="(item, index) in editableItems" :key="index" class="order-items-editor__row">
-          <span class="order-items-editor__original">{{ item.productName }}</span>
-          <select v-model="item.productID" required>
-            <option value="" disabled>Seleccionar producto</option>
-            <option v-for="product in productCatalog" :key="product.ID" :value="product.ID">
-              {{ product.Name }}
-            </option>
-          </select>
-          <input v-model.number="item.quantity" type="number" min="1">
-          <button type="button" @click="removeItemRow(index)">Quitar</button>
-        </div>
+        <!-- Real <form> (not a <div>) so the product <select>'s `required`
+             participates in the browser's constraint validation on submit;
+             see the hasInvalidItemRow guard in submitItems for the
+             defense-in-depth check that doesn't rely on that alone. -->
+        <form @submit.prevent="submitItems">
+          <div v-for="(item, index) in editableItems" :key="index" class="order-items-editor__row">
+            <span class="order-items-editor__original">{{ item.productName }}</span>
+            <select v-model="item.productID" required>
+              <option value="" disabled>Seleccionar producto</option>
+              <option v-for="product in productCatalog" :key="product.ID" :value="product.ID">
+                {{ product.Name }}
+              </option>
+            </select>
+            <input v-model.number="item.quantity" type="number" min="1">
+            <button type="button" @click="removeItemRow(index)">Quitar</button>
+          </div>
 
-        <button type="button" class="order-items-editor__add" @click="addItemRow">+ Agregar producto</button>
+          <button type="button" class="order-items-editor__add" @click="addItemRow">+ Agregar producto</button>
 
-        <div class="order-items-editor__actions">
-          <button type="button" @click="submitItems">Guardar</button>
-          <button type="button" @click="closeItemsEditor">Cancelar</button>
-        </div>
+          <div class="order-items-editor__actions">
+            <button type="submit" data-testid="save-items">Guardar</button>
+            <button type="button" @click="closeItemsEditor">Cancelar</button>
+          </div>
+        </form>
       </div>
     </div>
   </section>
