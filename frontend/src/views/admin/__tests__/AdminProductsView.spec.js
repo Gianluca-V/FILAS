@@ -8,7 +8,7 @@ vi.mock('../../../api/resources.js', () => ({
   deleteProduct: vi.fn(),
 }));
 
-import { deleteProduct, getProducts } from '../../../api/resources.js';
+import { createProduct, deleteProduct, getProducts } from '../../../api/resources.js';
 import AdminProductsView from '../AdminProductsView.vue';
 
 function flushPromises() {
@@ -54,6 +54,29 @@ describe('AdminProductsView', () => {
     await flushPromises();
 
     expect(deleteProduct).toHaveBeenCalledWith('7');
+  });
+
+  it('creates a product coercing Price and Stock to numbers', async () => {
+    getProducts.mockResolvedValue([]);
+    createProduct.mockResolvedValue({ ID: '9' });
+
+    const wrapper = mount(AdminProductsView);
+    await flushPromises();
+
+    await wrapper.find('.admin-resource__add').trigger('click');
+    await wrapper.find('#Name').setValue('Pan de campo');
+    await wrapper.find('#Price').setValue('150');
+    await wrapper.find('#Stock').setValue('7');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(createProduct).toHaveBeenCalledTimes(1);
+    const payload = createProduct.mock.calls[0][0];
+    expect(payload).toEqual({ Name: 'Pan de campo', Price: 150, Image: null, Stock: 7 });
+    // The load-bearing coercion: Price/Stock must reach the API as numbers,
+    // not the strings the form inputs hold.
+    expect(typeof payload.Price).toBe('number');
+    expect(typeof payload.Stock).toBe('number');
   });
 
   it('does not call deleteProduct when the confirmation is canceled', async () => {
