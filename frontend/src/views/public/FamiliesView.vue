@@ -1,25 +1,11 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 
 import { getFamily } from '../../api/resources.js';
+import { useAsyncResource } from '../../composables/useAsyncResource.js';
 import { resolveAssetPath } from '../../utils/assets.js';
-import { isNotFound } from '../../utils/httpErrors.js';
 
-const status = ref('loading');
-const family = ref([]);
-
-onMounted(async () => {
-  try {
-    family.value = await getFamily();
-    status.value = 'ready';
-  } catch (error) {
-    if (isNotFound(error)) {
-      status.value = 'empty';
-    } else {
-      status.value = 'error';
-    }
-  }
-});
+const { data: family, status } = useAsyncResource(getFamily, { notFoundIsEmpty: true });
 
 // Category enum from the spec: "Centro de dia" / "Taller protegido".
 const dayCenterItems = computed(() => family.value.filter((item) => item.Category === 'Centro de dia'));

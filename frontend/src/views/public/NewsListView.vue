@@ -1,29 +1,13 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-
 import { getNews } from '../../api/resources.js';
+import { useAsyncResource } from '../../composables/useAsyncResource.js';
 import { resolveAssetPath } from '../../utils/assets.js';
-import { isNotFound } from '../../utils/httpErrors.js';
 
 // status: 'loading' | 'ready' | 'empty' | 'error'. Empty is a distinct
 // state (not an error): GET /api/news returns 404 when there is no news
 // yet (see backend/internal/handler/rest/news.go), so a 404 here means
 // "no news", not a failure.
-const status = ref('loading');
-const news = ref([]);
-
-onMounted(async () => {
-  try {
-    news.value = await getNews();
-    status.value = 'ready';
-  } catch (error) {
-    if (isNotFound(error)) {
-      status.value = 'empty';
-    } else {
-      status.value = 'error';
-    }
-  }
-});
+const { data: news, status } = useAsyncResource(getNews, { notFoundIsEmpty: true });
 </script>
 
 <template>

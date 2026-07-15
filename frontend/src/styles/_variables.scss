@@ -12,13 +12,6 @@ $color-accent: #118e11;
 // Typography
 $font-family-base: 'Mulish', sans-serif;
 
-// Spacing
-$spacing-xs: 0.5rem;
-$spacing-sm: 1rem;
-$spacing-md: 1.5rem;
-$spacing-lg: 2rem;
-$spacing-xl: 3rem;
-
 // Breakpoints (legacy media-query thresholds, kept as SCSS vars for reuse
 // in mixins.scss)
 $breakpoint-tablet: 995px;

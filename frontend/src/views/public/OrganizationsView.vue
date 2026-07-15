@@ -1,25 +1,9 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-
 import { getOrganizations } from '../../api/resources.js';
 import OrganizationSlider from '../../components/OrganizationSlider.vue';
-import { isNotFound } from '../../utils/httpErrors.js';
+import { useAsyncResource } from '../../composables/useAsyncResource.js';
 
-const status = ref('loading');
-const organizations = ref([]);
-
-onMounted(async () => {
-  try {
-    organizations.value = await getOrganizations();
-    status.value = 'ready';
-  } catch (error) {
-    if (isNotFound(error)) {
-      status.value = 'empty';
-    } else {
-      status.value = 'error';
-    }
-  }
-});
+const { data: organizations, status } = useAsyncResource(getOrganizations, { notFoundIsEmpty: true });
 </script>
 
 <template>

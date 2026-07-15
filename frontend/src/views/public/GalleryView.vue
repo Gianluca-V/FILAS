@@ -1,26 +1,12 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
 import { getGallery } from '../../api/resources.js';
+import { useAsyncResource } from '../../composables/useAsyncResource.js';
 import { resolveAssetPath } from '../../utils/assets.js';
-import { isNotFound } from '../../utils/httpErrors.js';
 
-const status = ref('loading');
-const images = ref([]);
+const { data: images, status } = useAsyncResource(getGallery, { notFoundIsEmpty: true });
 const selectedImage = ref(null);
-
-onMounted(async () => {
-  try {
-    images.value = await getGallery();
-    status.value = 'ready';
-  } catch (error) {
-    if (isNotFound(error)) {
-      status.value = 'empty';
-    } else {
-      status.value = 'error';
-    }
-  }
-});
 
 function openImage(image) {
   selectedImage.value = image;
