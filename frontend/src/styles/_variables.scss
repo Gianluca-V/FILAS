@@ -1,0 +1,25 @@
+// Shared design tokens, extracted from the legacy css/style.css :root
+// palette so the Vue rebuild keeps visual parity (design §3.3 — no
+// redesign, auto-imported into every SFC via vite.config.js).
+
+// Colors
+$color-text: #000000;
+$color-background: #ffffff;
+$color-primary: #d31b1b;
+$color-secondary: #c8690a;
+$color-accent: #118e11;
+
+// Typography
+$font-family-base: 'Mulish', sans-serif;
+
+// Spacing
+$spacing-xs: 0.5rem;
+$spacing-sm: 1rem;
+$spacing-md: 1.5rem;
+$spacing-lg: 2rem;
+$spacing-xl: 3rem;
+
+// Breakpoints (legacy media-query thresholds, kept as SCSS vars for reuse
+// in mixins.scss)
+$breakpoint-tablet: 995px;
+$breakpoint-mobile: 450px;

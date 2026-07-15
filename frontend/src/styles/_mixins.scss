@@ -1,0 +1,29 @@
+// Shared mixins, auto-imported into every SFC via vite.config.js.
+
+@mixin flex-row($justify: flex-start, $align: center, $gap: 0) {
+  display: flex;
+  flex-direction: row;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+@mixin flex-column($justify: flex-start, $align: center, $gap: 0) {
+  display: flex;
+  flex-direction: column;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+@mixin below-tablet {
+  @media (max-width: $breakpoint-tablet) {
+    @content;
+  }
+}
+
+@mixin below-mobile {
+  @media (max-width: $breakpoint-mobile) {
+    @content;
+  }
+}

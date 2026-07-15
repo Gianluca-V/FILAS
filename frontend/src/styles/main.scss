@@ -1,0 +1,41 @@
+// Global resets + base typography, ported from the legacy css/style.css
+// universal selector reset (design §3.3 — page-specific styles become
+// component-scoped <style scoped> instead of one shared file).
+
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: none;
+  text-decoration: none;
+  box-sizing: border-box;
+  font-family: $font-family-base;
+}
+
+html,
+body {
+  min-height: 100svh;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  color: $color-text;
+  background-color: $color-background;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
