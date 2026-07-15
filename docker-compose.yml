@@ -45,5 +45,21 @@ services:
       retries: 10
       start_period: 15s
 
+  # SPA served by nginx (built from ./frontend), reverse-proxying /api to the
+  # api container for a same-origin, one-command demo. Only started with the
+  # `demo` profile: `docker compose --profile demo up`. Dev uses the Vite dev
+  # server on the host instead (npm run dev, which proxies /api to the api).
+  web:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT}:80"
+    profiles:
+      - demo
+
 volumes:
   filas_db_data:
