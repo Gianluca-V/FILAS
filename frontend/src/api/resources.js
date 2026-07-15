@@ -57,6 +57,5 @@ export const deleteOrganization = (id) => del(`/organizations/${id}`);
 // --- Orders (admin: list/detail/update line items/patch state, auth-gated
 // via router.go — POST/createOrder above is the only public one) ---
 export const getOrders = () => get('/orders');
-export const getOrder = (id) => get(`/orders/${id}`);
 export const updateOrder = (id, payload) => put(`/orders/${id}`, payload);
 export const patchOrderState = (id, state) => patch(`/orders/${id}`, { state });

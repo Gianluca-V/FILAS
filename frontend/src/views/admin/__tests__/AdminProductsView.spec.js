@@ -63,7 +63,7 @@ describe('AdminProductsView', () => {
     await flushPromises();
 
     await wrapper.find('[data-testid="delete-9"]').trigger('click');
-    await wrapper.find('.confirm-dialog__button--cancel').trigger('click');
+    await wrapper.find('[data-testid="confirm-cancel"]').trigger('click');
     await flushPromises();
 
     expect(deleteProduct).not.toHaveBeenCalled();

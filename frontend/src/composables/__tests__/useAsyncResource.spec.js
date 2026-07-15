@@ -61,4 +61,26 @@ describe('useAsyncResource', () => {
 
     expect(status.value).toBe('error');
   });
+
+  it('refresh() re-invokes fetchFn and replaces data after the initial load', async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce([{ ID: '1' }])
+      .mockResolvedValueOnce([{ ID: '1' }, { ID: '2' }]);
+
+    const { data, status, refresh } = mountResource(fetchFn);
+    await flushPromises();
+
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+    expect(data.value).toEqual([{ ID: '1' }]);
+
+    const refreshPromise = refresh();
+    expect(status.value).toBe('loading');
+    await refreshPromise;
+    await flushPromises();
+
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(status.value).toBe('ready');
+    expect(data.value).toEqual([{ ID: '1' }, { ID: '2' }]);
+  });
 });

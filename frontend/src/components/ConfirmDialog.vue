@@ -17,6 +17,7 @@ defineEmits(['confirm', 'cancel']);
       <div class="confirm-dialog__actions">
         <button
           type="button"
+          data-testid="confirm-cancel"
           class="confirm-dialog__button confirm-dialog__button--cancel"
           @click="$emit('cancel')"
         >
