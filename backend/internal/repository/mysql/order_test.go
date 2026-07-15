@@ -188,6 +188,12 @@ const orderInsertSQL = "INSERT INTO orders (name, phone, total) VALUES (?, ?, ?)
 const orderProductInsertSQL = "INSERT INTO orderproduct (orderID, productID, productQuantity, orderPrice) VALUES (?, ?, ?, ?)"
 const stockAdjustSQL = "UPDATE products SET Stock = Stock + ? WHERE ID = ?"
 
+// stockDecrementSQL is Create's stock-decrement query only: a FLOOR-GUARDED
+// conditional UPDATE mirroring orderTransitionSQL's CAS idiom. stockAdjustSQL
+// (unconditional) remains TransitionState's stock-RESTORE query — a positive
+// delta never needs the floor guard.
+const stockDecrementSQL = "UPDATE products SET Stock = Stock + ? WHERE ID = ? AND Stock + ? >= 0"
+
 func TestOrderRepository_Create_InsertsOrderLinesAndAppliesDeltasInOneTx(t *testing.T) {
 	db, mock := newTestDB(t)
 	repo := mysql.NewOrderRepository(db)
@@ -214,11 +220,11 @@ func TestOrderRepository_Create_InsertsOrderLinesAndAppliesDeltasInOneTx(t *test
 	mock.ExpectExec(regexp.QuoteMeta(orderProductInsertSQL)).
 		WithArgs(9001, 2, 3, 1800.0).
 		WillReturnResult(sqlmock.NewResult(2, 1))
-	mock.ExpectExec(regexp.QuoteMeta(stockAdjustSQL)).
-		WithArgs(-2, 1).
+	mock.ExpectExec(regexp.QuoteMeta(stockDecrementSQL)).
+		WithArgs(-2, 1, -2).
 		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectExec(regexp.QuoteMeta(stockAdjustSQL)).
-		WithArgs(-3, 2).
+	mock.ExpectExec(regexp.QuoteMeta(stockDecrementSQL)).
+		WithArgs(-3, 2, -3).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
@@ -287,14 +293,54 @@ func TestOrderRepository_Create_RollsBackWhenStockAdjustmentFails(t *testing.T) 
 	mock.ExpectExec(regexp.QuoteMeta(orderProductInsertSQL)).
 		WithArgs(9003, 1, 2, 1200.0).
 		WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectExec(regexp.QuoteMeta(stockAdjustSQL)).
-		WithArgs(-2, 1).
+	mock.ExpectExec(regexp.QuoteMeta(stockDecrementSQL)).
+		WithArgs(-2, 1, -2).
 		WillReturnError(dbErr)
 	mock.ExpectRollback()
 
 	_, err := repo.Create(context.Background(), order, []domain.StockAdjustment{{ProductID: 1, Delta: -2}})
 	if !errors.Is(err, dbErr) {
 		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("unmet expectations (rollback must be called): %v", err)
+	}
+}
+
+// TestOrderRepository_Create_RollsBackWhenStockDecrementHitsFloor is the
+// TOCTOU-fix corrective's core proof: the usecase's aggregated-demand check
+// reads stock in a separate, earlier transaction, so two concurrent
+// checkouts for the same product could both pass it before either decrements
+// — the repository closes that gap by making the decrement itself a
+// FLOOR-GUARDED conditional UPDATE (stockDecrementSQL), mirroring
+// TransitionState's CAS idiom (orderTransitionSQL). Zero rows affected means
+// the decrement would have driven stock negative: the whole order rolls
+// back and domain.ErrInsufficientStock is returned, regardless of what the
+// usecase's earlier pre-check concluded.
+func TestOrderRepository_Create_RollsBackWhenStockDecrementHitsFloor(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrderRepository(db)
+
+	order := domain.Order{
+		Name: "Cliente", Phone: "123", Total: 1200,
+		Products: []domain.OrderProduct{{ProductID: 1, Quantity: 2, Price: 1200}},
+	}
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(orderInsertSQL)).
+		WithArgs("Cliente", "123", 1200.0).
+		WillReturnResult(sqlmock.NewResult(9004, 1))
+	mock.ExpectExec(regexp.QuoteMeta(orderProductInsertSQL)).
+		WithArgs(9004, 1, 2, 1200.0).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec(regexp.QuoteMeta(stockDecrementSQL)).
+		WithArgs(-2, 1, -2).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectRollback()
+
+	_, err := repo.Create(context.Background(), order, []domain.StockAdjustment{{ProductID: 1, Delta: -2}})
+	if !errors.Is(err, domain.ErrInsufficientStock) {
+		t.Errorf("Create() error = %v, want it to wrap %v", err, domain.ErrInsufficientStock)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("unmet expectations (rollback must be called): %v", err)
@@ -311,6 +357,65 @@ func TestOrderRepository_Create_PropagatesBeginTxError(t *testing.T) {
 	_, err := repo.Create(context.Background(), domain.Order{Name: "A", Phone: "1"}, nil)
 	if !errors.Is(err, dbErr) {
 		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+}
+
+// TestOrderRepository_Create_RollsBackWhenLastInsertIdFails proves a driver
+// that fails to report the new order's ID (e.g. no AUTO_INCREMENT support)
+// aborts the whole transaction instead of proceeding with a zero-value ID.
+func TestOrderRepository_Create_RollsBackWhenLastInsertIdFails(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrderRepository(db)
+
+	order := domain.Order{Name: "Cliente", Phone: "123", Total: 1200}
+	dbErr := errors.New("driver does not support LastInsertId")
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(orderInsertSQL)).
+		WithArgs("Cliente", "123", 1200.0).
+		WillReturnResult(sqlmock.NewErrorResult(dbErr))
+	mock.ExpectRollback()
+
+	_, err := repo.Create(context.Background(), order, nil)
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("unmet expectations (rollback must be called): %v", err)
+	}
+}
+
+// TestOrderRepository_Create_PropagatesCommitError proves a commit failure
+// (e.g. connection lost after all statements succeeded) surfaces as an
+// error to the caller instead of silently reporting success.
+func TestOrderRepository_Create_PropagatesCommitError(t *testing.T) {
+	db, mock := newTestDB(t)
+	repo := mysql.NewOrderRepository(db)
+
+	order := domain.Order{
+		Name: "Cliente", Phone: "123", Total: 1200,
+		Products: []domain.OrderProduct{{ProductID: 1, Quantity: 2, Price: 1200}},
+	}
+	dbErr := errors.New("connection lost")
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(orderInsertSQL)).
+		WithArgs("Cliente", "123", 1200.0).
+		WillReturnResult(sqlmock.NewResult(9005, 1))
+	mock.ExpectExec(regexp.QuoteMeta(orderProductInsertSQL)).
+		WithArgs(9005, 1, 2, 1200.0).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec(regexp.QuoteMeta(stockDecrementSQL)).
+		WithArgs(-2, 1, -2).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit().WillReturnError(dbErr)
+
+	_, err := repo.Create(context.Background(), order, []domain.StockAdjustment{{ProductID: 1, Delta: -2}})
+	if !errors.Is(err, dbErr) {
+		t.Errorf("Create() error = %v, want it to wrap %v", err, dbErr)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("unmet expectations: %v", err)
 	}
 }
 

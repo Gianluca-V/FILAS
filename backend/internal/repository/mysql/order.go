@@ -147,7 +147,19 @@ func (r *OrderRepository) Get(ctx context.Context, id int) (domain.Order, error)
 
 const orderInsert = "INSERT INTO orders (name, phone, total) VALUES (?, ?, ?)"
 const orderProductInsert = "INSERT INTO orderproduct (orderID, productID, productQuantity, orderPrice) VALUES (?, ?, ?, ?)"
+
+// stockAdjust is an UNCONDITIONAL stock delta, used only where the delta is
+// known to be non-negative (TransitionState's cancel-path RESTORE) — a
+// floor guard is irrelevant there and must not block a legitimate restore.
 const stockAdjust = "UPDATE products SET Stock = Stock + ? WHERE ID = ?"
+
+// stockDecrement is Create's stock-decrement query: a FLOOR-GUARDED
+// conditional UPDATE mirroring orderTransition's CAS idiom below. `delta` is
+// always <= 0 here, so `Stock + delta >= 0` is equivalent to `Stock >=
+// quantity` — the authoritative, race-safe stock check (see the "Create"
+// doc comment on domain.OrderRepository). Zero rows affected means applying
+// this decrement would have driven stock negative.
+const stockDecrement = "UPDATE products SET Stock = Stock + ? WHERE ID = ? AND Stock + ? >= 0"
 
 // Create implements the atomic contract documented on
 // domain.OrderRepository.Create: order insert, every line-item insert, and
@@ -185,9 +197,19 @@ func (r *OrderRepository) Create(ctx context.Context, o domain.Order, deltas []d
 	}
 
 	for _, d := range deltas {
-		if _, err := tx.ExecContext(ctx, stockAdjust, d.Delta, d.ProductID); err != nil {
+		res, err := tx.ExecContext(ctx, stockDecrement, d.Delta, d.ProductID, d.Delta)
+		if err != nil {
 			_ = tx.Rollback()
 			return domain.Order{}, fmt.Errorf("mysql: create order: adjust stock for product %d: %w", d.ProductID, err)
+		}
+		affected, err := res.RowsAffected()
+		if err != nil {
+			_ = tx.Rollback()
+			return domain.Order{}, fmt.Errorf("mysql: create order: read stock rows affected for product %d: %w", d.ProductID, err)
+		}
+		if affected == 0 {
+			_ = tx.Rollback()
+			return domain.Order{}, fmt.Errorf("mysql: create order: insufficient stock for product %d: %w", d.ProductID, domain.ErrInsufficientStock)
 		}
 	}
 

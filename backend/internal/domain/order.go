@@ -115,14 +115,22 @@ type OrderRepository interface {
 	// Create MUST atomically, in a single transaction: (1) insert the
 	// order, (2) insert its line items, and (3) apply every given
 	// StockAdjustment (all negative — a decrement) to the corresponding
-	// products. The usecase has already validated aggregated per-product
-	// demand against current stock (ErrInsufficientStock) before calling
-	// this, so the repository does not need to re-check availability, only
-	// apply the deltas consistently WITH the insert — if the stock update
-	// fails, the order insert MUST roll back too (no orphan order with no
-	// matching stock decrement, and vice versa). Returns the created Order
-	// with IDs populated from the database's AUTO_INCREMENT. Mirrors
-	// legacy createOrder (FilasServer/orders.php:168), which had NO such
+	// products. The usecase validates aggregated per-product demand against
+	// current stock (ErrInsufficientStock) before calling this, but that
+	// pre-check reads stock in a separate, earlier transaction — a TOCTOU
+	// gap two concurrent requests for the same product could both pass. The
+	// repository MUST close that gap itself: every stock decrement MUST be
+	// applied as a FLOOR-GUARDED conditional UPDATE (e.g. `... WHERE ID=?
+	// AND Stock+delta>=0`, mirroring TransitionState's CAS idiom below),
+	// and zero rows affected MUST be treated as ErrInsufficientStock,
+	// rolling back the whole transaction. This conditional decrement is
+	// the authoritative, race-safe stock check; the usecase's pre-check is
+	// only a fast, clear-failure optimization (defense in depth, not the
+	// sole guard). If any stock update fails or hits the floor, the order
+	// insert MUST roll back too (no orphan order with no matching stock
+	// decrement, and vice versa). Returns the created Order with IDs
+	// populated from the database's AUTO_INCREMENT. Mirrors legacy
+	// createOrder (FilasServer/orders.php:168), which had NO such
 	// atomicity guarantee — a partial failure there could leave an order
 	// with some, but not all, of its stock decremented.
 	Create(ctx context.Context, o Order, deltas []StockAdjustment) (Order, error)
