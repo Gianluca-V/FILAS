@@ -44,11 +44,13 @@ func run() error {
 	db := mysql.MustOpen(cfg.DSN())
 	defer db.Close()
 
-	productSvc := usecase.NewProductService(mysql.NewProductRepository(db))
+	productRepo := mysql.NewProductRepository(db)
+	productSvc := usecase.NewProductService(productRepo)
 	newsSvc := usecase.NewNewsService(mysql.NewNewsRepository(db))
 	gallerySvc := usecase.NewGalleryService(mysql.NewGalleryRepository(db))
 	familySvc := usecase.NewFamilyService(mysql.NewFamilyRepository(db))
 	organizationSvc := usecase.NewOrganizationService(mysql.NewOrganizationRepository(db))
+	orderSvc := usecase.NewOrderService(mysql.NewOrderRepository(db), productRepo)
 
 	adminRepo := mysql.NewAdminRepository(db)
 	jwtSvc := auth.NewJWTService(cfg.JWTSecret, time.Duration(cfg.JWTExpiryHours)*time.Hour)
@@ -63,6 +65,7 @@ func run() error {
 		GalleryService:      gallerySvc,
 		FamilyService:       familySvc,
 		OrganizationService: organizationSvc,
+		OrderService:        orderSvc,
 		AdminService:        adminSvc,
 		AuthService:         authSvc,
 		JWTService:          jwtSvc,
