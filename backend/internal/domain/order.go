@@ -31,12 +31,29 @@ func ValidOrderTransitionTarget(target OrderState) bool {
 // triggers (`price * NEW.productQuantity`, see 01-schema.sql); the Go
 // usecase computes it instead (see usecase.OrderService), so by the time an
 // OrderProduct reaches the repository, Price is already final.
+//
+// ProductName and ProductPrice are POST-PR6 additions (PR7, task 5.3),
+// populated ONLY on the read paths (OrderRepository.List/Get) via a JOIN
+// against `products` — Create/Update/TransitionState never read or write
+// them, and the write-path repository methods leave them zero-valued.
+// They exist to support the legacy GET response shape (orders.php's
+// GROUP_CONCAT-built `products` array, characterized live — see
+// backend/docs/legacy-quirks.md §15), which is a DIFFERENT thing than the
+// frozen per-line Price above: legacy's response embeds `p.name` and
+// `p.price` — the product's CURRENT name/price from a live JOIN — NOT
+// `op.orderPrice` (the frozen price*quantity paid at order time). A
+// product whose price changes after an order is placed will show the NEW
+// price on every subsequent GET of that historical order, never what was
+// actually billed. This is preserved as characterized, not "fixed" — see
+// §15 for the live-confirmed evidence.
 type OrderProduct struct {
-	ID        int
-	OrderID   int
-	ProductID int
-	Quantity  int
-	Price     float64
+	ID           int
+	OrderID      int
+	ProductID    int
+	Quantity     int
+	Price        float64
+	ProductName  string
+	ProductPrice float64
 }
 
 // Order is a customer order with its line items. Total is the ported
@@ -82,6 +99,17 @@ type StockAdjustment struct {
 // prices/totals and it does not decide WHETHER a transition is legal
 // beyond the atomicity/CAS contract documented per method below.
 type OrderRepository interface {
+	// List and Get both mirror legacy getOrders/getOrder
+	// (FilasServer/orders.php:69/118): the underlying query INNER JOINs
+	// orders to orderproduct (and orderproduct to products), so an order
+	// with ZERO line items is invisible to BOTH — it is silently omitted
+	// from List, and Get returns domain.ErrNotFound for it exactly as if
+	// the order row didn't exist at all (live-confirmed: legacy's
+	// `$result->num_rows > 0` check on the JOINed result set, not a
+	// direct orders-table lookup). Every order created through
+	// usecase.OrderService.Create/Update always has >=1 line item, so this
+	// only matters for pre-existing garbage data, not new writes — see
+	// backend/docs/legacy-quirks.md §15.
 	List(ctx context.Context) ([]Order, error)
 	Get(ctx context.Context, id int) (Order, error)
 	// Create MUST atomically, in a single transaction: (1) insert the
