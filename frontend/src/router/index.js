@@ -1,8 +1,7 @@
 // vue-router (history mode), replacing the legacy hand-rolled hashchange
-// router in js/adminRouter.mjs (design §3.2). Public views are registered
-// here as lazy-loaded placeholders; task 7.2 replaces the stub SFCs under
-// views/public/ with the real implementations. Admin views land in task
-// 8.1 — only the login placeholder and the auth guard are real here.
+// router in js/adminRouter.mjs (design §3.2). Public views (task 7.2) and
+// admin views (task 8.1) are both real here; only the auth guard's
+// contract predates the views it protects.
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { useAuthStore } from '../stores/auth.js';
@@ -54,6 +53,43 @@ const routes = [
     name: 'admin-login',
     component: () => import('../views/admin/AdminLoginView.vue'),
   },
+  {
+    path: '/admin',
+    component: () => import('../views/admin/AdminLayout.vue'),
+    children: [
+      { path: '', redirect: { name: 'admin-products' } },
+      {
+        path: 'products',
+        name: 'admin-products',
+        component: () => import('../views/admin/AdminProductsView.vue'),
+      },
+      {
+        path: 'gallery',
+        name: 'admin-gallery',
+        component: () => import('../views/admin/AdminGalleryView.vue'),
+      },
+      {
+        path: 'families',
+        name: 'admin-families',
+        component: () => import('../views/admin/AdminFamiliesView.vue'),
+      },
+      {
+        path: 'organizations',
+        name: 'admin-organizations',
+        component: () => import('../views/admin/AdminOrganizationsView.vue'),
+      },
+      {
+        path: 'news',
+        name: 'admin-news',
+        component: () => import('../views/admin/AdminNewsView.vue'),
+      },
+      {
+        path: 'orders',
+        name: 'admin-orders',
+        component: () => import('../views/admin/AdminOrdersView.vue'),
+      },
+    ],
+  },
 ];
 
 const router = createRouter({
@@ -62,9 +98,7 @@ const router = createRouter({
 });
 
 // Route guard: every /admin/* route except /admin/login requires an
-// authenticated session (design §3.3). Admin views themselves ship in
-// task 8.1, but the guard logic is real and tested now so the auth
-// contract is locked before those views exist.
+// authenticated session (design §3.3).
 router.beforeEach((to) => {
   const isAdminRoute = to.path.startsWith('/admin');
   const isLoginRoute = to.name === 'admin-login';

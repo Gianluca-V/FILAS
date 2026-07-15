@@ -3,7 +3,7 @@
 // backend/internal/handler/rest/dto/response.go. Endpoints are
 // /api/<resource> — no /FilasServer prefix (that was legacy-only).
 // Task 7.2 (public views) and task 8.1 (admin views) consume these.
-import { del, get, post, put } from './client.js';
+import { del, get, patch, post, put } from './client.js';
 
 // --- Products (public read) ---
 export const getProducts = () => get('/products');
@@ -53,3 +53,10 @@ export const deleteFamilyItem = (id) => del(`/family/${id}`);
 export const createOrganization = (payload) => post('/organizations', payload);
 export const updateOrganization = (id, payload) => put(`/organizations/${id}`, payload);
 export const deleteOrganization = (id) => del(`/organizations/${id}`);
+
+// --- Orders (admin: list/detail/update line items/patch state, auth-gated
+// via router.go — POST/createOrder above is the only public one) ---
+export const getOrders = () => get('/orders');
+export const getOrder = (id) => get(`/orders/${id}`);
+export const updateOrder = (id, payload) => put(`/orders/${id}`, payload);
+export const patchOrderState = (id, state) => patch(`/orders/${id}`, { state });

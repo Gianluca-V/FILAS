@@ -7,10 +7,8 @@ import router from '../index.js';
 describe('router auth guard', () => {
   beforeEach(async () => {
     setActivePinia(createPinia());
-    // /admin/products doesn't exist yet (admin views ship in task 8.1); the
-    // guard runs before route matching, so vue-router logs a harmless "no
-    // match" warning for it below. Silenced to keep test output focused on
-    // the guard behavior under test.
+    // Silence router console noise so test output stays focused on the
+    // guard behavior under test.
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     await router.push('/');
     await router.isReady();
