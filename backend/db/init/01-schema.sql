@@ -2,23 +2,26 @@
 -- Row/column data below is copied verbatim from the source dump; only the
 -- following are intentionally changed:
 --
---  1. Trigger status: all 5 legacy MySQL triggers from filas.sql are
---     RESTORED here, verbatim. Their logic (orderPrice, orders.total,
---     finishDate stamping) is ALSO being ported to the Go
---     `usecase/order.go` layer per ADR-3 (sdd/migrate-go-vue/design), but
---     until that usecase exists and its order-parity characterization
---     tests are green (Phase 6/PR7 gate), the dockerized DB is the
---     characterization reference and MUST behave exactly like the legacy
---     PHP+trigger stack. Dropping the triggers before that gate would
---     silently lose the only working implementation of this logic — do
---     NOT strip them early. They are dropped from this seed ONLY in PR7,
---     immediately after order-parity tests pass. There are FIVE triggers
---     in the original dump (confirmed by gate review obs #28):
---       - after_orderProduct_insert   (orderproduct)
---       - after_orderProduct_update   (orderproduct)
---       - before_orderProduct_insert  (orderproduct)
---       - before_orderProduct_update  (orderproduct)
---       - before_update_orders        (orders)
+--  1. Trigger status: all 5 legacy MySQL triggers from filas.sql have been
+--     DROPPED in PR7 (task 6.1), after their logic (orderPrice, orders.total,
+--     finishDate stamping) was ported to the Go `usecase/order.go` +
+--     `repository/mysql/order.go` layers per ADR-3 (sdd/migrate-go-vue/design)
+--     AND the order-parity gate proved the Go path produces IDENTICAL
+--     persisted results with the triggers present vs. absent (before/after
+--     live evidence in backend/docs/legacy-quirks.md §15.4). The Go
+--     transactions now write orderPrice and total explicitly and stamp
+--     finishDate in the atomic TransitionState update, so the database no
+--     longer owns any of this logic. The five dropped triggers (were
+--     confirmed by gate review obs #28) and the point in this file where
+--     each was removed:
+--       - after_orderProduct_insert   (orderproduct)  -- see note below
+--       - after_orderProduct_update   (orderproduct)  -- see note below
+--       - before_orderProduct_insert  (orderproduct)  -- see note below
+--       - before_orderProduct_update  (orderproduct)  -- see note below
+--       - before_update_orders        (orders)        -- see note below
+--     A drop note is left inline at each former trigger location. Recreating
+--     any of them would double-apply orderPrice/total on top of the Go
+--     writes — they must stay dropped.
 --
 --  2. `admins` table: the source dump has NO primary key at all (ID is a
 --     nullable int with zero constraints). Patched here with an explicit
@@ -34,6 +37,22 @@
 --       password: filas-local-dev-2026
 --     (salt/hash below were generated fresh for this password; they do
 --     NOT correspond to any real account.)
+--
+--  4. Trigger case-sensitivity bug (PR7 discovery, now historical): the
+--     source dump's `after_orderProduct_insert`/`after_orderProduct_update`
+--     trigger bodies referenced `FROM orderProduct` (mixed case) while the
+--     actual table is `orderproduct` (lowercase, see note 1). This was a
+--     latent bug that MySQL 5.7/Windows (case-insensitive table lookups)
+--     silently tolerated; `mysql:8` on Linux (`lower_case_table_names=0`,
+--     case SENSITIVE) throws `Table 'filas.orderProduct' doesn't exist` on
+--     every INSERT into `orderproduct`, aborting the whole statement. That
+--     made the "triggers still present" half of the PR7 gate impossible to
+--     exercise, so the case was corrected FIRST (`orderProduct` ->
+--     `orderproduct`) purely to run the gate, then the triggers were
+--     dropped entirely (note 1). No trigger bodies remain in this file, so
+--     the fix is now moot for live behavior — recorded here only to explain
+--     why the gate's "before" half required a preliminary correction. See
+--     backend/docs/legacy-quirks.md §15.3 for the full write-up.
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -186,57 +205,18 @@ INSERT INTO `orderproduct` (`ID`, `orderID`, `productID`, `productQuantity`, `or
 (64, 32, 22, 3, 2550);
 
 --
--- Triggers `orderproduct` (ported to Go usecase/order.go; kept here until
--- the PR7 gate -- see header note 1)
+-- Triggers `orderproduct` -- DROPPED in PR7 (task 6.1) after the order
+-- parity gate. The four legacy triggers that lived here
+-- (after_orderProduct_insert/update recomputing orders.total = SUM(orderPrice);
+-- before_orderProduct_insert/update setting orderPrice = product.price *
+-- productQuantity) are now enforced solely by Go's usecase/order.go +
+-- repository/mysql/order.go, which write orderPrice and total explicitly
+-- inside each transaction. Proven equivalent by the before/after live gate
+-- documented in backend/docs/legacy-quirks.md §15.4: an order created +
+-- transitioned through the Go API yields IDENTICAL persisted orderPrice,
+-- total, stock deltas, and finishDate stamping whether these triggers are
+-- present or absent. See header note 1.
 --
-DELIMITER $$
-CREATE TRIGGER `after_orderProduct_insert` AFTER INSERT ON `orderproduct` FOR EACH ROW BEGIN
-    UPDATE orders
-    SET total = (
-        SELECT SUM(orderPrice)
-        FROM orderProduct
-        WHERE orderID = NEW.orderID
-    )
-    WHERE ID = NEW.orderID;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `after_orderProduct_update` AFTER UPDATE ON `orderproduct` FOR EACH ROW BEGIN
-    UPDATE orders
-    SET total = (
-        SELECT SUM(orderPrice)
-        FROM orderProduct
-        WHERE orderID = NEW.orderID
-    )
-    WHERE ID = NEW.orderID;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `before_orderProduct_insert` BEFORE INSERT ON `orderproduct` FOR EACH ROW BEGIN
-    DECLARE productPrice DOUBLE;
-
-    SELECT price * NEW.productQuantity INTO productPrice
-    FROM products
-    WHERE ID = NEW.productID;
-
-    SET NEW.orderPrice = productPrice;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `before_orderProduct_update` BEFORE UPDATE ON `orderproduct` FOR EACH ROW BEGIN
-    DECLARE productPrice DOUBLE;
-
-    SELECT price * NEW.productQuantity INTO productPrice
-    FROM products
-    WHERE ID = NEW.productID;
-
-    SET NEW.OrderPrice = productPrice;
-END
-$$
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -271,17 +251,12 @@ INSERT INTO `orders` (`ID`, `total`, `startDate`, `finishDate`, `state`, `name`,
 (32, 2550, '2023-11-20 22:28:45', NULL, 'pending', 'HoneyCorp', '1432546753');
 
 --
--- Trigger `orders` (ported to Go usecase/order.go; kept here until the
--- PR7 gate -- see header note 1)
+-- Trigger `orders` -- DROPPED in PR7 (task 6.1) after the order parity gate.
+-- The legacy before_update_orders trigger (stamping finishDate =
+-- CURRENT_TIMESTAMP on a pending->finished transition) is now enforced by
+-- Go's usecase/order.go, which sets finishDate explicitly in the atomic
+-- TransitionState CAS update. See header note 1 and legacy-quirks.md §15.4.
 --
-DELIMITER $$
-CREATE TRIGGER `before_update_orders` BEFORE UPDATE ON `orders` FOR EACH ROW BEGIN
-    IF NEW.state = 'finished' AND OLD.state != 'finished' THEN
-        SET NEW.finishDate = CURRENT_TIMESTAMP;
-    END IF;
-END
-$$
-DELIMITER ;
 
 ALTER TABLE `orders` ADD PRIMARY KEY (`ID`);
 ALTER TABLE `orders` MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
