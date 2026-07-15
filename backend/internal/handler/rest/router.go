@@ -17,6 +17,7 @@ type RouterDeps struct {
 	GalleryService      GalleryService
 	FamilyService       FamilyService
 	OrganizationService OrganizationService
+	OrderService        OrderService
 
 	AdminService AdminService
 	AuthService  AuthService
@@ -35,8 +36,12 @@ type RouterDeps struct {
 // with the FIXED auth behavior in PR5 (task 4.1): unlike PR4's resources,
 // which reproduce legacy behavior byte-for-byte, news's JWT enforcement is
 // a deliberate, user-approved fix for a legacy auth bug — see the doc
-// comment on the news route registration below. The orders resource is
-// wired in a later PR.
+// comment on the news route registration below. Orders are wired in PR7
+// (tasks 5.2/5.3): POST is the one PUBLIC write in the whole app (customer
+// checkout, exact legacy parity — orders.php's createOrder never checked
+// the Authorization header at all); GET/PUT/PATCH are auth-gated, same
+// unified-401 pattern as every other gated resource — see
+// rest.OrderHandler's doc comment and backend/docs/legacy-quirks.md §15.
 func NewRouter(deps RouterDeps) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -102,6 +107,17 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	r.GET("/api/admins/:id", middleware.RequireAuth(deps.JWTService), admins.Get)
 	r.PUT("/api/admins/:id", middleware.RequireAuth(deps.JWTService), admins.Update)
 	r.DELETE("/api/admins/:id", middleware.RequireAuth(deps.JWTService), admins.Delete)
+
+	// Orders (PR7): POST is PUBLIC (customer checkout, exact legacy
+	// parity — createOrder never checked auth at all). GET/PUT/PATCH
+	// require a valid JWT, same unified-401 pattern as every other gated
+	// resource. See rest.OrderHandler's doc comment.
+	orders := NewOrderHandler(deps.OrderService)
+	r.POST("/api/orders", orders.Create)
+	r.GET("/api/orders", middleware.RequireAuth(deps.JWTService), orders.List)
+	r.GET("/api/orders/:id", middleware.RequireAuth(deps.JWTService), orders.Get)
+	r.PUT("/api/orders/:id", middleware.RequireAuth(deps.JWTService), orders.Update)
+	r.PATCH("/api/orders/:id", middleware.RequireAuth(deps.JWTService), orders.PatchState)
 
 	return r
 }

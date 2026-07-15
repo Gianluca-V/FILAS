@@ -14,6 +14,9 @@ import (
 	"github.com/gianluca-v/filas-backend/internal/handler/rest"
 )
 
+// orderPtr is a small helper for building a *time.Time inline in test data.
+func orderTimePtr(t time.Time) *time.Time { return &t }
+
 // Contract/characterization tests: lock the Go handlers' JSON output against
 // golden fixtures captured LIVE from the legacy PHP (FilasServer/*.php)
 // running against a fresh copy of the seeded Docker DB (see
@@ -179,6 +182,108 @@ func TestContract_Admins(t *testing.T) {
 	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/admins", token, http.StatusOK, "admins_list.json")
 	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/admins/1543", token, http.StatusOK, "admins_get.json")
 	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/admins/999999", token, http.StatusNotFound, "admins_not_found.json")
+}
+
+// TestContract_Orders locks the GET /api/orders[/:id] response shape
+// against fixtures captured LIVE from a scratch copy of FilasServer/
+// orders.php against the seeded Docker db (see
+// backend/docs/legacy-quirks.md §15 for the full capture methodology and
+// the CRITICAL characterization: `products[].productPrice` is the
+// product's CURRENT price via a live JOIN, NOT the frozen per-line price
+// actually billed). GET is auth-gated (router.go PR7 wiring), unlike the
+// PR2 public-read resources above.
+func TestContract_Orders(t *testing.T) {
+	jwtSvc := auth.NewJWTService("contract-test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+
+	start10 := time.Date(2023, 11, 18, 20, 9, 58, 0, time.UTC)
+	finish10 := time.Date(2023, 11, 18, 20, 41, 43, 0, time.UTC)
+	start27 := time.Date(2023, 11, 20, 18, 30, 2, 0, time.UTC)
+
+	order10 := domain.Order{
+		ID: 10, Total: 3600, State: domain.OrderStateCanceled,
+		StartDate: start10, FinishDate: orderTimePtr(finish10),
+		Products: []domain.OrderProduct{
+			{ProductID: 1, Quantity: 2, ProductName: "Mermelada de pera", ProductPrice: 600},
+			{ProductID: 3, Quantity: 3, ProductName: "Mermelada de tomate", ProductPrice: 600},
+		},
+	}
+	order27 := domain.Order{
+		ID: 27, Total: 13100, State: domain.OrderStatePending,
+		StartDate: start27, Name: "Turco agustin", Phone: "32142432546",
+		Products: []domain.OrderProduct{
+			{ProductID: 23, Quantity: 1, ProductName: "Galletas (6 u.)", ProductPrice: 850},
+		},
+	}
+
+	r := rest.NewRouter(rest.RouterDeps{
+		HealthDB: fakePinger{},
+		OrderService: &fakeOrderService{
+			orders: []domain.Order{order10, order27},
+			byID:   map[int]domain.Order{27: order27},
+		},
+		AuthService: &fakeAuthService{},
+		JWTService:  jwtSvc,
+	})
+
+	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/orders", token, http.StatusOK, "orders_list.json")
+	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/orders/27", token, http.StatusOK, "orders_get.json")
+	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/orders/999999", token, http.StatusNotFound, "orders_not_found.json")
+}
+
+// TestContract_Orders_EmptyListIsOKNotNotFound locks the orders-specific
+// empty-list quirk: unlike news/gallery/family/organizations (404 on
+// empty), orders' underlying legacy query never returns `false` on zero
+// rows, so the "$result === false" 404 branch never fires — same
+// reasoning as products'/admins' 200-empty-list behavior (see §8,
+// live-confirmed by truncating orders/orderproduct — see §15).
+func TestContract_Orders_EmptyListIsOKNotNotFound(t *testing.T) {
+	jwtSvc := auth.NewJWTService("contract-test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+	r := rest.NewRouter(rest.RouterDeps{
+		HealthDB:     fakePinger{},
+		OrderService: &fakeOrderService{orders: []domain.Order{}},
+		AuthService:  &fakeAuthService{},
+		JWTService:   jwtSvc,
+	})
+	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/orders", token, http.StatusOK, "orders_empty_list.json")
+}
+
+// TestContract_Orders_ProductNameWithQuoteAndCommaDoesNotBreakTheResponse
+// is the design's own flagged risk (§9 "Architectural risks"), turned into
+// a regression lock: legacy's manual CONCAT-built JSON string breaks on a
+// product Name containing `"`/`,` (json_decode silently returns null,
+// live-confirmed — see backend/docs/legacy-quirks.md §15), but the Go DTO
+// builds the array structurally via encoding/json, so it can NEVER
+// corrupt regardless of the product name's content — proving the SHAPE is
+// reproduced, not the bug's fragility.
+func TestContract_Orders_ProductNameWithQuoteAndCommaDoesNotBreakTheResponse(t *testing.T) {
+	jwtSvc := auth.NewJWTService("contract-test-secret", time.Hour)
+	token, err := jwtSvc.Generate(1543)
+	if err != nil {
+		t.Fatalf("jwtSvc.Generate() error = %v", err)
+	}
+	start := time.Date(2026, 7, 13, 22, 43, 51, 0, time.UTC)
+	order35 := domain.Order{
+		ID: 35, Total: 100, State: domain.OrderStatePending,
+		StartDate: start, Name: "Quote Test", Phone: "555",
+		Products: []domain.OrderProduct{
+			{ProductID: 25, Quantity: 1, ProductName: `Dulce "Especial", con comas`, ProductPrice: 100},
+		},
+	}
+	r := rest.NewRouter(rest.RouterDeps{
+		HealthDB:     fakePinger{},
+		OrderService: &fakeOrderService{byID: map[int]domain.Order{35: order35}},
+		AuthService:  &fakeAuthService{},
+		JWTService:   jwtSvc,
+	})
+	assertAuthedJSONMatchesFixture(t, r, http.MethodGet, "/api/orders/35", token, http.StatusOK, "orders_get_quote_robustness.json")
 }
 
 func assertAuthedJSONMatchesFixture(t *testing.T, r http.Handler, method, path, token string, wantStatus int, fixture string) {

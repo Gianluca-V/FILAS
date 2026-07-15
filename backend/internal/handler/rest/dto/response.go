@@ -8,6 +8,7 @@ package dto
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gianluca-v/filas-backend/internal/domain"
 )
@@ -118,4 +119,93 @@ func NewAdminResponse(a domain.Admin) AdminResponse {
 // LoginResponse matches POST /api/admins {login:true} on success.
 type LoginResponse struct {
 	Token string `json:"token"`
+}
+
+// legacyDateTimeLayout matches MySQL's DATETIME string form, exactly what
+// legacy's mysqli fetch_assoc echoed verbatim for orders.startDate/
+// finishDate (characterized live: `"2023-11-20 18:30:02"`, no timezone
+// offset, no "T" separator — see backend/docs/legacy-quirks.md §15).
+const legacyDateTimeLayout = "2006-01-02 15:04:05"
+
+// OrderProductResponse is one line item inside OrderResponse.Products.
+// FIELD ORDER AND TYPES ARE LOAD-BEARING: this reproduces the shape
+// legacy's `json_decode(stripslashes($row['products']), true)` produced
+// from its GROUP_CONCAT-built JSON string (orders.php:83-93/133-143),
+// where ProductPrice/ProductQuantity are genuine JSON NUMBERS (unquoted —
+// unlike every other numeric field in this API, which is a JSON STRING,
+// see e.g. ProductResponse), because they came from json_decode-ing a
+// hand-built JSON string, not from a raw mysqli string column.
+// CRITICAL, live-confirmed characterization: ProductPrice is the
+// PRODUCT'S CURRENT price (`p.price` in a live JOIN), NOT the frozen
+// per-line price actually billed (`op.orderPrice` = price*quantity at
+// order time) — see domain.OrderProduct.ProductName's doc comment.
+type OrderProductResponse struct {
+	ProductName     string  `json:"productName"`
+	ProductPrice    float64 `json:"productPrice"`
+	ProductQuantity int     `json:"productQuantity"`
+}
+
+// OrderResponse matches one element of GET /api/orders[/:id] from
+// orders.php, characterized live against a scratch copy of FilasServer/
+// running against the seeded Docker db (see backend/docs/legacy-quirks.md
+// §15 for the full capture). FIELD ORDER MATTERS (Go's encoding/json
+// preserves struct declaration order): orderID, orderTotal, orderState,
+// orderStartDate, orderFinishDate, orderName, orderPhone, products — this
+// is the EXACT order legacy's associative-array-turned-JSON produced.
+// Unlike NewsResponse/GalleryResponse/etc., a by-ID GET also wraps the
+// single result in an array (see rest.OrderHandler.Get), matching the
+// SAME array-wrap quirk (§8) for a different underlying reason: legacy's
+// getOrder collects rows into `$order[]` even though the WHERE clause can
+// only ever match one order's worth of JOINed rows.
+//
+// Deliberately NOT reproduced: legacy's manual `CONCAT(...)`-built
+// `products` JSON string is fragile — a product Name containing a `"` or
+// `,` corrupts the concatenated string, and `json_decode` on the corrupt
+// result silently returns null, so legacy emits `"products":null` for
+// such an order (live-confirmed: see legacy-quirks.md §15). Go's
+// `encoding/json` builds this array structurally and properly escapes
+// quotes/commas, so `products` is ALWAYS a valid array — reproducing the
+// SHAPE, not the bug's fragility, per the design's own precedent (ADR
+// notes on the GROUP_CONCAT risk).
+type OrderResponse struct {
+	ID         string                 `json:"orderID"`
+	Total      string                 `json:"orderTotal"`
+	State      string                 `json:"orderState"`
+	StartDate  string                 `json:"orderStartDate"`
+	FinishDate *string                `json:"orderFinishDate"`
+	Name       string                 `json:"orderName"`
+	Phone      string                 `json:"orderPhone"`
+	Products   []OrderProductResponse `json:"products"`
+}
+
+// NewOrderResponse converts a domain.Order (as returned by
+// OrderRepository.List/Get, with ProductName/ProductPrice populated) to
+// its legacy-shaped JSON response.
+func NewOrderResponse(o domain.Order) OrderResponse {
+	products := make([]OrderProductResponse, 0, len(o.Products))
+	for _, p := range o.Products {
+		products = append(products, OrderProductResponse{
+			ProductName:     p.ProductName,
+			ProductPrice:    p.ProductPrice,
+			ProductQuantity: p.Quantity,
+		})
+	}
+	resp := OrderResponse{
+		ID:        strconv.Itoa(o.ID),
+		Total:     formatLegacyFloat(o.Total),
+		State:     string(o.State),
+		StartDate: formatLegacyDateTime(o.StartDate),
+		Name:      o.Name,
+		Phone:     o.Phone,
+		Products:  products,
+	}
+	if o.FinishDate != nil {
+		formatted := formatLegacyDateTime(*o.FinishDate)
+		resp.FinishDate = &formatted
+	}
+	return resp
+}
+
+func formatLegacyDateTime(t time.Time) string {
+	return t.Format(legacyDateTimeLayout)
 }
