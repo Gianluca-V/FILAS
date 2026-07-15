@@ -427,3 +427,172 @@ there is no live/Docker verification for this PR, since there is no
 DB-backed order path yet to verify against; the fakes prove the usecase
 calls the atomic contract correctly, not that PR7's real implementation
 IS atomic (that is PR7's own test responsibility).
+
+## 15. Orders repo/handler + GROUP_CONCAT shape + trigger-case bug (PR7, tasks 5.2/5.3/6.1)
+
+Live-characterized (same Methodology as this document's header note): a
+scratch copy of `FilasServer/` was patched to connect to the local Docker
+`db` on `127.0.0.1:${DB_PORT}`, with table-name case fixed for MySQL 8/
+Linux (`orderProduct` -> `orderproduct` in `orders.php`'s own SQL, `Products`
+-> `products`) and exercised with `curl` against every documented
+operation, including mutating calls verified against the raw DB state
+afterward. Scratch files were never committed.
+
+### 15.1 Orders auth model — PUBLIC create, gated everything else
+
+Confirmed directly in `FilasServer/orders.php`'s routing switch: `POST`
+(`createOrder`) has **NO** auth check at all — no `getallheaders()` call,
+no `TokenValidationResponse`, nothing. `GET`/`PUT`/`PATCH` all gate on
+`isset($headers['Authorization'])` (400 if absent) then
+`TokenValidationResponse` (401 if invalid) — same two-tier scheme as
+admins (§5), which Go unifies to a single 401 for both cases, same
+precedent. This is a genuine, deliberate legacy design (not a bug like
+news' auth hole, §13): `POST /api/orders` is the customer-facing checkout
+endpoint and was never meant to require a login. Go reproduces this
+exactly: `router.go` wires `orders.Create` with NO middleware, and
+`orders.List`/`.Get`/`.Update`/`.PatchState` behind
+`middleware.RequireAuth`.
+
+### 15.2 `getOrders`/`getOrder` response shape — GROUP_CONCAT decoded live
+
+Live-captured exact shape (order 27, `GET /api/orders/27` with a valid
+token):
+
+```json
+[{"orderID":"27","orderTotal":"13100","orderState":"pending","orderStartDate":"2023-11-20 18:30:02","orderFinishDate":null,"orderName":"Turco agustin","orderPhone":"32142432546","products":[{"productName":"Mermelada de tomate","productPrice":600,"productQuantity":5}]}]
+```
+
+Key findings, all locked by `dto.OrderResponse`/`OrderProductResponse` and
+the `TestContract_Orders*` fixtures in `backend/testdata/contract/`:
+
+- `orderID`/`orderTotal`/`orderState`/`orderName`/`orderPhone` are JSON
+  **strings** (same mysqli-string convention as every other resource,
+  §8), even though `orderTotal` is numeric.
+- `orderStartDate`/`orderFinishDate` are `"YYYY-MM-DD HH:MM:SS"` strings
+  (MySQL's DATETIME-to-string form, no timezone, no "T" separator);
+  `orderFinishDate` is JSON `null` when the column is NULL.
+- A by-ID `GET` wraps the single result in a one-element array, same
+  quirk as news/gallery/family/organizations (§8) — legacy's `getOrder`
+  collects into `$order[]` even though at most one order can match.
+- **`products[]` entries are genuine JSON NUMBERS for `productPrice`/
+  `productQuantity`** (unquoted) — the ONLY place in this entire API where
+  a numeric value isn't a JSON string. This is because they come from
+  `json_decode(stripslashes($row['products']), true)` on a hand-built JSON
+  STRING (the `GROUP_CONCAT` result), not from a raw mysqli column value —
+  `json_decode` parses unquoted numeric literals as native PHP
+  int/float, and `json_encode` re-emits them as JSON numbers.
+- **CRITICAL, easy-to-get-wrong finding: `productPrice` is `p.price` — the
+  product's CURRENT price via a live `JOIN` — NOT `op.orderPrice` (the
+  frozen `price*quantity` actually billed at order time).** Live-confirmed
+  by `PUT`-replacing order 27's line to `{productID:3, quantity:5}`
+  (product 3's price is 600, so `orderPrice`=3000) and then `GET`-ing it
+  back: the response showed `"productPrice":600` (product 3's unit price),
+  never `3000` (the line total). A product whose price changes after an
+  order is placed will show the NEW price on every subsequent `GET` of
+  that historical order — this is preserved exactly, not fixed. See
+  `domain.OrderProduct.ProductName`/`.ProductPrice` doc comments and
+  `mysql.OrderRepository`'s `orderJoinSelect` (`p.Price AS productPrice`,
+  NOT `op.orderPrice`).
+- **`GET /api/orders` empty-list is 200 `[]`, NOT 404** — unlike news/
+  gallery/family/organizations. Legacy's `getOrders()` checks
+  `$result === false`, and a zero-row `SELECT` (via `$conn->query()`)
+  returns a valid `mysqli_result` object, never `false` — same reasoning
+  as products'/admins' 200-empty-list behavior (§8). Live-confirmed:
+  `TRUNCATE`-ing `orders`/`orderproduct` and calling `GET /api/orders/`
+  with a valid token returned `200 []`.
+- **The underlying query is an INNER JOIN, not a LEFT JOIN**: an order
+  with ZERO `orderproduct` rows is invisible to BOTH `getOrders` and
+  `getOrder` — `getOrder`'s `$result->num_rows > 0` check on the JOINed
+  result set is false, so it 404s with `{"message":"Order not found"}`
+  even though the order row genuinely exists in `orders`. Every order
+  created through `usecase.OrderService.Create`/`.Update` always has >=1
+  line item, so this only matters for pre-existing garbage data. Go's
+  `mysql.OrderRepository.List`/`.Get` reproduce this via the same INNER
+  JOIN (`orderJoinSelect`), not a defensive LEFT JOIN.
+- **Products array order is UNDEFINED in legacy, not part of the parity
+  contract.** `GROUP_CONCAT` has no `ORDER BY` clause inside it
+  (`orders.php:84-88`), so MySQL is free to return matching rows in
+  storage/index order — live-confirmed: order 10's 3 line items came back
+  in the sequence naranja-inglesa/pera/tomate, NOT `orderproduct.ID`
+  ascending (16,17,18 -> pera/naranja/tomate) as a naive reading of the
+  INSERT order would suggest. Go's `mysql.OrderRepository` uses a STABLE,
+  deterministic `ORDER BY o.ID, op.ID` instead — a reasonable, documented
+  choice given legacy's own order is unreliable, not a byte-parity target.
+- **Deliberately NOT reproduced: the GROUP_CONCAT/manual-JSON fragility
+  bug.** Legacy's `products` field is built via string `CONCAT(...)` —
+  inserting a product with `Name = 'Dulce "Especial", con comas'` and
+  ordering it, then `GET`-ing that order back, returned
+  `"products":null` (live-confirmed): the embedded `"` breaks the
+  hand-built JSON string, `json_decode` silently fails and returns `null`,
+  and legacy blindly assigns that `null` to `$row['products']`. Go's
+  `dto.OrderResponse` builds the array structurally via `encoding/json`,
+  which properly escapes quotes/commas — `products` is ALWAYS a valid
+  array regardless of product name content. Locked by
+  `TestContract_Orders_ProductNameWithQuoteAndCommaDoesNotBreakTheResponse`
+  / `orders_get_quote_robustness.json`. Per the design's own precedent
+  (§9 "Architectural risks"): reproduce the SHAPE, not the bug's
+  fragility.
+
+### 15.3 Pre-existing trigger case-sensitivity bug, discovered and fixed (blocking, not scope creep)
+
+While reaching the "triggers still present" half of the PR7 gate (task
+6.1 step 1), every `INSERT INTO orderproduct` — whether issued by the
+scratch PHP OR by a raw `mysql` client — failed with
+`ERROR 1146: Table 'filas.orderProduct' doesn't exist`, even though the
+query text itself said `orderproduct` (lowercase, matching the actual
+table). Root cause: the `after_orderProduct_insert`/
+`after_orderProduct_update` trigger BODIES (not the PHP, not the INSERT
+statement) reference `FROM orderProduct` (mixed case) — copied verbatim
+from the source `filas.sql` dump. MySQL 5.7/Windows (the original legacy
+host) tolerates this because `lower_case_table_names` there is
+case-insensitive; `mysql:8` on Linux (this project's Docker image) runs
+with `lower_case_table_names=0` (case SENSITIVE), so the trigger's
+internal `SELECT ... FROM orderProduct` genuinely cannot find the table
+and the ENTIRE INSERT statement aborts.
+
+This was a **latent, previously-undiscovered bug**: PR1-PR6 never
+exercised a real INSERT into `orderproduct` against the dockerized DB (PR6
+was fakes-only), so nothing had ever fired these triggers before now. It
+made the "characterize WITH triggers present" half of the PR7 gate
+literally impossible to execute (every order-creation attempt 500s), so
+it was fixed as a narrowly-scoped, pre-existing-bug correction — `01-schema.sql`'s
+two `AFTER` trigger bodies now read `FROM orderproduct` (lowercase) — done
+BEFORE and SEPARATELY from the trigger-DROP itself (task 6.1 step 2-3).
+Confirmed live: identical `INSERT INTO orderproduct (...)` 500s on the
+unpatched schema, succeeds on the patched one. See `01-schema.sql`'s
+header note 4 for the schema-file-level documentation of this fix.
+
+### 15.4 Trigger-drop gate evidence
+
+The gate proves the Go `usecase/order.go` + `repository/mysql/order.go`
+path produces IDENTICAL persisted behavior whether the 5 legacy triggers
+are present or absent — i.e. Go now fully owns orderPrice/total/finishDate/
+stock, not the database. It was run live against the dockerized stack
+(`docker compose up`, fresh seed) by driving the Go API and reading the raw
+DB with `mysql` after each step.
+
+The SAME order was created through `POST /api/orders` in both phases:
+`{orderProducts:[{productID:1,quantity:2},{productID:23,quantity:3}]}`
+(product 1 price 600, product 23 price 850).
+
+| Observable (raw DB) | Phase A: 5 triggers PRESENT (case-fixed) | Phase B: 0 triggers (dropped) |
+|---|---|---|
+| `orderproduct.orderPrice` (product 1) | 1200 (= 600 × 2) | 1200 |
+| `orderproduct.orderPrice` (product 23) | 2550 (= 850 × 3) | 2550 |
+| `orders.total` | 3750 (= SUM) | 3750 |
+| `products.stock` delta (p1 / p23) | −2 / −3 | −2 / −3 |
+| `PATCH ->finished` stamps `finishDate` | yes, non-null | yes, non-null |
+| `PATCH ->canceled` restores stock, leaves `finishDate` NULL | yes | yes |
+| `SELECT COUNT(*) information_schema.triggers` | 5 | 0 |
+
+Phase B is the decisive half: with ZERO triggers in the database, the Go
+API still wrote `orderPrice`/`total` correctly and stamped `finishDate` on
+the pending→finished transition (a different wall-clock value than Phase A,
+proving Go — not `before_update_orders` — set it). A full `GET /api/orders/
+:id` of the Go-created finished order was then captured from BOTH the Go
+backend and a scratch copy of legacy `orders.php` pointed at the same
+Docker DB, and the two responses were **byte-identical** (`diff` empty,
+matching sha256) — closing the loop create→persist→read across both stacks.
+The four `orderproduct` triggers and `before_update_orders` were removed
+from `01-schema.sql` only after this evidence was green (see that file's
+header note 1 and the inline drop notes).
